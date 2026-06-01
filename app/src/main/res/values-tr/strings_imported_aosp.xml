@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <string name="cpp_prefs_vibrate_on_keypress">Dokunulduğunda titreşim</string>
+   <string name="cpp_prefs_auto_rotate_screen">Ekranı otomatik döndür</string>
+   <string name="cpp_language">Dil</string>
+   <string name="cpp_theme">Tema</string>
+   <string name="cpp_theme_light">Açık Renkli</string>
+   <string name="cpp_theme_dark">Koyu Renkli</string>
+   <string name="cpp_prefs_keep_screen_on">Uyanık kal</string>
+   <string name="cpp_permission_overlay">Diğer uygl. üzerinde görüntüle</string>
+   <string name="cpp_yes">Evet</string>
+   <string name="cpp_no">Hayır</string>
+   <string name="cpp_create">Oluştur</string>
+   <string name="cpp_close">Kapat</string>
+   <string name="cpp_switch">Değiştir</string>
+   <string name="cpp_add">Ekle</string>
+   <string name="cpp_mode">Mod</string>
+   <string name="cpp_enable">Etkinleştir</string>
+   <string name="cpp_other">Diğer</string>
+   <string name="cpp_high_contrast_text">Yüksek kontrastlı metin</string>
+   <string name="cpp_edit">Düzenle</string>
+   <string name="cpp_delete">Sil</string>
+   <string name="cpp_done">Bitti</string>
+   <string name="cpp_cancel">İptal</string>
+   <string name="cpp_description">Açıklama</string>
+   <string name="cpp_about">Hakkında</string>
+   <string name="cpp_copy_text">Panoya kopyala</string>
+   <string name="cpp_text_copied">Metin kopyalandı</string>
+   <string name="cpp_name">Ad</string>
+   <string name="cpp_settings">Ayarlar</string>
+   <string name="cpp_nan">Sayı değil</string>
+   <string name="cpp_error">Hata</string>
+   <string name="cpp_copy">Kopyala</string>
+</resources>

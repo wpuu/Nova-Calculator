@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_mode"
+        android:title="@string/cpp_mode"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:icon="@drawable/ic_chevron_left_white_24dp"
+                android:title="@string/cpp_mode"
+                app:showAsAction="never" />
+            <item
+                android:title=""
+                app:actionViewClass="org.solovyev.android.widget.menu.MenuItemDivider"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_mode_engineer"
+                android:title="@string/cpp_mode_engineer" />
+            <item
+                android:id="@+id/menu_mode_simple"
+                android:title="@string/cpp_mode_simple" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/menu_angle_units"
+        android:title="@string/cpp_angles"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:icon="@drawable/ic_chevron_left_white_24dp"
+                android:title="@string/cpp_angles"
+                app:showAsAction="never" />
+            <item
+                android:title=""
+                app:actionViewClass="org.solovyev.android.widget.menu.MenuItemDivider"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_au_deg"
+                android:title="@string/cpp_deg" />
+            <item
+                android:id="@+id/menu_au_rad"
+                android:title="@string/cpp_rad" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/menu_numeral_base"
+        android:title="@string/cpp_radix"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:icon="@drawable/ic_chevron_left_white_24dp"
+                android:title="@string/cpp_radix"
+                app:showAsAction="never" />
+            <item
+                android:title=""
+                app:actionViewClass="org.solovyev.android.widget.menu.MenuItemDivider"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_nb_bin"
+                android:title="@string/cpp_bin" />
+            <item
+                android:id="@+id/menu_nb_dec"
+                android:title="@string/cpp_dec" />
+            <item
+                android:id="@+id/menu_nb_hex"
+                android:title="@string/cpp_hex" />
+        </menu>
+    </item>
+
+    <item
+        android:title=""
+        app:actionViewClass="org.solovyev.android.widget.menu.MenuItemDivider"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_settings"
+        android:title="@string/cpp_settings"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_history"
+        android:title="@string/c_history"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_plotter"
+        android:title="@string/cpp_plotter"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_conversion_tool"
+        android:title="@string/c_conversion_tool"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_about"
+        android:title="@string/cpp_about"
+        app:showAsAction="never" />
+
+    <item
+        android:title=""
+        app:actionViewClass="org.solovyev.android.widget.menu.MenuItemDivider"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_hidden_settings"
+        android:title="高级设置"
+        app:showAsAction="never" />
+</menu>

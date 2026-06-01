@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="c_about_content">Copyright © 2009–2013\n\n<b>Application développée par serso aka se.solovyev</b>\n\n
+Retrouvez nous sur Facebook: <a href="http://facebook.com/calculatorpp">http://facebook.com/calculatorpp</a>\n\n
+Ce programme est distribué sous la licence Apache 2.0 :\n le code source est disponible sur \n
+<a href="https://github.com/serso/android-calculatorpp">http://github.com</a>\n\n
+Pour plus d\'informations \nveuillez contacter le développeur par email\n
+<a href="mailto:se.solovyev@gmail.com">se.solovyev@gmail.com</a>
+\nou rendez vous sur \n<a href="http://se.solovyev.org">http://se.solovyev.org</a>\n\n
+Si vous voulez soutenir le projet \nvous pouvez acheter une option spéciale depuis les préférences de l\'application\n\n
+Si vous aimez l\'application\n donnez lui 5 étoiles sur le \n
+<a href="https://market.android.com/details?id=org.solovyev.android.calculator">Google Play</a>\n\n
+Cette application utilise les librairies open source suivantes :\n
+<a href="http://simple.sourceforge.net">Simple (XML serialization)</a>\n
+<a href="http://meditorworld.appspot.com/meditor.txt">JSCL</a></string>
+    <string name="c_calc_ad_free_summary">Et enlever la publicité</string>
+    <string name="c_calc_ad_free_title">Soutenir le projet</string>
+    <string name="c_calc_show_release_notes_title">Voir les notes à propos de la version</string>
+    <string name="c_calc_use_back_button_as_prev_title">Utiliser le bouton Précédent pour le précédent de l\'historique</string>
+    <string name="c_char_is_not_accepted">Le caractère \'%s\' n\'est pas accepté dans le nom de la variable !</string>
+    <string name="c_conversion_tool">Outil de conversion</string>
+    <string name="c_convert">Convertir en…</string>
+    <string name="c_copy_expression">Copier l\'expression</string>
+    <string name="c_copy_result">Copier le résultat</string>
+    <string name="c_error">Erreur</string>
+    <string name="c_first_start_text">Merci d\'avoir choisi Calculator++\n\nCalculator++ est un outil puissant pour faire des calculs quotidiens</string>
+    <string name="c_fun_category_common">Commune</string>
+    <string name="c_fun_category_comparison">Comparaison</string>
+    <string name="c_fun_category_hyper_trig">Trigonométrie hyperbolique</string>
+    <string name="c_fun_category_my">Mes</string>
+    <string name="c_fun_category_trig">Trigonométrie</string>
+    <string name="c_fun_description_abs">Donne la valeur absolue d\'un argument</string>
+    <string name="c_fun_description_acos">Arccosinus - réciproque de la fonction cosinus</string>
+    <string name="c_fun_description_acot">Arccotangente - Réciproque de la fonction cotangente</string>
+    <string name="c_fun_description_asin">Arcsinus - Réciproque de la fonction sinus</string>
+    <string name="c_fun_description_atan">Arctangente - réciproque de la fonction tangente</string>
+    <string name="c_fun_description_cos">Fonction cosinus trigonométrique</string>
+    <string name="c_fun_description_cot">Fonction cotangente trigonométrique</string>
+    <string name="c_fun_description_cubic">Fonction racine cubique</string>
+    <string name="c_fun_description_deg">Convertit des radians en degrés</string>
+    <string name="c_fun_description_dms">Convertit des degrés en notation DMS en notation décimale  : d - degrés, m - minutes (par défaut = 0), s - secondes (par défaut = 0)</string>
+    <string name="c_fun_description_eq">Fonction d\'égalité - retourne 1 si les deux arguments sont égaux, 0 sinon</string>
+    <string name="c_fun_description_exp">Fonction exponentielle</string>
+    <string name="c_fun_description_ge">Fonction supérieur ou égal - retourne 1 si les deux arguments sont égaux ou le premier est supérieur au second, 0 sinon</string>
+    <string name="c_fun_description_gt">Fonction supérieur - retourne 1 si le premier argument est supérieur au second, 0 sinon</string>
+    <string name="c_fun_description_le">Fonction inférieur ou égal - retourne 1 si les deux arguments sont égaux ou le premier est inférieur au second, 0 sinon</string>
+    <string name="c_fun_description_lg">Logarithme décimal - logarithme de base 10</string>
+    <string name="c_fun_description_ln">Logarithme népérien - logarithme de base e</string>
+    <string name="c_fun_description_log">Logarithme - logarithme de la base spécifiée</string>
+    <string name="c_fun_description_lt">Fonction inférieur - retourne 1 si le premier argument est inférieur au second, 0 sinon</string>
+    <string name="c_fun_description_ne">Fonction différent - retourne 1 si les deux arguments sont différents, 0 sinon</string>
+    <string name="c_fun_description_rad">Convertit des degrés en radians : d - degrés, m - minutes (par défaut = 0), s - secondes (par défaut = 0)</string>
+    <string name="c_fun_description_sgn">Donne le signe d\'un argument : \n
+-1 si l\'argument est négatif \n
+0 si égal à 0 \n
+1, si positif \n</string>
+    <string name="c_fun_description_sin">Fonction sinus trigonométrique</string>
+    <string name="c_fun_description_sqrt">Fonction racine carrée</string>
+    <string name="c_fun_description_tan">Fonction tangente trigonométrique</string>
+    <string name="c_functions">Fonctions</string>
+    <string name="c_history">Historique</string>
+    <string name="c_history_comment">Commentaire</string>
+    <string name="c_history_expression">Valeur</string>
+    <string name="c_op_description_derivative">Donne la dérivé à l\'ordre \'ordre\' (par défaut = 1) de la fonction f(x) par rapport à la variable  \'x\' et la calcule au point \'point_x\' (par défaut = identique à \'x\')</string>
+    <string name="c_op_description_integral">Donne l\'intégrale de la fonction \"f(x)\" par rapport la variable \"x\"</string>
+    <string name="c_op_description_integral_ab">Intègre la fonction \"f(x)\" par rapport à la variable \"x\" de \"a\" à \"b\"</string>
+    <string name="c_op_description_mod">L\'opérateur modulo trouve le reste de la division de « x » par « y »</string>
+    <string name="c_op_description_product">Donne le produit des termes \"f(i)\", en itérant \"i\" de \"de\" vers \"vers\"</string>
+    <string name="c_op_description_sum">Additionne les termes de \"f(i)\", en itérant \"i\" de \"de\" vers \"vers\"</string>
+    <string name="c_operators">Opérateurs</string>
+    <string name="c_pf_description_degree">Convertit les degrés en radians. \n Exemples:\n 268° = 4.67748\n 30,21° = 0.52726</string>
+    <string name="c_pf_description_double_factorial">Donne la double factorielle de l\'expression précédente</string>
+    <string name="c_pf_description_factorial">Donne la factorielle de l\'expression précédente</string>
+    <string formatted="false" name="c_pf_description_percent">Donne la valeur en pourcentage de l\'expression précédente.\nExemple:\n
+100 + 50% = 150\n
+100 * 50% = 50\n
+100 + 100 * 50% * 50% = 125</string>
+    <string name="c_plot">Tracer le graphe</string>
+    <string name="c_release_notes">Informations sur les mises à jours</string>
+    <string name="c_release_notes_for_title">"Informations sur la version "</string>
+    <string name="c_save">Enregistrer</string>
+    <string name="c_use">Utilisation</string>
+    <string name="c_value_is_not_a_number">La valeur doit être un nombre ou être laissée vide. Si vous avez des paramètres, créez plutôt une fonction !</string>
+    <string name="c_var_already_exists">Une variable portant le même nom existe déjà !</string>
+    <string name="c_var_create_var">Créer une variable</string>
+    <string name="c_var_description">Description</string>
+    <string name="c_var_description_G">La constante gravitationnelle est une constante physique empirique impliquée dans le calcul de l\'attraction gravitationnelle entre les objets avec la masse, m^3·kg^−1·s^−2</string>
+    <string name="c_var_description_PI">Rapport de la circonférence de n\'importe quel cercle à son diamètre. Note : cette constante est indépendante de l\'unité => rad: 3.14, deg: 180.0</string>
+    <string name="c_var_description_c">Vitesse de la lumière dans le vide, m.s^ -1</string>
+    <string name="c_var_description_e">Unique nombre réel tel que la valeur de la dérivée (pente de la tangente) de la fonction f(x) = e^x au point x = 0 est égal à 1</string>
+    <string name="c_var_description_h_reduced">Constante réduite de Planck, J·s</string>
+    <string name="c_var_description_i">Unité imaginaire telle que i^2 = -1</string>
+    <string name="c_var_description_inf">Infini</string>
+    <string name="c_var_description_nan">Pas un nombre</string>
+    <string name="c_var_description_pi">Rapport de la circonférence de n\'importe quel cercle à son diamètre. Note : cette constante est indépendante de l\'unité => rad: 3,14, deg: 3.14  </string>
+    <string name="c_var_edit_var">Modifier les variables</string>
+    <string name="c_var_my">Mes</string>
+    <string name="c_var_name_clashes">Nom de variable en conflit avec le nom d\'une fonction !</string>
+    <string name="c_var_removal_confirmation_question">Voulez-vous vraiment supprimer la variable « %s » ?</string>
+    <string name="c_var_system">Intégré</string>
+    <string name="c_var_value">Valeur</string>
+    <string name="close">Fermer</string>
+    <string name="convert_to_bin">Convertir en bin</string>
+    <string name="convert_to_dec">Convertir en déc</string>
+    <string name="convert_to_hex">Convertir en hex</string>
+    <string name="cpp_about">À propos de</string>
+    <string name="cpp_add">Ajouter</string>
+    <string name="cpp_angles">"Angles"</string>
+    <string name="cpp_app_name">Calculator++</string>
+    <string name="cpp_app_name_on_screen">Calculator++ (mode fenêtre)</string>
+    <string name="cpp_appearance">"Apparence"</string>
+    <string name="cpp_bin">Binaire</string>
+    <string name="cpp_cancel">Annuler</string>
+    <string name="cpp_clear_history">Effacer</string>
+    <string name="cpp_clear_history_message">L\'intégralité de l\'historique sera supprimée.</string>
+    <string name="cpp_clear_history_title">Effacer l\'historique ?</string>
+    <string name="cpp_close">Fermer</string>
+    <string name="cpp_continue">Continuer</string>
+    <string name="cpp_converter_amount_of_substance">Quantité de matière</string>
+    <string name="cpp_converter_electric_current">Courant électrique</string>
+    <string name="cpp_converter_length">Longueur</string>
+    <string name="cpp_converter_mass">Masse</string>
+    <string name="cpp_converter_temperature">Température</string>
+    <string name="cpp_converter_time">Temps</string>
+    <string name="cpp_copy">Copier</string>
+    <string name="cpp_copy_text">Copier dans le presse-papiers</string>
+    <string name="cpp_create">Créer</string>
+    <string name="cpp_dec">Décimal</string>
+    <string name="cpp_deg">Degrés</string>
+    <string name="cpp_delete">Supprimer</string>
+    <string name="cpp_description">Description</string>
+    <string name="cpp_done">OK</string>
+    <string name="cpp_dont_show_again">Ne plus afficher</string>
+    <string name="cpp_duplicate_parameter">"Paramètre dupliqué : '%1$s'."</string>
+    <string name="cpp_edit">Modifier</string>
+    <string name="cpp_enable">Activer</string>
+    <string name="cpp_error">Erreur</string>
+    <string name="cpp_examples">"Exemples"</string>
+    <string name="cpp_field_cannot_be_empty">"Ce champ ne peut pas être vide"</string>
+    <string name="cpp_floating_calculator">Paramètres de la calculatrice (dans une fenêtre séparée)</string>
+    <string name="cpp_format">"Format"</string>
+    <string name="cpp_grad">Grades</string>
+    <string name="cpp_help">Aide</string>
+    <string name="cpp_hex">Hexadécimal</string>
+    <string name="cpp_high_contrast_text">Texte avec contraste élevé</string>
+    <string name="cpp_history_tab_saved">Historique enregistré</string>
+    <string name="cpp_introduction">Introduction</string>
+    <string name="cpp_language">Langue</string>
+    <string name="cpp_missing_permission_message">Veuillez activer l\'autorisation %1$s dans les réglages systèmes</string>
+    <string name="cpp_missing_permission_title">Autorisation manquante</string>
+    <string name="cpp_mode">Mode</string>
+    <string name="cpp_mode_engineer">Scientifique</string>
+    <string name="cpp_mode_simple">Simple</string>
+    <string name="cpp_name">Nom</string>
+    <string name="cpp_name_contains_invalid_characters">"Le nom contient des caractères non valides."</string>
+    <string name="cpp_nan">Pas un nombre.</string>
+    <string name="cpp_new_in_version">Nouveautés de la version %1$s</string>
+    <string name="cpp_no">Non</string>
+    <string name="cpp_number_format">"Format de nombre"</string>
+    <string name="cpp_oct">Octal</string>
+    <string name="cpp_other">Autre</string>
+    <string name="cpp_parameter">"Paramètre"</string>
+    <string name="cpp_permission_overlay">Se superposer aux autres applis</string>
+    <string name="cpp_plot_empty_function_error">Impossible de tracer une fonction vide !</string>
+    <string name="cpp_plot_function_line_color">Couleur de ligne</string>
+    <string name="cpp_plot_function_line_width">Epaisseur de ligne</string>
+    <string name="cpp_plot_range">Intervalle de traçage</string>
+    <string name="cpp_plot_too_many_variables">Impossible à tracer : trop de variables !</string>
+    <string name="cpp_plotter">Traceur de fonctions</string>
+    <string name="cpp_precision">Précision du résultat</string>
+    <string name="cpp_prefs_advanced">Avancé</string>
+    <string name="cpp_prefs_auto_rotate_screen">Rotation auto de l\'écran</string>
+    <string name="cpp_prefs_basic">Basique</string>
+    <string name="cpp_prefs_keep_screen_on">Rester activé</string>
+    <string name="cpp_prefs_vibrate_on_keypress">Vibrer au toucher</string>
+    <string name="cpp_purchase_text">Soutenir le projet est simple et sécurisé : la procédure d\'achat est assurée par Google
+et tout ce dont vous avez besoin est un compte Google correctement configuré.\n\n
+Les informations de paiement sont stockées sur les serveurs Google avec votre compte Google et vous pouvez facilement utiliser cette application sur plusieurs appareils.\n\n
+En cliquant sur le bouton \'Continuer\' vous serez redirigés vers l\'application Google Play afin de réaliser le paiement.</string>
+    <string name="cpp_purchase_title">Acheter</string>
+    <string name="cpp_rad">Radians</string>
+    <string name="cpp_rateus_cancel">Non, merci</string>
+    <string name="cpp_rateus_message">Si vous appréciez %1$s, prenez un moment et donnez-nous 5 étoiles dans Google Play.</string>
+    <string name="cpp_rateus_ok">Noter maintenant</string>
+    <string name="cpp_rateus_title">Noter %1$s</string>
+    <string name="cpp_release_notes_choose_theme">Voulez-vous essayer les nouveaux thèmes Material ? Choisissez-en dans la liste :</string>
+    <string name="cpp_report_problem">Signaler un problème</string>
+    <string name="cpp_settings">Paramètres</string>
+    <string name="cpp_share_link">http://www.facebook.com/calculatorpp</string>
+    <string name="cpp_switch">Changer</string>
+    <string name="cpp_system_language">"Langue du système"</string>
+    <string name="cpp_text_copied">Texte copié</string>
+    <string name="cpp_theme">Thème</string>
+    <string name="cpp_theme_app">App theme</string>
+    <string name="cpp_theme_dark">Foncé</string>
+    <string name="cpp_theme_light">Clair</string>
+    <string name="cpp_theme_metro_blue">Métro bleu</string>
+    <string name="cpp_thousands_separator">"Séparateur de milliers"</string>
+    <string name="cpp_thousands_separator_apostrophe">Apostrophe (\')</string>
+    <string name="cpp_thousands_separator_no">Pas de séparateur de classe</string>
+    <string name="cpp_thousands_separator_space">Espace ( )</string>
+    <string name="cpp_translators_list">qbyron, Gringo49, Tahiti Pope, Quetzal</string>
+    <string name="cpp_translators_text">Cette application est traduite en français par : </string>
+    <string name="cpp_turns">Tour</string>
+    <string name="cpp_vars_and_constants">Variables et constantes</string>
+    <string name="cpp_widget">Widget settings</string>
+    <string name="cpp_wizard_back">Retour</string>
+    <string name="cpp_wizard_dragbutton_action_center">Appuyez sur le bouton ci-dessous une fois pour utiliser 9</string>
+    <string name="cpp_wizard_dragbutton_action_down">Glisser vers le bas depuis le centre du bouton pour utiliser ^2</string>
+    <string name="cpp_wizard_dragbutton_action_end">Excellent ! Touchez le bouton encore une fois pour réessayer</string>
+    <string name="cpp_wizard_dragbutton_action_up">Glisser vers le haut depuis le centre du bouton pour utiliser %</string>
+    <string name="cpp_wizard_dragbutton_description">Le glissement sur une touche est une fonctionnalité exclusive à Calculator++ ce qui permet un accès rapide aux fonctions secondaires</string>
+    <string name="cpp_wizard_dragbutton_title">Bases du glissé de bouton</string>
+    <string name="cpp_wizard_final_done">L\'application est configurée et prête à être utilisée.</string>
+    <string name="cpp_wizard_final_title">Presque fini !</string>
+    <string name="cpp_wizard_finish">Fini</string>
+    <string name="cpp_wizard_finish_confirmation">Quitter l\'assistant ?</string>
+    <string name="cpp_wizard_finish_confirmation_title">Terminé ?</string>
+    <string name="cpp_wizard_mode_engineer_description">En mode scientifique, les fonctionnalités avancées sont accessibles depuis l\'écran principal.
+Le résultat n\'est pas arrondi et est affiché en notation scientifique, le radian est l\'unité d\'angle par défaut.</string>
+    <string name="cpp_wizard_mode_simple_description">En mode simplifié, seules les fonctionnalités de base seront disponibles depuis l\'écran principal. 
+Le résultat est arrondi à 5 chiffres après la virgule et le degré est l\'unité de mesure d\'angle par défaut.</string>
+    <string name="cpp_wizard_mode_title">Choisissez le mode</string>
+    <string name="cpp_wizard_next">Suivant</string>
+    <string name="cpp_wizard_onscreen_calculator_title">Calculatrice dans une fenêtre séparée</string>
+    <string name="cpp_wizard_onscreen_checkbox">Activer</string>
+    <string name="cpp_wizard_onscreen_description">Avoir la calculatrice ouverte dans une fenêtre séparée vous permet de calculer tout en utilisant les autres applications de votre appareil</string>
+    <string name="cpp_wizard_skip">Passer</string>
+    <string name="cpp_wizard_start">Commencer l\'assistant</string>
+    <string name="cpp_wizard_theme_title">Choisir un thème</string>
+    <string name="cpp_wizard_welcome_title">Bienvenue</string>
+    <string name="cpp_yes">Oui</string>
+    <string name="derivatives">Dérivation/Intégration</string>
+    <string name="fix">Réparé</string>
+    <string name="function_already_exists">Une fonction portant le même nom existe déjà !</string>
+    <string name="function_create_function">Créer une fonction</string>
+    <string name="function_edit_function">Modifier la fonction</string>
+    <string name="function_removal_confirmation_question">Voulez-vous vraiment supprimer la fonction \'%s\' ?</string>
+    <string name="not_valid_result">Le résultat actuel n\'est pas valide !</string>
+    <string name="open_onscreen_calculator">Cliquez pour ouvrir la calculatrice en mode fenêtré</string>
+    <string name="other">Autre</string>
+    <string name="p_calculations_calculate_on_fly_title">Le résultat est calculé pendant la frappe</string>
+    <string name="p_metro_green_theme">Métro vert</string>
+    <string name="p_metro_purple_theme">Métro violet</string>
+    <string name="removal_confirmation">Confirmation de suppression</string>
+</resources>

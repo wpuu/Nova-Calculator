@@ -1,0 +1,5 @@
+include ':app'
+include ':dragbutton'
+include ':jscl'
+include ':plotter:lib'
+include ':translations'

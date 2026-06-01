@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "org.solovyev.android.calculator.app-mergeDebugResources-60:/values-v11/values-v11.xml",
+            "map": [
+                {
+                    "source": "E:\\Nova Calculator\\app\\src\\main\\res\\values-v11\\styles.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "4",
+                        "endColumns": "12",
+                        "endOffsets": "197"
+                    }
+                }
+            ]
+        }
+    ]
+}

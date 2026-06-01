@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <string name="cpp_prefs_vibrate_on_keypress">Vibrar ao tocar</string>
+   <string name="cpp_prefs_auto_rotate_screen">Girar tela</string>
+   <string name="cpp_language">Idioma</string>
+   <string name="cpp_theme">Tema</string>
+   <string name="cpp_theme_light">Claro</string>
+   <string name="cpp_theme_dark">Escuro</string>
+   <string name="cpp_prefs_keep_screen_on">Permanecer ativo</string>
+   <string name="cpp_permission_overlay">Sobrepor a outros apps</string>
+   <string name="cpp_yes">Sim</string>
+   <string name="cpp_no">Não</string>
+   <string name="cpp_create">Criar</string>
+   <string name="cpp_close">Fechar</string>
+   <string name="cpp_switch">Alternar</string>
+   <string name="cpp_add">Adicionar</string>
+   <string name="cpp_mode">Modo</string>
+   <string name="cpp_enable">Ativar</string>
+   <string name="cpp_other">Outros</string>
+   <string name="cpp_high_contrast_text">Texto em alto contraste</string>
+   <string name="cpp_edit">Editar</string>
+   <string name="cpp_delete">Excluir</string>
+   <string name="cpp_done">Concluído</string>
+   <string name="cpp_cancel">Cancelar</string>
+   <string name="cpp_description">Descrição</string>
+   <string name="cpp_about">Sobre</string>
+   <string name="cpp_copy_text">Copiar para área de transferência</string>
+   <string name="cpp_text_copied">Texto copiado</string>
+   <string name="cpp_name">Nome</string>
+   <string name="cpp_settings">Configurações</string>
+   <string name="cpp_nan">Não é número</string>
+   <string name="cpp_error">Erro</string>
+   <string name="cpp_copy">Copiar</string>
+</resources>

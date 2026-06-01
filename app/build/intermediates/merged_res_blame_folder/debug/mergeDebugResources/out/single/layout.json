@@ -1,0 +1,730 @@
+[
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_8.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_8.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_right.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_right.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_round_brackets_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_round_brackets_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_power_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_power_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_release_notes.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_release_notes.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_plot_functions.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_plot_functions.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_functions_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_functions_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_vars.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_vars.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\widget_layout_lockscreen.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\widget_layout_lockscreen.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_wizard_step_choose_theme_preview.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_wizard_step_choose_theme_preview.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_multiplication_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_multiplication_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_round_brackets.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_round_brackets.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_minus_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_minus_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_equals_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_equals_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_0_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_0_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_history_item.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_history_item.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\activity_main_editor_with_overflow_menu.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\activity_main_editor_with_overflow_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_3.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_3.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_wizard_step_choose_theme.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_wizard_step_choose_theme.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\preference_precision.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\preference_precision.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_paste_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_paste_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_1_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_1_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_equals.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_equals.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_clear_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_clear_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_unit_converter.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_unit_converter.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_plus_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_plus_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_vars_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_vars_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\widget_layout_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\widget_layout_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_4.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_4.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\widget_layout.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\widget_layout.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_4_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_4_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_release_note_step.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_release_note_step.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_9.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_9.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_functions.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_functions.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\widget_display_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\widget_display_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_1.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_1.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_9_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_9_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_memory.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_memory.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_8_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_8_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_percent.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_percent.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_equals_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_equals_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_function_edit_base_controls.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_function_edit_base_controls.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\simple_keyboard_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\simple_keyboard_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_6.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_6.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_wizard_step_choose_mode.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_wizard_step_choose_mode.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_history_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_history_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\activity_tabs_tablayout.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\activity_tabs_tablayout.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_settings_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_settings_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_layout_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_layout_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_history_edit.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_history_edit.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\simple_keyboard_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\simple_keyboard_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_division_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_division_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\simple_keyboard.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\simple_keyboard.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_dot.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_dot.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_9_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_9_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_right.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_right.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_left.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_left.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_round_brackets.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_round_brackets.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_left_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_left_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_editor.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_editor.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_functions_function.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_functions_function.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_8_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_8_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_copy_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_copy_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_7_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_7_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_percent_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_percent_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_plot_dimensions.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_plot_dimensions.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_plot_function_edit.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_plot_function_edit.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_division.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_division.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_minus.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_minus.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_keyboard_lockscreen.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_keyboard_lockscreen.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_6_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_6_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_layout.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_layout.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\widget_layout_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\widget_layout_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_vars_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_vars_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_history.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_history.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_4.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_4.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_settings_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_settings_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_operators_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_operators_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_history.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_history.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_6_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_6_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_7.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_7.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_1.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_1.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_variable_edit.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_variable_edit.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_clear.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_clear.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_paste.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_paste.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_entities_item.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_entities_item.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_functions.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_functions.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_wizard_step_final.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_wizard_step_final.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_right_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_right_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_7_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_7_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_erase.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_erase.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_8.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_8.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_2.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_2.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_app.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_app.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_display_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_display_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_vars.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_vars.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_5.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_5.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_5_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_5_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_division.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_division.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\widget_editor_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\widget_editor_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_plus.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_plus.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_2.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_2.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_5_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_5_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_minus.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_minus.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_keyboard_lockscreen_collapsed.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_keyboard_lockscreen_collapsed.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_keyboard.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_keyboard.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_app_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_app_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_power.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_power.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_layout_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_layout_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_history.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_history.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_multiplication_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_multiplication_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_plus.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_plus.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\activity_main.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "org.solovyev.android.calculator.app-mergeDebugResources-61:/layout/activity_settings.xml",
+        "source": "org.solovyev.android.calculator.app-main-64:/layout/activity_settings.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_plot.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_plot.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_equals_no_bg.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_equals_no_bg.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_display.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_display.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_dot_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_dot_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_7.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_7.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_header_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_header_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\activity_settings.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\activity_settings.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_3_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_3_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\widget_layout_lockscreen_collapsed.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\widget_layout_lockscreen_collapsed.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\widget_editor.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\widget_editor.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_minus_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_minus_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_editor_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_editor_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_multiplication.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_multiplication.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_round_brackets_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_round_brackets_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_copy_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_copy_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_wizard_step_onscreen.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_wizard_step_onscreen.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_4_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_4_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_settings.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_settings.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_9.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_9.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_wizard_step_welcome.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_wizard_step_welcome.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_3.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_3.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_entities.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_entities.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_header.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_header.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_wizard.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_wizard.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_erase_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_erase_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_division_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_division_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_0_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_0_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_paste_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_paste_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_0.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_0.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_2_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_2_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_erase.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_erase.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_5.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_5.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\widget_display.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\widget_display.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_button_like.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_button_like.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_dot_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_dot_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\activity_tabs.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\activity_tabs.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_left_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_left_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_erase_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_erase_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\activity_underwater_camera.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\activity_underwater_camera.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_operators.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_operators.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_percent_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_percent_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\activity_empty.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\activity_empty.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_function_edit.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_function_edit.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_wizard_step_drag_button.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_wizard_step_drag_button.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\fragment_about.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\fragment_about.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_editor.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_editor.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_6.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_6.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_operators_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_operators_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_copy.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_copy.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_multiplication.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_multiplication.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_dot.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_dot.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_3_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_3_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_left.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_left.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_app_display.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_app_display.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\onscreen_header_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\onscreen_header_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_0.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_0.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_power_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_power_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_clear_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_clear_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_right_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_right_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_activity_wizard.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_activity_wizard.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_clear.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_clear.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_2_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_2_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_app_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_app_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_plus_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_plus_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_1_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_1_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_history_material.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_history_material.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_functions_material_light.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_functions_material_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-mergeDebugResources-61:\\layout\\cpp_simple_button_percent.xml",
+        "source": "C:\\Users\\Admin\\.gradle\\daemon\\8.7\\org.solovyev.android.calculator.app-main-64:\\layout\\cpp_simple_button_percent.xml"
+    }
+]

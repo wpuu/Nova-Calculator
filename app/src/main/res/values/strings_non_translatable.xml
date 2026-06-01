@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cpp_kb_clear" translatable="false">C</string>
+    <string name="cpp_kb_variables" translatable="false">π</string>
+    <string name="cpp_kb_functions" translatable="false">ƒ</string>
+    <string name="cpp_kb_operators" translatable="false">∂</string>
+    <string name="cpp_kb_memory_recall" translatable="false">M</string>
+    <string name="cpp_kb_memory_plus" translatable="false">M+</string>
+    <string name="cpp_kb_memory_minus" translatable="false">M-</string>
+    <string name="cpp_kb_memory_clear" translatable="false">MC</string>
+    <string name="cpp_dimensions_x_min" translatable="false">X min</string>
+    <string name="dimensions_x_max" translatable="false">X max</string>
+    <string name="dimensions_y_min" translatable="false">Y min</string>
+    <string name="dimensions_y_max" translatable="false">Y max</string>
+    <string name="cpp_function_body" translatable="false">f(x, y)</string>
+    <string name="cpp_show_greek_keyboard" translatable="false">αβγ</string>
+    <string name="cpp_exponent" translatable="false">E</string>
+    <string name="cpp_theme_black" translatable="false">%1$s (AMOLED)</string>
+    <string-array name="cpp_prefs_precisions" translatable="false">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+    </string-array>
+</resources>

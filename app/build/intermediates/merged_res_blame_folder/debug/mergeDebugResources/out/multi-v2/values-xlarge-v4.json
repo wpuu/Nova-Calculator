@@ -1,0 +1,36 @@
+{
+    "logs": [
+        {
+            "outputFile": "org.solovyev.android.calculator.app-mergeDebugResources-60:/values-xlarge-v4/values-xlarge-v4.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\Admin\\.gradle\\caches\\transforms-4\\ff6aa91ed7b14caaad5fb658ffdcaa93\\transformed\\appcompat-1.6.1\\res\\values-xlarge-v4\\values-xlarge-v4.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7",
+                        "startColumns": "4,4,4,4,4,4",
+                        "startOffsets": "55,126,197,267,337,405",
+                        "endColumns": "70,70,69,69,67,67",
+                        "endOffsets": "121,192,262,332,400,468"
+                    }
+                },
+                {
+                    "source": "E:\\Nova Calculator\\app\\src\\main\\res\\values-xlarge\\dimens.xml",
+                    "from": {
+                        "startLines": "23",
+                        "startColumns": "4",
+                        "startOffsets": "806",
+                        "endColumns": "55",
+                        "endOffsets": "857"
+                    },
+                    "to": {
+                        "startLines": "8",
+                        "startColumns": "4",
+                        "startOffsets": "473",
+                        "endColumns": "55",
+                        "endOffsets": "524"
+                    }
+                }
+            ]
+        }
+    ]
+}

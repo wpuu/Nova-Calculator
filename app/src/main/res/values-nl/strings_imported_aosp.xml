@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <string name="cpp_prefs_vibrate_on_keypress">Trillen bij aanraking</string>
+   <string name="cpp_prefs_auto_rotate_screen">Scherm autom. draaien</string>
+   <string name="cpp_language">Taal</string>
+   <string name="cpp_theme">Thema</string>
+   <string name="cpp_theme_light">Licht</string>
+   <string name="cpp_theme_dark">Donker</string>
+   <string name="cpp_prefs_keep_screen_on">Stand-by</string>
+   <string name="cpp_permission_overlay">Over andere apps tekenen</string>
+   <string name="cpp_yes">Ja</string>
+   <string name="cpp_no">Nee</string>
+   <string name="cpp_create">Aanmaken</string>
+   <string name="cpp_close">Sluiten</string>
+   <string name="cpp_switch">Overschakelen</string>
+   <string name="cpp_add">Toevoegen</string>
+   <string name="cpp_mode">Modus</string>
+   <string name="cpp_enable">Inschakelen</string>
+   <string name="cpp_other">Overige</string>
+   <string name="cpp_high_contrast_text">Tekst met hoog contrast</string>
+   <string name="cpp_edit">Bewerken</string>
+   <string name="cpp_delete">Verwijderen</string>
+   <string name="cpp_done">Gereed</string>
+   <string name="cpp_cancel">Annuleren</string>
+   <string name="cpp_description">Beschrijving</string>
+   <string name="cpp_about">Over</string>
+   <string name="cpp_copy_text">Kopiëren naar klembord</string>
+   <string name="cpp_text_copied">Tekst gekopieerd</string>
+   <string name="cpp_name">Naam</string>
+   <string name="cpp_settings">Instellingen</string>
+   <string name="cpp_nan">Is geen getal</string>
+   <string name="cpp_error">Fout</string>
+   <string name="cpp_copy">Kopiëren</string>
+</resources>

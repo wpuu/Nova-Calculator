@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="CppKeyboardButton.Premium.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_premium_digit</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="CppKeyboardButton.Premium.Digit.Highlighted" parent="CppKeyboardButton.Premium.Digit">
+    </style>
+
+    <style name="CppKeyboardButton.Premium.Operation" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_premium_operation</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="directionTextAlpha">0.7</item>
+    </style>
+
+    <style name="CppKeyboardButton.Premium.Operation.Highlighted" parent="CppKeyboardButton.Premium.Operation">
+    </style>
+
+    <style name="CppKeyboardButton.Premium.Control" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_premium_control</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    
+    <style name="CppKeyboardButton.Premium.Control.Highlighted" parent="CppKeyboardButton.Premium.Control">
+    </style>
+
+    <style name="Cpp.Theme.Premium" parent="Cpp.Theme">
+        <item name="android:windowBackground">@color/premium_bg</item>
+        <item name="cpp_editor_bg">@color/premium_bg</item>
+        <item name="cpp_fab_bg">@color/premium_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Premium.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Premium.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Premium.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Premium.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Premium.Operation</item>
+    </style>
+
+    <style name="Cpp.Theme.Premium.Dialog" parent="Cpp.Theme.Dialog">
+        <item name="cpp_editor_bg">@color/premium_bg</item>
+        <item name="cpp_fab_bg">@color/premium_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Premium.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Premium.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Premium.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Premium.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Premium.Operation</item>
+    </style>
+
+    <style name="Cpp.Theme.Premium.Dialog.Alert" parent="Cpp.Theme.Dialog.Alert">
+        <item name="cpp_editor_bg">@color/premium_bg</item>
+        <item name="cpp_fab_bg">@color/premium_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Premium.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Premium.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Premium.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Premium.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Premium.Operation</item>
+    </style>
+
+    <style name="Cpp.Theme.Premium.Calculator" parent="Cpp.Theme.Premium">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <style name="CppKeyboardButton.PremiumNeumorphism.Digit" parent="CppKeyboardButton.Premium.Digit">
+        <item name="android:background">@drawable/btn_premium_neumorphism_digit</item>
+    </style>
+    <style name="CppKeyboardButton.PremiumNeumorphism.Operation" parent="CppKeyboardButton.Premium.Operation">
+        <item name="android:background">@drawable/btn_premium_neumorphism_operation</item>
+    </style>
+    <style name="CppKeyboardButton.PremiumNeumorphism.Control" parent="CppKeyboardButton.Premium.Control">
+        <item name="android:background">@drawable/btn_premium_neumorphism_control</item>
+    </style>
+
+    <style name="Cpp.Theme.PremiumNeumorphism" parent="Cpp.Theme.Premium">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumNeumorphism.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumNeumorphism.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumNeumorphism.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumNeumorphism.Dialog" parent="Cpp.Theme.Premium.Dialog">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumNeumorphism.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumNeumorphism.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumNeumorphism.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumNeumorphism.Dialog.Alert" parent="Cpp.Theme.Premium.Dialog.Alert">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumNeumorphism.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumNeumorphism.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumNeumorphism.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumNeumorphism.Calculator" parent="Cpp.Theme.PremiumNeumorphism">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <style name="CppKeyboardButton.PremiumGlass.Digit" parent="CppKeyboardButton.Premium.Digit">
+        <item name="android:background">@drawable/btn_premium_glass_digit</item>
+    </style>
+    <style name="CppKeyboardButton.PremiumGlass.Operation" parent="CppKeyboardButton.Premium.Operation">
+        <item name="android:background">@drawable/btn_premium_glass_operation</item>
+    </style>
+    <style name="CppKeyboardButton.PremiumGlass.Control" parent="CppKeyboardButton.Premium.Control">
+        <item name="android:background">@drawable/btn_premium_glass_control</item>
+    </style>
+
+    <style name="Cpp.Theme.PremiumGlass" parent="Cpp.Theme.Premium">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumGlass.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumGlass.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumGlass.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumGlass.Dialog" parent="Cpp.Theme.Premium.Dialog">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumGlass.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumGlass.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumGlass.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumGlass.Dialog.Alert" parent="Cpp.Theme.Premium.Dialog.Alert">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumGlass.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumGlass.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumGlass.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumGlass.Calculator" parent="Cpp.Theme.PremiumGlass">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+</resources>

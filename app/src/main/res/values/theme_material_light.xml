@@ -1,0 +1,110 @@
+<!--
+  ~ Copyright 2013 serso aka se.solovyev
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Contact details
+  ~
+  ~ Email: se.solovyev@gmail.com
+  ~ Site:  http://se.solovyev.org
+  -->
+
+<resources>
+
+    <style name="CppKeyboardButton.Material.Light.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/material_button_light</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Digit.Highlighted" parent="CppKeyboardButton.Material.Light.Digit">
+        <item name="android:background">@drawable/material_button_light_darker</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Operation" parent="CppKeyboardButton.Material.Digit">
+        <item name="android:background">@drawable/material_button_light_primary</item>
+        <item name="directionTextAlpha">0.7</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Operation.Highlighted" parent="CppKeyboardButton.Material.Light.Operation">
+        <item name="android:background">@drawable/material_button_light_primary_darker</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Control" parent="CppKeyboardButton.Material.Light.Digit" />
+
+    <style name="CppHeaderButton.Material.Light" parent="CppKeyboardButton.Material.Light.Control">
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_weight">0</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:textSize">@dimen/cpp_onscreen_header_button_text_size</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Simple.Digit" parent="CppKeyboardButton.Material.Light.Digit">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Simple.Control" parent="CppKeyboardButton.Material.Light.Control">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Simple.Control.Highlighted" parent="CppKeyboardButton.Material.Light.Simple.Control">
+        <item name="android:background">@drawable/material_button_light_darker</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Simple.NoBg" parent="CppKeyboardButton.Material.Light.Control">
+        <item name="android:background">@drawable/widget_button_no_bg_light</item>
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Simple.Control.Image" parent="CppKeyboardButton.Material.Light.Control">
+        <item name="android:padding">@dimen/cpp_keyboard_simple_image_button_padding</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Simple.Control.Image.Highlighted" parent="CppKeyboardButton.Material.Light.Simple.Control.Image">
+        <item name="android:background">@drawable/material_button_light_primary_darker</item>
+    </style>
+
+    <style name="CppKeyboardButton.Material.Light.Simple.Operation" parent="CppKeyboardButton.Material.Light.Operation">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+    </style>
+
+    <style name="Cpp.Theme.Material.Light" parent="Cpp.Theme.Light">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Light.Digit.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Light.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Light.Operation.Highlighted</item>
+    </style>
+
+    <style name="Cpp.Theme.Material.Light.Dialog" parent="Cpp.Theme.Light.Dialog">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Light.Digit.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Light.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Light.Operation.Highlighted</item>
+    </style>
+
+    <style name="Cpp.Theme.Material.Light.Dialog.Alert" parent="Cpp.Theme.Light.Dialog.Alert">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Light.Digit.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Light.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Light.Operation.Highlighted</item>
+    </style>
+
+    <style name="Cpp.Theme.Material.Light.Calculator" parent="Cpp.Theme.Material.Light">
+        <item name="android:windowBackground">@color/cpp_bg_light</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+</resources>

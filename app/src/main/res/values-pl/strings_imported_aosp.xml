@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <string name="cpp_prefs_vibrate_on_keypress">Wibracje przy dotknięciu</string>
+   <string name="cpp_prefs_auto_rotate_screen">Autoobracanie ekranu</string>
+   <string name="cpp_language">Język</string>
+   <string name="cpp_theme">Motyw</string>
+   <string name="cpp_theme_light">Jasny</string>
+   <string name="cpp_theme_dark">Ciemny</string>
+   <string name="cpp_prefs_keep_screen_on">Pozostaw ekran włączony</string>
+   <string name="cpp_permission_overlay">Wyświetlanie nad innymi aplikacjami</string>
+   <string name="cpp_yes">Tak</string>
+   <string name="cpp_no">Nie</string>
+   <string name="cpp_create">Utwórz</string>
+   <string name="cpp_close">Zamknij</string>
+   <string name="cpp_switch">Przełącz</string>
+   <string name="cpp_add">Dodaj</string>
+   <string name="cpp_mode">Tryb lokalizacji</string>
+   <string name="cpp_enable">Włącz</string>
+   <string name="cpp_other">Inne</string>
+   <string name="cpp_high_contrast_text">Tekst o dużym kontraście</string>
+   <string name="cpp_edit">Edytuj</string>
+   <string name="cpp_delete">Usuń</string>
+   <string name="cpp_done">Gotowe</string>
+   <string name="cpp_cancel">Anuluj</string>
+   <string name="cpp_description">Opis</string>
+   <string name="cpp_about">Informacje</string>
+   <string name="cpp_copy_text">Kopiuj do schowka</string>
+   <string name="cpp_text_copied">Tekst skopiowany</string>
+   <string name="cpp_name">Imię i nazwisko</string>
+   <string name="cpp_settings">Ustawienia</string>
+   <string name="cpp_nan">To nie liczba</string>
+   <string name="cpp_error">Błąd</string>
+   <string name="cpp_copy">Kopiuj</string>
+</resources>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="CppKeyboardButton.IOS.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_ios_digit</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="CppKeyboardButton.IOS.Digit.Highlighted" parent="CppKeyboardButton.IOS.Digit">
+    </style>
+
+    <style name="CppKeyboardButton.IOS.Operation" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_ios_operation</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="directionTextAlpha">0.7</item>
+    </style>
+
+    <style name="CppKeyboardButton.IOS.Operation.Highlighted" parent="CppKeyboardButton.IOS.Operation">
+    </style>
+
+    <style name="CppKeyboardButton.IOS.Control" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_ios_control</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+    
+    <style name="CppKeyboardButton.IOS.Control.Highlighted" parent="CppKeyboardButton.IOS.Control">
+    </style>
+
+    <style name="Cpp.Theme.IOS" parent="Cpp.Theme">
+        <item name="android:windowBackground">@color/ios_bg</item>
+        <item name="cpp_editor_bg">@color/ios_bg</item>
+        <item name="cpp_fab_bg">@color/ios_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.IOS.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.IOS.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.IOS.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.IOS.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.IOS.Operation</item>
+    </style>
+
+    <style name="Cpp.Theme.IOS.Dialog" parent="Cpp.Theme.Dialog">
+        <item name="cpp_editor_bg">@color/ios_bg</item>
+        <item name="cpp_fab_bg">@color/ios_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.IOS.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.IOS.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.IOS.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.IOS.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.IOS.Operation</item>
+    </style>
+
+    <style name="Cpp.Theme.IOS.Dialog.Alert" parent="Cpp.Theme.Dialog.Alert">
+        <item name="cpp_editor_bg">@color/ios_bg</item>
+        <item name="cpp_fab_bg">@color/ios_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.IOS.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.IOS.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.IOS.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.IOS.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.IOS.Operation</item>
+    </style>
+
+    <style name="Cpp.Theme.IOS.Calculator" parent="Cpp.Theme.IOS">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+</resources>

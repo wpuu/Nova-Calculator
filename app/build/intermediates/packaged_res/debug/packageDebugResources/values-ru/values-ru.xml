@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="c_about_content">Copyright © 2009–2015\n\n<b>Программа создана\nserso aka se.solovyev</b>\n\n
+		Сайт приложения: <a href="https://vk.com/calculatorpp">https://vk.com/calculatorpp</a>\n\n
+		Эта программа с открытыми исходным кодом:\nон может быть найден на \n
+		<a href="https://github.com/serso/android-calculatorpp">http://github.com</a>\n\n
+		За подробной информацией, пожалуйста,\nобращайтесь на почту\n<a href="mailto:se.solovyev@gmail.com">
+			se.solovyev@gmail.com</a>\n
+		или посетите сайт \n<a href="http://se.solovyev.org">http://se.solovyev.org</a>\n\n
+		Если вы хотите поддержать проект материально\nвы можете купить специальную опцию из настроек приложения\n\n
+		Если вам понравилось приложение –\nпоставьте 5 звёздочек в\n
+		<a href="https://market.android.com/details?id=org.solovyev.android.calculator">Google Play</a>\n\n
+		Это приложение использует следующие открытые библиотеки:\n
+		<a href="http://simple.sourceforge.net">Simple (XML serialization)</a>\n
+		<a href="http://meditorworld.appspot.com/meditor.txt">JSCL</a>
+	</string>
+    <string name="c_calc_ad_free_summary">И убрать рекламу</string>
+    <string name="c_calc_ad_free_title">Поддержать проект</string>
+    <string name="c_calc_show_release_notes_title">Показывать примечания к выпуску</string>
+    <string name="c_calc_use_back_button_as_prev_title">Использовать кнопку назад как назад по истории</string>
+    <string name="c_char_is_not_accepted">Символ \'%s\' не допустим в названии переменной!</string>
+    <string name="c_conversion_tool">Перевод величин</string>
+    <string name="c_convert">Перевести в…</string>
+    <string name="c_copy_expression">Копировать выражение</string>
+    <string name="c_copy_result">Копировать результат</string>
+    <string name="c_error">Ошибка</string>
+    <string name="c_first_start_text">Спасибо за выбор Калькулятора++!\n\nКалькулятор++ - это мощный инструмент для проведения ежедневных расчётов.</string>
+    <string name="c_fun_category_common">Общие</string>
+    <string name="c_fun_category_comparison">Сравнение</string>
+    <string name="c_fun_category_hyper_trig">Гиперболические тригонометрические</string>
+    <string name="c_fun_category_my">Мои</string>
+    <string name="c_fun_category_trig">Тригонометрические</string>
+    <string name="c_fun_description_abs">Возвращает модуль числа</string>
+    <string name="c_fun_description_acos">Арккосинус - обратная функция к косинусу</string>
+    <string name="c_fun_description_acot">Арккотангенс - обратная функция к котангенсу</string>
+    <string name="c_fun_description_asin">Арксинус - обратная функция к синусу</string>
+    <string name="c_fun_description_atan">Арктангенс - обратная функция к тангенсу</string>
+    <string name="c_fun_description_cos">Тригонометрическая функция косинус</string>
+    <string name="c_fun_description_cot">Тригонометрическая функция котангенс</string>
+    <string name="c_fun_description_cubic">Функция кубического корня</string>
+    <string name="c_fun_description_deg">Преобразует радианы в градусы</string>
+    <string name="c_fun_description_dms">Преобразует градусы из шестидесятеричной системы в десятичную: d - градусы, m - минуты (по умолчанию = 0), s - секунды (по умолчанию = 0)
+	</string>
+    <string name="c_fun_description_eq">Равно - возвращает 1, если два аргумента равны; иначе 0</string>
+    <string name="c_fun_description_exp">Экспонента</string>
+    <string name="c_fun_description_ge">Больше-либо-равно - возвращает 1, если два аргумента равны или первое больше второго; иначе 0</string>
+    <string name="c_fun_description_gt">Возвращает 1, если первый аргумент больше второго; иначе 0</string>
+    <string name="c_fun_description_le">Меньше-либо-равно - возвращает 1, если два аргумента равны или первое меньше второго; иначе 0
+	</string>
+    <string name="c_fun_description_lg">Десятичный логарифм - логарифм по основанию 10</string>
+    <string name="c_fun_description_ln">Натуральный логарифм - логарифм по основанию e</string>
+    <string name="c_fun_description_log">Логaрифм по заданному основанию</string>
+    <string name="c_fun_description_lt">Возвращает 1, если первый аргумент меньше второго; иначе 0</string>
+    <string name="c_fun_description_ne">Возвращает 1, если два аргумента не равны; иначе 0</string>
+    <string name="c_fun_description_rad">Преобразует градусы в радианы: d - градусы, m - минуты (по умолчанию = 0), s - секунды (по умолчанию = 0)
+	</string>
+    <string name="c_fun_description_sgn">Возвращает знак аргумента: -1, если аргумент меньше 0; 0, если равен 0; 1, если больше 0</string>
+    <string name="c_fun_description_sin">Тригонометрическая функция синус</string>
+    <string name="c_fun_description_sqrt">Функция квадратного корня</string>
+    <string name="c_fun_description_tan">Тригонометрическая функция тангенс</string>
+    <string name="c_functions">Функции</string>
+    <string name="c_history">История</string>
+    <string name="c_history_comment">Комментарий</string>
+    <string name="c_history_expression">Значение</string>
+    <string name="c_op_description_derivative">Возвращает производную порядка \'order\' (по умолчанию = 1) функции \'f(x)\' по переменной \'x\' и вычисляет её в точке \'x_point\' (по умолчанию = такая же как и \'x\')</string>
+    <string name="c_op_description_integral">Возвращает интеграл функции \'f(x)\' по переменной \'x\'</string>
+    <string name="c_op_description_integral_ab">Интегрирует функцию \'f(x)\' по переменной \'x\' от \'a\' до \'b\'
+	</string>
+    <string name="c_op_description_mod">Возвращает остаток от деления \'x\' на \'y\'</string>
+    <string name="c_op_description_product">Возвращает произведение функций \'f(i)\', пробегая по переменной \'i\' от \'from\' до \'to\'
+	</string>
+    <string name="c_op_description_sum">Суммирует функции \'f(i)\', пробегая по переменной \'i\' от \'from\' до \'to\'
+	</string>
+    <string name="c_operators">Операторы</string>
+    <string name="c_pf_description_degree">Преобразует градусы в радианы.\n
+		Примеры:\n
+		268° = 4.67748\n
+		30.21° = 0.52726
+	</string>
+    <string name="c_pf_description_double_factorial">Возвращает двойной факториал от предыдущего выражения</string>
+    <string name="c_pf_description_factorial">Возвращает факториал от предыдущего выражения</string>
+    <string formatted="false" name="c_pf_description_percent">Возвращает процентное значение от предыдущего выражения.\nПримеры:\n
+		100 + 50% = 150\n
+		100 * 50% = 50\n
+		100 + 100 * 50% * 50% = 125
+	</string>
+    <string name="c_plot">Построить график</string>
+    <string name="c_release_notes">Примечания к выпуску</string>
+    <string name="c_release_notes_for_title">"Примечания к выпуску версии "</string>
+    <string name="c_save">Сохранить</string>
+    <string name="c_use">Использовать</string>
+    <string name="c_value_is_not_a_number">Значение должно либо оставаться пустым, либо быть числом: если у вас есть
+		параметры, то создайте функцию!
+	</string>
+    <string name="c_var_already_exists">Переменная с таким именем уже существует!</string>
+    <string name="c_var_create_var">Создать переменную</string>
+    <string name="c_var_description">Описание</string>
+    <string name="c_var_description_G">Гравитационная постоянная, с^3·кг^−1·с^−2</string>
+    <string name="c_var_description_PI">Отношение длины окружности к диаметру. Внимание: эта постоянная зависит от
+		единиц измерения углов => rad: 3.14, deg: 180.0
+	</string>
+    <string name="c_var_description_c">Скорость света в вакууме, м·с</string>
+    <string name="c_var_description_e">Вещественное число, при котором производная функции f(x) = e^x в точке x = 0 равна 1
+	</string>
+    <string name="c_var_description_h_reduced">Приведённая постоянная Планка, Дж·с</string>
+    <string name="c_var_description_i">Мнимая единица, определённая как i^2 = −1</string>
+    <string name="c_var_description_inf">Бесконечность</string>
+    <string name="c_var_description_nan">Не число</string>
+    <string name="c_var_description_pi">Отношение длины окружности к диаметру. Внимание: эта постоянная не зависит от
+		единиц измерения углов => rad: 3.14, deg: 3.14
+	</string>
+    <string name="c_var_edit_var">Редактировать переменную</string>
+    <string name="c_var_my">Мои</string>
+    <string name="c_var_name_clashes">Имя переменной не может быть зарезервированным системным именем!</string>
+    <string name="c_var_removal_confirmation_question">Вы действительно хотите удалить переменную \'%s\'?</string>
+    <string name="c_var_system">Встроенные</string>
+    <string name="c_var_value">Значение</string>
+    <string name="close">Закрыть</string>
+    <string name="convert_to_bin">Перевести в bin</string>
+    <string name="convert_to_dec">Перевести в dec</string>
+    <string name="convert_to_hex">Перевести в hex</string>
+    <string name="cpp_about">О программе</string>
+    <string name="cpp_add">Добавить</string>
+    <string name="cpp_angles">"Углы"</string>
+    <string name="cpp_app_name">Калькулятор++</string>
+    <string name="cpp_app_name_on_screen">Калькулятор++ (В отдельном окне)</string>
+    <string name="cpp_appearance">"Внешний вид"</string>
+    <string name="cpp_bin">Бинарная</string>
+    <string name="cpp_cancel">Отмена</string>
+    <string name="cpp_clear_history">Очистить</string>
+    <string name="cpp_clear_history_message">Вся история будет очищена.</string>
+    <string name="cpp_clear_history_title">Очистить историю?</string>
+    <string name="cpp_close">Закрыть</string>
+    <string name="cpp_continue">Продолжить</string>
+    <string name="cpp_converter_amount_of_substance">Количество вещества</string>
+    <string name="cpp_converter_electric_current">Электрический ток</string>
+    <string name="cpp_converter_length">Длина</string>
+    <string name="cpp_converter_mass">Масса</string>
+    <string name="cpp_converter_temperature">Температура</string>
+    <string name="cpp_converter_time">Время</string>
+    <string name="cpp_copy">Копировать</string>
+    <string name="cpp_copy_text">Копировать в буфер обмена</string>
+    <string name="cpp_create">Создать</string>
+    <string name="cpp_dec">Десятичная</string>
+    <string name="cpp_deg">Градусы</string>
+    <string name="cpp_delete">Удалить</string>
+    <string name="cpp_description">Описание</string>
+    <string name="cpp_done">Готово</string>
+    <string name="cpp_dont_show_again">Не показывать снова</string>
+    <string name="cpp_duplicate_parameter">"Повторяющийся параметр: "%1$s"."</string>
+    <string name="cpp_edit">Изменить</string>
+    <string name="cpp_enable">Включить</string>
+    <string name="cpp_error">Ошибка</string>
+    <string name="cpp_examples">"Примеры"</string>
+    <string name="cpp_field_cannot_be_empty">"Поле не может быть пустым"</string>
+    <string name="cpp_floating_calculator">Калькулятор в отдельном окне</string>
+    <string name="cpp_format">"Формат"</string>
+    <string name="cpp_grad">Грады</string>
+    <string name="cpp_help">Справка</string>
+    <string name="cpp_hex">Шестнадцатеричная</string>
+    <string name="cpp_high_contrast_text">Высококонтрастный текст</string>
+    <string name="cpp_history_tab_recent">Недавняя</string>
+    <string name="cpp_history_tab_saved">Сохранённая</string>
+    <string name="cpp_introduction">Введение</string>
+    <string name="cpp_language">Язык</string>
+    <string name="cpp_missing_permission_message">В системных настройках разрешите приложению доступ к следующему компоненту:%1$s</string>
+    <string name="cpp_missing_permission_title">Отсутствует разрешение</string>
+    <string name="cpp_mode">Режим</string>
+    <string name="cpp_mode_engineer">Инженерный</string>
+    <string name="cpp_mode_simple">Простой</string>
+    <string name="cpp_name">Имя</string>
+    <string name="cpp_name_contains_invalid_characters">"Имя содержит недопустимые символы."</string>
+    <string name="cpp_nan">Не число</string>
+    <string name="cpp_new_in_version">Новое в версии %1$s</string>
+    <string name="cpp_no">Нет</string>
+    <string name="cpp_number_format">"Формат чисел"</string>
+    <string name="cpp_number_format_dec">Десятичный</string>
+    <string name="cpp_number_format_eng">Инженерный</string>
+    <string name="cpp_number_format_sci">Научный</string>
+    <string name="cpp_numeral_system">Система счисления</string>
+    <string name="cpp_oct">Восьмеричная</string>
+    <string name="cpp_other">Другое</string>
+    <string name="cpp_parameter">"Параметр"</string>
+    <string name="cpp_permission_overlay">Наложение поверх других окон</string>
+    <string name="cpp_plot_empty_function_error">Невозможно построить пустую функцию!</string>
+    <string name="cpp_plot_function_line_color">Цвет линии</string>
+    <string name="cpp_plot_function_line_width">Толщина линии</string>
+    <string name="cpp_plot_range">Интервал построения</string>
+    <string name="cpp_plot_too_many_variables">Невозможно построить функцию: слишком много переменных!</string>
+    <string name="cpp_plotter">Графопостроитель</string>
+    <string name="cpp_precision">Точность</string>
+    <string name="cpp_prefs_advanced">Дополнительно</string>
+    <string name="cpp_prefs_auto_rotate_screen">Автоповорот экрана</string>
+    <string name="cpp_prefs_basic">Основные</string>
+    <string name="cpp_prefs_keep_screen_on">Не выключать экран</string>
+    <string name="cpp_prefs_vibrate_on_keypress">Виброотклик</string>
+    <string name="cpp_purchase_text">Поддержать проект очень легко и безопасно: процесс покупки проводится Google и всё
+		что вам нужно - это настроенный Google аккаунт.\n\n
+		Информация о покупке хранится на серверах Google с вашим Google аккаунтом и вы можете легко использовать
+		приложение на нескольких устройствах.\n\n
+		По нажатию кнопки \'Продолжить\' вы будете перенаправлены в приложение Google Play для совершения покупки.
+	</string>
+    <string name="cpp_purchase_title">Покупка</string>
+    <string name="cpp_rad">Радианы</string>
+    <string name="cpp_radix">Система</string>
+    <string name="cpp_rateus_cancel">Нет, спасибо</string>
+    <string name="cpp_rateus_message">Если вам нравится %1$s, отвлекитесь на минутку и поставьте нам 5 звездочек в Google Play.</string>
+    <string name="cpp_rateus_ok">Оценить</string>
+    <string name="cpp_rateus_title">Оцените %1$s</string>
+    <string name="cpp_release_notes_143">
+        ★ Язык приложения может быть изменён в настройках\n
+        ★ Темы для калькулятора в отдельном окне\n
+        ★ Темы для виджета на рабочий стол
+    </string>
+    <string name="cpp_release_notes_148">
+        ★ Новый графопостроитель\n
+        ★ Улучшенный пользовательский интерфейс: главный и второстепенные экраны, диалоги, меню и т.д.\n
+        ★ Переделанный переводчик величин\n
+        ★ Кнопка Память (MC, M+, M-, M)\n
+        ★ Плавающий калькулятор для Андроид М\n
+        ★ Автосохранение недавней истории\n
+        ★ Приложение быстрее запускается и потребляет меньше памяти
+    </string>
+    <string name="cpp_release_notes_150">
+        ★ Кнопки Копировать/Вставить\n
+        ★ Тема для AMOLED дисплеев\n
+        ★ Исправлено форматирование маленьких чисел\n
+        ★ Построение графиков стало быстрее\n
+        ★ Перевод чисел между системами счисления\n
+        ★ Кнопка E в редакторе констант
+    </string>
+    <string name="cpp_release_notes_152">
+        ★ Настройка для высококонтрастного текста\n
+        ★ Изменённый экран настроек\n
+        ★ Больше настроек форматирования чисел: инженерный и научный формат\n
+        ★ Изменения в интерфейсе
+    </string>
+    <string name="cpp_release_notes_choose_theme">Хотите попробовать новые темы в стиле Матириал? Выберите их из списка:</string>
+    <string name="cpp_report_problem">Сообщить о проблеме</string>
+    <string name="cpp_settings">Настройки</string>
+    <string name="cpp_share_link">https://vk.com/calculatorpp</string>
+    <string name="cpp_switch">Сменить аккаунт</string>
+    <string name="cpp_system_language">"Системный язык"</string>
+    <string name="cpp_text_copied">Текст скопирован</string>
+    <string name="cpp_theme">Тема</string>
+    <string name="cpp_theme_app">Тема приложения</string>
+    <string name="cpp_theme_dark">Темная</string>
+    <string name="cpp_theme_light">Светлая</string>
+    <string name="cpp_theme_metro_blue">Метро Синяя</string>
+    <string name="cpp_thousands_separator">"Разделитель разрядов тысяч"</string>
+    <string name="cpp_thousands_separator_apostrophe">Апостроф (\')</string>
+    <string name="cpp_thousands_separator_no">Не использовать разделитель разрядов</string>
+    <string name="cpp_thousands_separator_space">Пробел ( )</string>
+    <string name="cpp_translators_list">Сергей Соловьёв</string>
+    <string name="cpp_translators_text">Это приложение перевели на русский: </string>
+    <string name="cpp_turns">Обороты</string>
+    <string name="cpp_units_aos_atoms">атомы</string>
+    <string name="cpp_units_aos_mol">моль</string>
+    <string name="cpp_units_ec_a">A</string>
+    <string name="cpp_units_ec_gi">Gi</string>
+    <string name="cpp_units_length_angstroms">Å</string>
+    <string name="cpp_units_length_astronomical_units">au</string>
+    <string name="cpp_units_length_feet">футы</string>
+    <string name="cpp_units_length_inches">дюймы</string>
+    <string name="cpp_units_length_light_years">св г</string>
+    <string name="cpp_units_length_meters">м</string>
+    <string name="cpp_units_length_miles">мили</string>
+    <string name="cpp_units_length_nautical_miles">мили (морские)</string>
+    <string name="cpp_units_length_parsecs">парсеки</string>
+    <string name="cpp_units_length_pixels">пиксели</string>
+    <string name="cpp_units_length_points">pt</string>
+    <string name="cpp_units_length_yards">ярды</string>
+    <string name="cpp_units_mass_kg">кг</string>
+    <string name="cpp_units_mass_lb">фунты</string>
+    <string name="cpp_units_mass_oz">унции</string>
+    <string name="cpp_units_mass_t">т</string>
+    <string name="cpp_units_mass_tons_uk">т (СК)</string>
+    <string name="cpp_units_mass_tons_us">т (США)</string>
+    <string name="cpp_units_time_days">дни</string>
+    <string name="cpp_units_time_hours">ч</string>
+    <string name="cpp_units_time_minutes">мин</string>
+    <string name="cpp_units_time_months">мес</string>
+    <string name="cpp_units_time_seconds">с</string>
+    <string name="cpp_units_time_weeks">нед</string>
+    <string name="cpp_units_time_years">г</string>
+    <string name="cpp_vars_and_constants">Переменные и константы</string>
+    <string name="cpp_widget">Виджет</string>
+    <string name="cpp_wizard_back">Назад</string>
+    <string name="cpp_wizard_dragbutton_action_center">Нажмите на кнопку ниже для того, чтобы воспользоваться 9</string>
+    <string name="cpp_wizard_dragbutton_action_down">Потяните из центра кнопки вниз для того, чтобы воспользоваться ^2</string>
+    <string name="cpp_wizard_dragbutton_action_end">Замечательно! Нажмите на кнопку ещё раз, чтобы повторить сначала</string>
+    <string name="cpp_wizard_dragbutton_action_up">Потяните из центра кнопки вверх для того, чтобы воспользоваться %</string>
+    <string name="cpp_wizard_dragbutton_description">Специально разработанные кнопки позволяют быстро и просто использовать дополнительные возможности калькулятора</string>
+    <string name="cpp_wizard_dragbutton_title">Основы использования кнопок</string>
+    <string name="cpp_wizard_final_done">Приложение настроено и готово к использованию.</string>
+    <string name="cpp_wizard_final_title">Ещё чуть-чуть!</string>
+    <string name="cpp_wizard_finish">Готово</string>
+    <string name="cpp_wizard_finish_confirmation">Вы действительно хотите завершить визард?</string>
+    <string name="cpp_wizard_finish_confirmation_title">Закончить?</string>
+    <string name="cpp_wizard_mode_engineer_description">В инженерном режиме дополнительные функции доступны на главном экране. Результат не округляется и представлен в инженерной нотации, радианы установлены единицами измерения углов по умолчанию.</string>
+    <string name="cpp_wizard_mode_simple_description">В простом режиме только базовая функциональность доступна на главном экране. Результат округляется до 5 знаков, градусы установлены единицами измерения углов по умолчанию.</string>
+    <string name="cpp_wizard_mode_title">Выберите режим</string>
+    <string name="cpp_wizard_next">Далее</string>
+    <string name="cpp_wizard_onscreen_calculator_title">Калькулятор в отдельном окне</string>
+    <string name="cpp_wizard_onscreen_checkbox">Включить</string>
+    <string name="cpp_wizard_onscreen_description">Калькулятор в отдельном окне позволяет вам произодить вычисления не закрывая при этом другие приложения</string>
+    <string name="cpp_wizard_skip">Пропустить</string>
+    <string name="cpp_wizard_start">Начать визард</string>
+    <string name="cpp_wizard_theme_title">Выберите тему</string>
+    <string name="cpp_wizard_welcome_title">Приветствие</string>
+    <string name="cpp_yes">Да</string>
+    <string name="derivatives">Производные/Интегралы</string>
+    <string name="fix">Исправить</string>
+    <string name="function_already_exists">Функция с таким именем уже существует!</string>
+    <string name="function_create_function">Создать функцию</string>
+    <string name="function_edit_function">Редактировать функцию</string>
+    <string name="function_removal_confirmation_question">Вы действительно хотите удалить функцию \'%s\'?</string>
+    <string name="not_valid_result">Результат не допустим!</string>
+    <string name="open_onscreen_calculator">Нажмите чтобы открыть калькулятор в отдельном окне</string>
+    <string name="other">Другие</string>
+    <string name="p_calculations_calculate_on_fly_title">Результат вычисляется по мере ввода выражения</string>
+    <string name="p_metro_green_theme">Метро Зелёная</string>
+    <string name="p_metro_purple_theme">Метро Фиолетовая</string>
+    <string name="removal_confirmation">Подтверждение удаления</string>
+</resources>

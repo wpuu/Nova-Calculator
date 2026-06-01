@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="c_about_content">Copyright © 2009–2013\n\n<b>Created by serso aka se.solovyev</b>\n\n
+		Facebookページを参照: <a href="http://facebook.com/calculatorpp">http://facebook.com/calculatorpp</a>\n\n
+		本プログラムはApache 2.0 Licenceのもと配布されています。:\nソースコードは以下より参照できます。\n
+		<a href="https://github.com/serso/android-calculatorpp">http://github.com</a>\n\n
+		さらに詳しい情報については\nEmailで作者までお問い合わせください。\n
+		<a href="mailto:se.solovyev@gmail.com">se.solovyev@gmail.com</a>
+		\nあるいは、こちらのサイトをご訪問ください。\n<a href="http://se.solovyev.org">http://se.solovyev.org</a>\n\n
+	プロジェクトのサポートを希望される場合は、\nアプリケーションの設定よりスペシャルオプションを購入できます。\n\n
+		アプリケーションを気に入られた場合は\n下記のサイトで5つ星をいただけましたら幸いです。\n
+		<a href="https://market.android.com/details?id=org.solovyev.android.calculator">Google Play</a>\n\n
+		本アプリケーションはnext open source librariesを使用しています。:\n
+		<a href="http://simple.sourceforge.net">Simple (XML serialization)</a>\n
+		<a href="http://meditorworld.appspot.com/meditor.txt">JSCL</a>
+	</string>
+    <string name="c_calc_ad_free_summary">広告を削除</string>
+    <string name="c_calc_ad_free_title">プロジェクトを支援します</string>
+    <string name="c_calc_show_release_notes_title">リリースノートを表示します</string>
+    <string name="c_calc_use_back_button_as_prev_title">戻るボタンを履歴に使用します</string>
+    <string name="c_char_is_not_accepted">文字\'%s\'は変数名として利用できません!</string>
+    <string name="c_conversion_tool">変換ツール</string>
+    <string name="c_convert">変換…</string>
+    <string name="c_copy_expression">式をコピー</string>
+    <string name="c_copy_result">結果をコピー</string>
+    <string name="c_error">エラー</string>
+    <string name="c_first_start_text">Calculator++をお選びいただきありがとうございます!\n\nCalculator++は日々の計算に使える強力なツールです。</string>
+    <string name="c_fun_category_common">一般</string>
+    <string name="c_fun_category_comparison">比較</string>
+    <string name="c_fun_category_hyper_trig">双曲三角関数</string>
+    <string name="c_fun_category_my">マイ</string>
+    <string name="c_fun_category_trig">三角関数</string>
+    <string name="c_fun_description_abs">引数の絶対値を返す</string>
+    <string name="c_fun_description_acos">逆余弦(アークコサイン)関数</string>
+    <string name="c_fun_description_acot">逆余接(アークコタンジェント)関数</string>
+    <string name="c_fun_description_asin">逆正弦(アークサイン)関数</string>
+    <string name="c_fun_description_atan">逆正接(アークタンジェント)関数</string>
+    <string name="c_fun_description_cos">余弦(コサイン)関数</string>
+    <string name="c_fun_description_cot">余接(コタンジェント)関数</string>
+    <string name="c_fun_description_cubic">立方根関数</string>
+    <string name="c_fun_description_deg">ラジアンを度に変換する</string>
+    <string name="c_fun_description_dms">角度をDMS(度分秒)表記から10 進表記法に変換する: d - 度、m - 分 (既定 = 0)、s 秒 (既定 = 0)</string>
+    <string name="c_fun_description_eq">等関数 - 2つの引数が等しいとき、1を返す(等しくないときは0)</string>
+    <string name="c_fun_description_exp">指数関数</string>
+    <string name="c_fun_description_ge">以上関数 - 2つの引数が等しいか、最初の引数が
+大きいとき、1を返す(小さいときは0)</string>
+    <string name="c_fun_description_gt">大なり関数 - 最初の引数が2番目の引数より大きいとき、1を返す(それ以外は0)</string>
+    <string name="c_fun_description_le">以下関数 - 2つの引数が等しいか、最初の引数が小さいとき、1を返す</string>
+    <string name="c_fun_description_lg">常用対数 - 底 10 の対数</string>
+    <string name="c_fun_description_ln">自然対数 - eを底とする対数</string>
+    <string name="c_fun_description_log">対数 - 特定の底に対する対数</string>
+    <string name="c_fun_description_lt">小なり関数 - 最初の引数が2番目の引数より小さいとき、1を返す(それ以外は0)</string>
+    <string name="c_fun_description_ne">不等関数 - 2 つの引数が等しくない場合、1を返す(等しい場合は0)</string>
+    <string name="c_fun_description_rad">度をラジアンに変換する: d - 度、m - 分 (既定 = 0)、s 秒 (既定 = 0)</string>
+    <string name="c_fun_description_sgn">引数の符号を返す: 負の数のとき-1、0のとき0、正の数のとき1</string>
+    <string name="c_fun_description_sin">正弦(サイン)関数</string>
+    <string name="c_fun_description_sqrt">平方根関数</string>
+    <string name="c_fun_description_tan">正接(タンジェント)関数</string>
+    <string name="c_functions">関数</string>
+    <string name="c_history">履歴</string>
+    <string name="c_history_comment">コメント</string>
+    <string name="c_history_expression">値</string>
+    <string name="c_op_description_derivative">関数\'f(x)\'の
+		\'x_point\' (デフォルト = \'x\'と同じ)における変数\'x\'での第\'order\'次(デフォルト = 1)導関数を与えます。
+	</string>
+    <string name="c_op_description_integral">関数\'f(x)\'の変数\'x\'による積分値を与えます</string>
+    <string name="c_op_description_integral_ab">\'f(x)\'を変数\'x\'で\'a\'から\'b\'まで積分します
+	</string>
+    <string name="c_op_description_mod">モジュロ演算は\'x\'を\'y\'で割った余りを見つけます。</string>
+    <string name="c_op_description_product">関数\'f(i)\'の積を\'i\'を\'from\'から\'to\'まで繰り返し、与えます。</string>
+    <string name="c_op_description_sum">関数\'f(i)\'の\'i\'を\'from\'から\'to\'まで繰り返します。
+	</string>
+    <string name="c_operators">演算</string>
+    <string name="c_pf_description_degree">度をラジアンに変換します\n
+		例:\n
+		268° = 4.67748\n
+		30.21° = 0.52726
+	</string>
+    <string name="c_pf_description_double_factorial">前の式の二乗を与えます</string>
+    <string name="c_pf_description_factorial">前の式の階乗を与えます</string>
+    <string formatted="false" name="c_pf_description_percent">前の式のパーセントでの値を与えます。\n例:\n
+		100 + 50% = 150\n
+		100 * 50% = 50\n
+		100 + 100 * 50% * 50% = 125
+	</string>
+    <string name="c_plot">グラフをプロット</string>
+    <string name="c_release_notes">リリースノート</string>
+    <string name="c_release_notes_for_title">"バージョンのリリースノート "</string>
+    <string name="c_save">保存</string>
+    <string name="c_use">使う</string>
+    <string name="c_value_is_not_a_number">値は数値、もしくは空のままである必要があります。パラメータを入力したい場合は、代わりに関数を作成してください。</string>
+    <string name="c_var_already_exists">同じ名前の変数がすでに存在しています!</string>
+    <string name="c_var_create_var">変数を作成</string>
+    <string name="c_var_description">説明</string>
+    <string name="c_var_description_G">万有引力定数は実験によって求められた物理定数で、物体間に働く引力の計算に関係します(m^3·kg^−1·s^−2)
+	</string>
+    <string name="c_var_description_PI">任意の円の直径に対する円周の割合。注意:この定数は度の単位に依存します => rad: 3.14, deg: 180.0
+	</string>
+    <string name="c_var_description_c">真空中の光の速さ(m·s)</string>
+    <string name="c_var_description_e">関数f(x) = e^xのx=0における微分の値(接線の傾き)が1となる唯一の実数
+	</string>
+    <string name="c_var_description_h_reduced">減らされたプランク定数(J·s)</string>
+    <string name="c_var_description_i">i^2 = -1と定義されている、虚数の単位。</string>
+    <string name="c_var_description_inf">無限</string>
+    <string name="c_var_description_nan">数値ではない</string>
+    <string name="c_var_description_pi">任意の円の直径に対する円周の割合。注意:この定数は度の単位とは独立しています => rad: 3.14, deg: 3.14
+	</string>
+    <string name="c_var_edit_var">変数を編集</string>
+    <string name="c_var_my">ユーザー</string>
+    <string name="c_var_name_clashes">変数名が関数名とかぶっています</string>
+    <string name="c_var_removal_confirmation_question">本当に変数 \'%s\' を削除しますか？</string>
+    <string name="c_var_system">ビルトイン</string>
+    <string name="c_var_value">値</string>
+    <string name="close">閉じる</string>
+    <string name="convert_to_bin">二進法へ変換</string>
+    <string name="convert_to_dec">10進数に変換</string>
+    <string name="convert_to_hex">16進数に変換</string>
+    <string name="cpp_about">概要</string>
+    <string name="cpp_add">追加</string>
+    <string name="cpp_angles">"アングル"</string>
+    <string name="cpp_app_name">Calculator++</string>
+    <string name="cpp_app_name_on_screen">Calculator++ (ウィンドウモード)</string>
+    <string name="cpp_appearance">"外観"</string>
+    <string name="cpp_bin">2進法</string>
+    <string name="cpp_cancel">キャンセル</string>
+    <string name="cpp_clear_history">消去</string>
+    <string name="cpp_clear_history_message">すべての履歴が消去されます。</string>
+    <string name="cpp_clear_history_title">履歴を消去しますか？</string>
+    <string name="cpp_close">閉じる</string>
+    <string name="cpp_continue">続行</string>
+    <string name="cpp_converter_amount_of_substance">物質量</string>
+    <string name="cpp_converter_electric_current">電流</string>
+    <string name="cpp_converter_length">長さ</string>
+    <string name="cpp_converter_mass">質量</string>
+    <string name="cpp_converter_temperature">温度</string>
+    <string name="cpp_converter_time">時間</string>
+    <string name="cpp_copy">コピー</string>
+    <string name="cpp_copy_text">クリップボードにコピー</string>
+    <string name="cpp_create">作成</string>
+    <string name="cpp_dec">10進法</string>
+    <string name="cpp_deg">度</string>
+    <string name="cpp_delete">削除</string>
+    <string name="cpp_description">説明</string>
+    <string name="cpp_done">完了</string>
+    <string name="cpp_dont_show_again">再度表示しない</string>
+    <string name="cpp_duplicate_parameter">"重複パラメーター: '%1$s'"</string>
+    <string name="cpp_edit">編集</string>
+    <string name="cpp_enable">有効にする</string>
+    <string name="cpp_error">エラー</string>
+    <string name="cpp_examples">"使用例"</string>
+    <string name="cpp_field_cannot_be_empty">"フィールドは空にできません"</string>
+    <string name="cpp_floating_calculator">電卓(ウィンドウモード)の設定</string>
+    <string name="cpp_format">"書式"</string>
+    <string name="cpp_grad">グラジアン</string>
+    <string name="cpp_help">ヘルプ</string>
+    <string name="cpp_hex">16進法</string>
+    <string name="cpp_high_contrast_text">高コントラストテキスト</string>
+    <string name="cpp_history_tab_saved">保存された履歴</string>
+    <string name="cpp_introduction">初めに</string>
+    <string name="cpp_language">言語</string>
+    <string name="cpp_missing_permission_message">システム設定で %1$s へのアクセス権限を許可してください</string>
+    <string name="cpp_missing_permission_title">不足している権限</string>
+    <string name="cpp_mode">モード</string>
+    <string name="cpp_mode_engineer">技術者</string>
+    <string name="cpp_mode_simple">シンプル</string>
+    <string name="cpp_name">名前</string>
+    <string name="cpp_name_contains_invalid_characters">"名前に無効な文字が含まれています。"</string>
+    <string name="cpp_nan">数字以外の値</string>
+    <string name="cpp_new_in_version">%1$sバージョンの新機能</string>
+    <string name="cpp_no">いいえ</string>
+    <string name="cpp_number_format">"表示形式"</string>
+    <string name="cpp_oct">8進法</string>
+    <string name="cpp_other">その他</string>
+    <string name="cpp_parameter">"パラメーター"</string>
+    <string name="cpp_permission_overlay">他のアプリの上に重ねて描画</string>
+    <string name="cpp_plot_empty_function_error">空の関数をプロットすることはできません</string>
+    <string name="cpp_plot_function_line_color">線の色</string>
+    <string name="cpp_plot_function_line_width">線の幅</string>
+    <string name="cpp_plot_range">グラフの範囲</string>
+    <string name="cpp_plot_too_many_variables">プロットすることができません: 変数が多すぎます！</string>
+    <string name="cpp_plotter">関数プロッター</string>
+    <string name="cpp_precision">計算結果の有効桁数</string>
+    <string name="cpp_prefs_advanced">詳細ツール</string>
+    <string name="cpp_prefs_auto_rotate_screen">画面の自動回転</string>
+    <string name="cpp_prefs_basic">基本設定</string>
+    <string name="cpp_prefs_keep_screen_on">スリープモードにしない</string>
+    <string name="cpp_prefs_vibrate_on_keypress">タッチ操作バイブ</string>
+    <string name="cpp_purchase_text">プロジェクトへの支援は簡単で安全です: 購入プロセスはGoogleより提供されます。そのため、必要なものは適切に設定されたGoogleアカウントのみです。\n\n
+		あなたのアカウントで購入したという情報はGoogleのサーバーに保存され、るため、簡単にこのアプリを別のデバイスで利用できます。\n\n
+		 \'続ける\'を選択すると、Google Playストアに接続され、支払いを行うことが出来ます。
+	</string>
+    <string name="cpp_purchase_title">購入</string>
+    <string name="cpp_rad">ラジアン</string>
+    <string name="cpp_rateus_cancel">今回はしない</string>
+    <string name="cpp_rateus_message">%1$s を楽しまれている場合には、Google Play での評価にご協力ください。</string>
+    <string name="cpp_rateus_ok">今すぐ評価する</string>
+    <string name="cpp_rateus_title">%1$s を評価する</string>
+    <string name="cpp_release_notes_choose_theme">新しいマテリアルテーマを試してみたいですか？リストから選択してください:</string>
+    <string name="cpp_report_problem">問題を報告</string>
+    <string name="cpp_settings">設定</string>
+    <string name="cpp_share_link">http://www.facebook.com/calculatorpp</string>
+    <string name="cpp_switch">切り替え</string>
+    <string name="cpp_system_language">"システム言語"</string>
+    <string name="cpp_text_copied">テキストをコピーしました</string>
+    <string name="cpp_theme">テーマ</string>
+    <string name="cpp_theme_app">App theme</string>
+    <string name="cpp_theme_dark">ダーク</string>
+    <string name="cpp_theme_light">ライト</string>
+    <string name="cpp_theme_metro_blue">メトロブルー</string>
+    <string name="cpp_thousands_separator">"3 桁の区切り文字"</string>
+    <string name="cpp_thousands_separator_apostrophe">アポストロフィ (\')</string>
+    <string name="cpp_thousands_separator_no">区切り記号なし</string>
+    <string name="cpp_thousands_separator_space">スペース( )</string>
+    <string name="cpp_translators_list">Sergey Solovyev</string>
+    <string name="cpp_translators_text">英語翻訳: </string>
+    <string name="cpp_turns">ターン</string>
+    <string name="cpp_vars_and_constants">変数と定数</string>
+    <string name="cpp_widget">Widget settings</string>
+    <string name="cpp_wizard_back">戻る</string>
+    <string name="cpp_wizard_dragbutton_action_center">9を入力するにはボタンを一度タップします</string>
+    <string name="cpp_wizard_dragbutton_action_down">ボタンの中心から下にスワイプすると^2を使用できます</string>
+    <string name="cpp_wizard_dragbutton_action_end">お見事！まだ試したい場合は、ボタンをもう一度押してください。</string>
+    <string name="cpp_wizard_dragbutton_action_up">ボタンの中心から上にスワイプすると%を使用できます</string>
+    <string name="cpp_wizard_dragbutton_description">スワイプボタンはCalculator++の特別な機能で、サブ機能への高速なアクセスを提供します。</string>
+    <string name="cpp_wizard_dragbutton_title">スワイプボタンの基本</string>
+    <string name="cpp_wizard_final_done">アプリのセットアップが完了して、使用する準備ができました。</string>
+    <string name="cpp_wizard_final_title">ほぼ完了です！</string>
+    <string name="cpp_wizard_finish">完了</string>
+    <string name="cpp_wizard_finish_confirmation">本当にウィザードを終了しますか？</string>
+    <string name="cpp_wizard_finish_confirmation_title">終了しますか？</string>
+    <string name="cpp_wizard_mode_engineer_description">技術者モードでは、特別な関数がメイン画面に表示されるようになります。
+		計算結果は丸めず、技術者表記で表示され、デフォルトの角度の単位としてラジアンが使用されます。
+	</string>
+    <string name="cpp_wizard_mode_simple_description">シンプルモードでは基本的な関数のみが利用可能です。
+結果は5桁でまるめられ、角度の単位は初期設定のものが用いられます。</string>
+    <string name="cpp_wizard_mode_title">モードを選択してください</string>
+    <string name="cpp_wizard_next">次へ</string>
+    <string name="cpp_wizard_onscreen_calculator_title">分離したウィンドウでの電卓の利用</string>
+    <string name="cpp_wizard_onscreen_checkbox">有効化</string>
+    <string name="cpp_wizard_onscreen_description">別窓での電卓の利用を有効にすると、お使いのデバイスで別のアプリを利用中に電卓を利用することが出来ます
+	</string>
+    <string name="cpp_wizard_skip">スキップ</string>
+    <string name="cpp_wizard_start">ウィザードを開始</string>
+    <string name="cpp_wizard_theme_title">テーマを選択してください</string>
+    <string name="cpp_wizard_welcome_title">ようこそ</string>
+    <string name="cpp_yes">はい</string>
+    <string name="derivatives">微分・積分</string>
+    <string name="fix">修正</string>
+    <string name="function_already_exists">同じ名前を持つ関数が既に存在します!</string>
+    <string name="function_create_function">関数の作成</string>
+    <string name="function_edit_function">関数の編集</string>
+    <string name="function_removal_confirmation_question">本当に関数\'%s\'を削除してもよろしいでしょうか?</string>
+    <string name="not_valid_result">現在の結果が正しくありません!</string>
+    <string name="open_onscreen_calculator">クリックしてウィンドウモードで電卓を開きます</string>
+    <string name="other">その他</string>
+    <string name="p_calculations_calculate_on_fly_title">入力中に演算結果を表示する</string>
+    <string name="p_metro_green_theme">メトログリーン</string>
+    <string name="p_metro_purple_theme">メトロパープル</string>
+    <string name="removal_confirmation">削除の確認</string>
+</resources>

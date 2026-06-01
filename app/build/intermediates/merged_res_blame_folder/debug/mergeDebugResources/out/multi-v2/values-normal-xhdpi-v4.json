@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "org.solovyev.android.calculator.app-mergeDebugResources-60:/values-normal-xhdpi-v4/values-normal-xhdpi-v4.xml",
+            "map": [
+                {
+                    "source": "E:\\Nova Calculator\\app\\src\\main\\res\\values-normal-xhdpi\\dimens.xml",
+                    "from": {
+                        "startLines": "23",
+                        "startColumns": "4",
+                        "startOffsets": "806",
+                        "endColumns": "60",
+                        "endOffsets": "862"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "60",
+                        "endOffsets": "111"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="c_about_content">Copyright © 2009–2013\n\n<b>Created by serso aka se.solovyev</b>\n\n
+		We are on Facebook: <a href="http://facebook.com/calculatorpp">http://facebook.com/calculatorpp</a>\n\n
+		This program is distributed under Apache 2.0 License:\nsource code can be found on\n
+		<a href="https://github.com/serso/android-calculatorpp">http://github.com</a>\n\n
+		For more information please\ncontact the author by email\n
+		<a href="mailto:se.solovyev@gmail.com">se.solovyev@gmail.com</a>
+		\nor visit\n<a href="http://se.solovyev.org">http://se.solovyev.org</a>\n\n
+		If you want to support the project\nyou can buy a special option from application preferences\n\n
+		If you like the application\nrate it with 5 stars on\n
+		<a href="https://market.android.com/details?id=org.solovyev.android.calculator">Google Play</a>\n\n
+		This application uses next open source libraries:\n
+		<a href="http://simple.sourceforge.net">Simple (XML serialization)</a>\n
+		<a href="http://meditorworld.appspot.com/meditor.txt">JSCL</a>
+	</string>
+    <string name="c_calc_ad_free_summary">وإزالة الإعلان</string>
+    <string name="c_calc_ad_free_title">دعم المشروع</string>
+    <string name="c_calc_show_release_notes_title">إظهار ملاحظات الإصدار</string>
+    <string name="c_calc_use_back_button_as_prev_title">استخدم زر الرجوع للحساب السابق</string>
+    <string name="c_char_is_not_accepted">المحرف \'%s\' غير مقبول في اسم المتغير!</string>
+    <string name="c_conversion_tool">أداة التحويل</string>
+    <string name="c_convert">تحويل الى…</string>
+    <string name="c_copy_expression">نسخ المعادلة</string>
+    <string name="c_copy_result">نسخ النتيجة</string>
+    <string name="c_error">خطأ</string>
+    <string name="c_first_start_text">شكراً لك لاخيار الآلة الحاسبة++!\n\nالآلة الحاسبة++ هي أداة قوية لإجراء العمليات الحسابية اليومية.</string>
+    <string name="c_fun_category_common">المشتركة</string>
+    <string name="c_fun_category_comparison">المقارنة</string>
+    <string name="c_fun_category_hyper_trig">القطع المثلّثي</string>
+    <string name="c_fun_category_my">لي</string>
+    <string name="c_fun_category_trig">مثلثي</string>
+    <string name="c_fun_description_abs">يعطي القيمة المطلقة للمعادلة</string>
+    <string name="c_fun_description_acos">أرك تجيب - عكس دالّة تجيب</string>
+    <string name="c_fun_description_acot">أرك تظل - عكس دالّة التظل</string>
+    <string name="c_fun_description_asin">أرك جيب - عكس دالّة الجيب</string>
+    <string name="c_fun_description_atan">أرك ظل - عكس دالّة الظل</string>
+    <string name="c_fun_description_cos">دالّة التجيب المثلثية</string>
+    <string name="c_fun_description_cot">دالّة التظل المثلثية</string>
+    <string name="c_fun_description_cubic">دالّة الجذر التكعيبي</string>
+    <string name="c_fun_description_deg">تحويل من راديان الى درجات</string>
+    <string name="c_fun_description_dms">تحويل الدرجات من رموز DMS الى أعداد عشرية: d - درجات, m - دقائق (الإفتراضي = 0), s - ثواني (الإفتراضي = 0)</string>
+    <string name="c_fun_description_eq">تساوي الدالّة - تعطي 1 إذا كانت المعادلتين متساويتين, عدا ذلك فتعطي 0</string>
+    <string name="c_fun_description_exp">الدالّة الأسية</string>
+    <string name="c_fun_description_ge">أكبر أو تساوي الدالّة - تعطي 1 إذا كانت المعادلتين متساويتين أو المعادلة الأولى أكبر من الثانية, عدا ذلك فتعطي 0</string>
+    <string name="c_fun_description_gt">الدالّة الأكبر - تعطي 1 إذا كانت المعادلة الأولى أكبر من الثانية, عدا ذلك فتعطي 0</string>
+    <string name="c_fun_description_le">أقل أو تساوي الدالّة - تعطي 1 إذا كانت المعادلتين متساويتين أو المعادلة الأولى أقل من الثانية, عدا ذلك فتعطي 0</string>
+    <string name="c_fun_description_lg">ديكاديك لوغاريتم - لوغاريتم الأساس 10</string>
+    <string name="c_fun_description_ln">اللوغاريتم الطبيعي - اللوغارثم للأساس e</string>
+    <string name="c_fun_description_log">لوغاريتم - لوغاريتم للقاعدة المحددة</string>
+    <string name="c_fun_description_lt">الدالّة الأقل - تعطي 1 إذا كانت المعادلة الأولى أقل من الثانية, عدا ذلك فتعطي 0</string>
+    <string name="c_fun_description_ne">لا تساوي الدالّة - تعطي 1 إذا كانت المعادلتين غير متساويتين, عدا ذلك فتعطي 0</string>
+    <string name="c_fun_description_rad">تحويل الدرجات الى راديان: d - درجات, m - دقائق (الإفتراضي = 0), s - ثواني (الإفتراضي = 0)</string>
+    <string name="c_fun_description_sgn">يعطي علامة المعادلة: -1 إذا كانت المعادلة أقل من 0, 0
+أما إذا كانت تساوي 0, 1 فهي أكبر من 0</string>
+    <string name="c_fun_description_sin">دالّة الجيب المثلثية</string>
+    <string name="c_fun_description_sqrt">دالّة الجذر التربيعي</string>
+    <string name="c_fun_description_tan">دالّة الظل المثلثية</string>
+    <string name="c_functions">الدوال</string>
+    <string name="c_history">السجل</string>
+    <string name="c_history_comment">تعليق</string>
+    <string name="c_history_expression">القيمة</string>
+    <string name="c_op_description_derivative">يعطي مشتق الأمر \'order\' (الإفتراضي = 1) من العمليات \'(f(x\' بالمتغير \'x\' و يحسب في النقطة \'x_point\' (الإفتراضي = قيمة \'x\' نفسها)</string>
+    <string name="c_op_description_integral">يعطي تكامل الدالة \'(f(x\' بالمتغير \'x\'</string>
+    <string name="c_op_description_integral_ab">يكامل الدالّة \'(f(x\' بالمتغير \'x\' من \'a\' الى \'b\'</string>
+    <string name="c_op_description_mod">العملية النمطية تقوم بإيجاد بقية حاصل \'X\' ضرب \'Y\'</string>
+    <string name="c_op_description_product">يعطي ناتج عمليات \'(f(i\', متتالية أساسها \'i\' من \'from\' الى \'to\'</string>
+    <string name="c_op_description_sum">عمليات الجمع \'(f(i\', متتالية أساسها \'i\' من \'from\' الى \'to\'</string>
+    <string name="c_operators">عوامل التشغيل</string>
+    <string name="c_pf_description_degree">تحويل من درجات إلى راديان.\n
+أمثلة:\n
+268° = 4.67748\n
+30.21° = 0.52726</string>
+    <string name="c_pf_description_double_factorial">يعطي ناتج الجداء المضاعف بالمعادلة السابقة</string>
+    <string name="c_pf_description_factorial">يعطي ناتج الجداء بالمعادلة السابقة</string>
+    <string formatted="false" name="c_pf_description_percent">يعطي قيمة النسبة المئوية للمعادلة
+قبل.\nأمثلة\n
+100 + 50% = 150\n
+100 * 50% = 50\n
+100 + 100 * 50% * 50% = 125</string>
+    <string name="c_plot">رسم الدالّة</string>
+    <string name="c_release_notes">سجل الملاحظه</string>
+    <string name="c_release_notes_for_title">"سجل ملاحظه للنسخة "</string>
+    <string name="c_save">حفظ</string>
+    <string name="c_use">استخدم</string>
+    <string name="c_value_is_not_a_number">يجب أن تكون القيمة رقماً أو تترك فارغة: إذا كان لديك عوامل متغيرة - قم بإنشاء دالة بدلاً من ذلك!</string>
+    <string name="c_var_already_exists">متغير يحمل نفس الاسم موجود مسبقاً!</string>
+    <string name="c_var_create_var">إنشاء متغير</string>
+    <string name="c_var_description">الوصف</string>
+    <string name="c_var_description_G">ثابت الجاذبية هو قيمة مادية تجريبية ثابتة متضمنة في حساب تأثير الجاذبية بين الأجسام و الكتل, m^3·kg^−1·s^−2</string>
+    <string name="c_var_description_PI">نسبة محيط أي الدائرة على قطرها. ملاحظة: هذا الثابت هو وحدة درجية تعتمد => راديان:3.14, درجة: 180.0</string>
+    <string name="c_var_description_c">سرعة الضوء في الفراغ, m·s</string>
+    <string name="c_var_description_e">عدد حقيقي فريد مثل هذا تصبح فيه القيمة المشتقة (منحدر من ظل المماس) للدالة f(x) = e ^ x في النقطة x = 0 يساوي 1</string>
+    <string name="c_var_description_h_reduced">انخفاض ثابت بلانك, J·s</string>
+    <string name="c_var_description_i">وحدة متخيلة, تعطى قيم مثل i^2 = −1</string>
+    <string name="c_var_description_inf">لا نهاية</string>
+    <string name="c_var_description_nan">ليس رقماً</string>
+    <string name="c_var_description_pi">نسبة محيط أي الدائرة على قطرها. ملاحظة: هذا الثابت هو وحدة درجية مستقلة => راديان:3.14, درجة: 3.14</string>
+    <string name="c_var_edit_var">تعديل متغير</string>
+    <string name="c_var_my">لي</string>
+    <string name="c_var_name_clashes">اسم المتغير يتشابك مع اسم الدالة!</string>
+    <string name="c_var_removal_confirmation_question">هل تريد حقاً حذف المتغير \'%s\'؟</string>
+    <string name="c_var_system">مُدمج</string>
+    <string name="c_var_value">القيمة</string>
+    <string name="close">إغلاق</string>
+    <string name="convert_to_bin">تحويل الى ثنائي</string>
+    <string name="convert_to_dec">تحويل الى عشري</string>
+    <string name="convert_to_hex">تحويل الى ثماني</string>
+    <string name="cpp_about">حول</string>
+    <string name="cpp_add">إضافة</string>
+    <string name="cpp_angles">"زوايا"</string>
+    <string name="cpp_app_name">الآلة الحاسبة++</string>
+    <string name="cpp_app_name_on_screen">الآلة الحاسبة++ (نمط النافذة)</string>
+    <string name="cpp_appearance">"المظهر"</string>
+    <string name="cpp_bin">ثنائي</string>
+    <string name="cpp_cancel">إلغاء</string>
+    <string name="cpp_clear_history">إزالة</string>
+    <string name="cpp_clear_history_message">سيتم مسح كل التاريخ.</string>
+    <string name="cpp_clear_history_title">مسح المحفوظات؟</string>
+    <string name="cpp_close">إغلاق</string>
+    <string name="cpp_continue">متابعة</string>
+    <string name="cpp_converter_amount_of_substance">كمية مادة</string>
+    <string name="cpp_converter_electric_current">تيار كهربائي</string>
+    <string name="cpp_converter_length">طول</string>
+    <string name="cpp_converter_mass">كتلة</string>
+    <string name="cpp_converter_temperature">درجة حرارة</string>
+    <string name="cpp_converter_time">زمن</string>
+    <string name="cpp_copy">نسخ</string>
+    <string name="cpp_copy_text">نسخ إلى الحافظة</string>
+    <string name="cpp_create">إنشاء</string>
+    <string name="cpp_dec">عشري</string>
+    <string name="cpp_deg">درجات</string>
+    <string name="cpp_delete">حذف</string>
+    <string name="cpp_description">الوصف</string>
+    <string name="cpp_done">تم</string>
+    <string name="cpp_dont_show_again">عدم الإظهار مرة أخرى</string>
+    <string name="cpp_duplicate_parameter">"معلمة مكررة: '%1$s'."</string>
+    <string name="cpp_edit">تعديل</string>
+    <string name="cpp_enable">تمكين</string>
+    <string name="cpp_error">خطأ</string>
+    <string name="cpp_examples">"أمثلة"</string>
+    <string name="cpp_floating_calculator">إعدادات الآلة الحاسبة (في نافذة منفصلة)</string>
+    <string name="cpp_format">"تنسيق بيانات غير معتمد."</string>
+    <string name="cpp_grad">غراديان</string>
+    <string name="cpp_help">تعليمات</string>
+    <string name="cpp_hex">ستّ عشري</string>
+    <string name="cpp_high_contrast_text">نص ذو درجة تباين عالية</string>
+    <string name="cpp_history_tab_saved">السجل المحفوظ</string>
+    <string name="cpp_introduction">مقدّمة</string>
+    <string name="cpp_language">اللغة</string>
+    <string name="cpp_missing_permission_message">يرجى تمكين إذن %1$s في إعدادات النظام</string>
+    <string name="cpp_missing_permission_title">إذن مفقود</string>
+    <string name="cpp_mode">الوضع</string>
+    <string name="cpp_mode_engineer">هندسية</string>
+    <string name="cpp_mode_simple">بسيطة</string>
+    <string name="cpp_name">الاسم</string>
+    <string name="cpp_name_contains_invalid_characters">"The name contains invalid characters."</string>
+    <string name="cpp_nan">ليس رقمًا</string>
+    <string name="cpp_new_in_version">الجديد في الإصدار %1$s</string>
+    <string name="cpp_no">لا</string>
+    <string name="cpp_number_format">"تنسيق الأرقام"</string>
+    <string name="cpp_oct">ثماني</string>
+    <string name="cpp_other">غير ذلك</string>
+    <string name="cpp_parameter">"المعلمة"</string>
+    <string name="cpp_permission_overlay">الظهور أمام التطبيقات الأخرى</string>
+    <string name="cpp_plot_empty_function_error">غير قادر على رسم دالّة فارغة!</string>
+    <string name="cpp_plot_function_line_color">لون الخط</string>
+    <string name="cpp_plot_function_line_width">عرض الخط</string>
+    <string name="cpp_plot_range">نطاق الرسم البياني</string>
+    <string name="cpp_plot_too_many_variables">غير قادر على رسم: متغيرات كثيرة جداً!</string>
+    <string name="cpp_plotter">رسّام الدوال</string>
+    <string name="cpp_precision">دقة النتيجة</string>
+    <string name="cpp_prefs_advanced">خيارات متقدمة</string>
+    <string name="cpp_prefs_auto_rotate_screen">التدوير التلقائي للشاشة</string>
+    <string name="cpp_prefs_basic">أساسي</string>
+    <string name="cpp_prefs_keep_screen_on">البقاء في الوضع النشط</string>
+    <string name="cpp_prefs_vibrate_on_keypress">الاهتزاز عند اللمس</string>
+    <string name="cpp_purchase_text">دعم المشروع سهل و آمن: عملية الشراء يتم توفيرها من قبل غوغل, وكل ما عليك هو حساب غوغل مكون بشكل صحيح.\n\n
+تفاصيل الدفع مخزنة في خوادم غوغل مع حساب غوغل الخاص بك و يمكنك بسهولة استخدام هذا التطبيق على عدة أجهزة.\n\n
+عند النقر فوق زر \'متابعة\' سيتم إعادة توجيهك إلى التطبيق سوق غوغل لتقوم بالدفع.</string>
+    <string name="cpp_purchase_title">الشراء</string>
+    <string name="cpp_rad">راديان</string>
+    <string name="cpp_rateus_cancel">لا، شكرًا</string>
+    <string name="cpp_rateus_message">إذا كنت تستمتع بـ %1$s، يرجى أن تستغرق لحظة وتعطينا تقييمًا بخمس نجوم في Google Play.</string>
+    <string name="cpp_rateus_ok">ضع تقييمًا الآن</string>
+    <string name="cpp_rateus_title">تقييم %1$s</string>
+    <string name="cpp_release_notes_choose_theme">هل تريد محاولة المواضيع المادية الجديدة؟ اختر منهم من القائمة:</string>
+    <string name="cpp_report_problem">الإبلاغ عن خطأ</string>
+    <string name="cpp_settings">الإعدادات</string>
+    <string name="cpp_share_link">http://www.facebook.com/calculatorpp</string>
+    <string name="cpp_switch">تبديل</string>
+    <string name="cpp_system_language">"طابقت لغته لغة النظام."</string>
+    <string name="cpp_text_copied">تم نسخ النص</string>
+    <string name="cpp_theme">المظهر</string>
+    <string name="cpp_theme_app">App theme</string>
+    <string name="cpp_theme_dark">داكن</string>
+    <string name="cpp_theme_light">فاتح</string>
+    <string name="cpp_theme_metro_blue">المترو الأزرق</string>
+    <string name="cpp_thousands_separator">"فاصل اللآلاف"</string>
+    <string name="cpp_thousands_separator_apostrophe">فاصلة عليا (\')</string>
+    <string name="cpp_thousands_separator_no">بلا فاصل</string>
+    <string name="cpp_thousands_separator_space">مسافة ( )</string>
+    <string name="cpp_translators_list">Sergey Solovyev</string>
+    <string name="cpp_translators_text">لقد تُرجم هذا البرنامج من قِبل: </string>
+    <string name="cpp_turns">الأدوار</string>
+    <string name="cpp_vars_and_constants">المتغيرات والثوابت</string>
+    <string name="cpp_widget">Widget settings</string>
+    <string name="cpp_wizard_back">رجوع</string>
+    <string name="cpp_wizard_dragbutton_action_center">إضغط على الزر أدناه مرة واحدة لإستخدام الرقم 9</string>
+    <string name="cpp_wizard_dragbutton_action_down">امسح من مركز الزر الى الاسفل لاستخدام التربيع</string>
+    <string name="cpp_wizard_dragbutton_action_end">ممتاز! إضغط على الزر مرة أخرى لإعادة المحاولة</string>
+    <string name="cpp_wizard_dragbutton_action_up">امسح من مركز الزر الى الاعلى لاستخدام %</string>
+    <string name="cpp_wizard_dragbutton_description">السحب على الزر هي ميزة حصرية في هذه الآلة الحاسبة++ اللتي بدورها توفر الوصول السريع إلى وظائف الثانوي</string>
+    <string name="cpp_wizard_dragbutton_title">تغيير للازرار الاساسيّه</string>
+    <string name="cpp_wizard_final_done">تم ضبط التطبيق ، جاهز للاستخدام.</string>
+    <string name="cpp_wizard_final_title">أوشكت على الإنتهاء!</string>
+    <string name="cpp_wizard_finish">إنتهى</string>
+    <string name="cpp_wizard_finish_confirmation">هل تريد حقاً إنهاء جولة الدليل؟</string>
+    <string name="cpp_wizard_finish_confirmation_title">انهاء؟</string>
+    <string name="cpp_wizard_mode_engineer_description">في النمط الهندسي ستتوفر وظائف خاصة على الشاشة الرئيسية.
+النتيجة لا يتم تقريبها و تظهر بصيغة هندسية، يستخدم الراديان كواحدة إفتراضية للزاوية.</string>
+    <string name="cpp_wizard_mode_simple_description">في النمط البسيط ستتوفر الوظائف الأساسية فقط في الشاشة الرئيسية.
+يتم تقريب النتيجة الى 5 أرقام كحد أقصى, وتستخدم الدرجات كوحدات إفتراضية للزاوية.</string>
+    <string name="cpp_wizard_mode_title">اختر نمط</string>
+    <string name="cpp_wizard_next">التالي</string>
+    <string name="cpp_wizard_onscreen_calculator_title">آلة حاسبة في نافذة منفصلة</string>
+    <string name="cpp_wizard_onscreen_checkbox">تمكين</string>
+    <string name="cpp_wizard_onscreen_description">الآلة الحاسبة ذات النافذة المنفصلة تسمح لك بالقيام بعمليات حسابية أثناء استخدام تطبيقات أخرى على جهازك</string>
+    <string name="cpp_wizard_skip">تخطي</string>
+    <string name="cpp_wizard_start">بدء الدليل</string>
+    <string name="cpp_wizard_theme_title">اختر المظهر</string>
+    <string name="cpp_wizard_welcome_title">أهلاً</string>
+    <string name="cpp_yes">نعم</string>
+    <string name="derivatives">المشتقات/التكاملات</string>
+    <string name="fix">تصليح</string>
+    <string name="function_already_exists">هناك دالّة بنفس الاسم موجود مسبقاً!</string>
+    <string name="function_create_function">قم بإنشاء دالّة</string>
+    <string name="function_edit_function">تعديل الدالّة</string>
+    <string name="function_removal_confirmation_question">هل تريد حقاً حذف الدالة \'%s\'؟</string>
+    <string name="not_valid_result">النتيجة الحالية غير صالحة!</string>
+    <string name="open_onscreen_calculator">أنقر لفتح الآلة الحاسبة في وضع النافذة</string>
+    <string name="other">الأخرى</string>
+    <string name="p_calculations_calculate_on_fly_title">إظهار النتيجة أثناء الكتابة</string>
+    <string name="p_metro_green_theme">المترو الأخضر</string>
+    <string name="p_metro_purple_theme">المترو الأرجواني</string>
+    <string name="removal_confirmation">تأكيد الإزالة</string>
+</resources>

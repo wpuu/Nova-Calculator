@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <string name="cpp_prefs_vibrate_on_keypress">الاهتزاز عند اللمس</string>
+   <string name="cpp_prefs_auto_rotate_screen">التدوير التلقائي للشاشة</string>
+   <string name="cpp_language">اللغة</string>
+   <string name="cpp_theme">المظهر</string>
+   <string name="cpp_theme_light">فاتح</string>
+   <string name="cpp_theme_dark">داكن</string>
+   <string name="cpp_prefs_keep_screen_on">البقاء في الوضع النشط</string>
+   <string name="cpp_permission_overlay">الظهور أمام التطبيقات الأخرى</string>
+   <string name="cpp_yes">نعم</string>
+   <string name="cpp_no">لا</string>
+   <string name="cpp_create">إنشاء</string>
+   <string name="cpp_close">إغلاق</string>
+   <string name="cpp_switch">تبديل</string>
+   <string name="cpp_add">إضافة</string>
+   <string name="cpp_mode">الوضع</string>
+   <string name="cpp_enable">تمكين</string>
+   <string name="cpp_other">غير ذلك</string>
+   <string name="cpp_high_contrast_text">نص ذو درجة تباين عالية</string>
+   <string name="cpp_edit">تعديل</string>
+   <string name="cpp_delete">حذف</string>
+   <string name="cpp_done">تم</string>
+   <string name="cpp_cancel">إلغاء</string>
+   <string name="cpp_description">الوصف</string>
+   <string name="cpp_about">حول</string>
+   <string name="cpp_copy_text">نسخ إلى الحافظة</string>
+   <string name="cpp_text_copied">تم نسخ النص</string>
+   <string name="cpp_name">الاسم</string>
+   <string name="cpp_settings">الإعدادات</string>
+   <string name="cpp_nan">ليس رقمًا</string>
+   <string name="cpp_error">خطأ</string>
+   <string name="cpp_copy">نسخ</string>
+</resources>

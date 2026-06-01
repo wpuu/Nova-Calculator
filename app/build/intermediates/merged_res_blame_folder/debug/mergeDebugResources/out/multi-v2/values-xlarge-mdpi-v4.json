@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "org.solovyev.android.calculator.app-mergeDebugResources-60:/values-xlarge-mdpi-v4/values-xlarge-mdpi-v4.xml",
+            "map": [
+                {
+                    "source": "E:\\Nova Calculator\\app\\src\\main\\res\\values-xlarge-mdpi\\dimens.xml",
+                    "from": {
+                        "startLines": "23,24",
+                        "startColumns": "4,4",
+                        "startOffsets": "844,897",
+                        "endColumns": "52,60",
+                        "endOffsets": "892,953"
+                    },
+                    "to": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,108",
+                        "endColumns": "52,60",
+                        "endOffsets": "103,164"
+                    }
+                }
+            ]
+        }
+    ]
+}

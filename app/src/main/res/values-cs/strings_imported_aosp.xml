@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <string name="cpp_prefs_vibrate_on_keypress">Při dotyku vibrovat</string>
+   <string name="cpp_prefs_auto_rotate_screen">Autom. otočení obrazovky</string>
+   <string name="cpp_language">Jazyk</string>
+   <string name="cpp_theme">Motiv</string>
+   <string name="cpp_theme_light">Světlý</string>
+   <string name="cpp_theme_dark">Tmavý</string>
+   <string name="cpp_prefs_keep_screen_on">Nevypínat obrazovku</string>
+   <string name="cpp_permission_overlay">Vykreslení přes další aplikace</string>
+   <string name="cpp_yes">Ano</string>
+   <string name="cpp_no">Ne</string>
+   <string name="cpp_create">Vytvořit</string>
+   <string name="cpp_close">Zavřít</string>
+   <string name="cpp_switch">Přepnout</string>
+   <string name="cpp_add">Přidat</string>
+   <string name="cpp_mode">Režim určování polohy</string>
+   <string name="cpp_enable">Aktivovat</string>
+   <string name="cpp_other">Jiné</string>
+   <string name="cpp_high_contrast_text">Text s vysokým kontrastem</string>
+   <string name="cpp_edit">Upravit</string>
+   <string name="cpp_delete">Smazat</string>
+   <string name="cpp_done">Hotovo</string>
+   <string name="cpp_cancel">Zrušit</string>
+   <string name="cpp_description">Popis</string>
+   <string name="cpp_about">O aplikaci</string>
+   <string name="cpp_copy_text">Zkopírovat do schránky</string>
+   <string name="cpp_text_copied">Text zkopírován</string>
+   <string name="cpp_name">Jméno</string>
+   <string name="cpp_settings">Nastavení</string>
+   <string name="cpp_nan">Není číslo</string>
+   <string name="cpp_error">Chyba</string>
+   <string name="cpp_copy">Kopírovat</string>
+</resources>

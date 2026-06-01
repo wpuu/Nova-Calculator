@@ -1,0 +1,57 @@
+<!--
+  ~ Copyright 2013 serso aka se.solovyev
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Contact details
+  ~
+  ~ Email: se.solovyev@gmail.com
+  ~ Site:  http://se.solovyev.org
+  -->
+
+<resources>
+
+    <string name="cpp_release_notes_143">
+        ★ Язык приложения может быть изменён в настройках\n
+        ★ Темы для калькулятора в отдельном окне\n
+        ★ Темы для виджета на рабочий стол
+    </string>
+
+    <string name="cpp_release_notes_148">
+        ★ Новый графопостроитель\n
+        ★ Улучшенный пользовательский интерфейс: главный и второстепенные экраны, диалоги, меню и т.д.\n
+        ★ Переделанный переводчик величин\n
+        ★ Кнопка Память (MC, M+, M-, M)\n
+        ★ Плавающий калькулятор для Андроид М\n
+        ★ Автосохранение недавней истории\n
+        ★ Приложение быстрее запускается и потребляет меньше памяти
+    </string>
+
+    <string name="cpp_release_notes_150">
+        ★ Кнопки Копировать/Вставить\n
+        ★ Тема для AMOLED дисплеев\n
+        ★ Исправлено форматирование маленьких чисел\n
+        ★ Построение графиков стало быстрее\n
+        ★ Перевод чисел между системами счисления\n
+        ★ Кнопка E в редакторе констант
+    </string>
+
+    <string name="cpp_release_notes_152">
+        ★ Настройка для высококонтрастного текста\n
+        ★ Изменённый экран настроек\n
+        ★ Больше настроек форматирования чисел: инженерный и научный формат\n
+        ★ Изменения в интерфейсе
+    </string>
+
+</resources>

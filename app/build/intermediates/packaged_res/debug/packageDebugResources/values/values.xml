@@ -1,0 +1,1616 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <string-array name="cpp_angle_unit_names">
+        <item>@string/cpp_deg</item>
+        <item>@string/cpp_rad</item>
+        <item>@string/cpp_grad</item>
+        <item>@string/cpp_turns</item>
+    </string-array>
+    <string-array name="cpp_angle_units" translatable="false">
+        <item>deg</item>
+        <item>rad</item>
+        <item>grad</item>
+        <item>turns</item>
+    </string-array>
+    <string-array name="cpp_layout_names">
+        <item>@string/cpp_mode_engineer</item>
+        <item>@string/cpp_mode_simple</item>
+    </string-array>
+    <string-array name="cpp_layouts" translatable="false">
+        <item>engineer</item>
+        <item>simple</item>
+    </string-array>
+    <string-array name="cpp_modes">
+        <item>@string/cpp_mode_simple</item>
+        <item>@string/cpp_mode_engineer</item>
+    </string-array>
+    <string-array name="cpp_numeral_base_names">
+        <item>@string/cpp_dec</item>
+        <item>@string/cpp_hex</item>
+        <item>@string/cpp_oct</item>
+        <item>@string/cpp_bin</item>
+    </string-array>
+    <string-array name="cpp_numeral_bases" translatable="false">
+        <item>dec</item>
+        <item>hex</item>
+        <item>oct</item>
+        <item>bin</item>
+    </string-array>
+    <string-array name="cpp_prefs_precisions" translatable="false">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+    </string-array>
+    <string-array name="cpp_simple_theme_names">
+        <item>@string/cpp_theme_app</item>
+        <item>@string/cpp_theme_dark</item>
+        <item>@string/cpp_theme_light</item>
+        <item>@string/cpp_theme_metro_blue</item>
+    </string-array>
+    <string-array name="cpp_simple_themes" translatable="false">
+        <item>default_theme</item>
+        <item>material_theme</item>
+        <item>material_light_theme</item>
+        <item>metro_blue_theme</item>
+    </string-array>
+    <string-array name="cpp_thousands_separator_names">
+        <item>@string/cpp_thousands_separator_no</item>
+        <item>@string/cpp_thousands_separator_apostrophe</item>
+        <item>@string/cpp_thousands_separator_space</item>
+    </string-array>
+    <string-array name="cpp_thousands_separators" translatable="false">
+        <item>""</item>
+        <item>\'</item>
+        <item>" "</item>
+    </string-array>
+    <attr format="boolean" name="centered"/>
+    <attr format="reference" name="cpp_button_style_control"/>
+    <attr format="reference" name="cpp_button_style_control_highlighted"/>
+    <attr format="reference" name="cpp_button_style_digit"/>
+    <attr format="reference" name="cpp_button_style_operation"/>
+    <attr format="reference" name="cpp_button_style_operation_highlighted"/>
+    <attr format="reference" name="cpp_editor_bg"/>
+    <attr format="reference" name="cpp_fab_bg"/>
+    <attr format="reference" name="cpp_text_color"/>
+    <attr format="reference" name="cpp_text_color_error"/>
+    <attr format="reference" name="cpp_toolbar_style"/>
+    <attr format="reference" name="cpp_wizard_button_bg"/>
+    <attr format="color" name="selectedColor"/>
+    <attr format="dimension" name="strokeWidth"/>
+    <attr format="color" name="unselectedColor"/>
+    <bool name="cpp_tablet">false</bool>
+    <bool name="default_circle_indicator_centered">true</bool>
+    <bool name="default_circle_indicator_snap">false</bool>
+    <bool name="default_line_indicator_centered">true</bool>
+    <bool name="default_title_indicator_selected_bold">true</bool>
+    <bool name="default_underline_indicator_fades">true</bool>
+    <color name="black">#000000</color>
+    <color name="blue_800">#1565C0</color>
+    <color name="blue_850">#1156B1</color>
+    <color name="blue_900">#0D47A1</color>
+    <color name="cpp_bg">@color/grey_850</color>
+    <color name="cpp_bg_light">@color/grey_100</color>
+    <color name="cpp_button_text">#ffffffff</color>
+    <color name="cpp_editor_bg">@color/grey_950</color>
+    <color name="cpp_material_accent">@color/grey_100</color>
+    <color name="cpp_ripple_material_dark" ns1:ignore="PrivateResource">@color/ripple_material_dark</color>
+    <color name="cpp_ripple_material_light" ns1:ignore="PrivateResource">@color/ripple_material_light</color>
+    <color name="cpp_text">@color/grey_300</color>
+    <color name="cpp_text_error">@color/cpp_text_inverse</color>
+    <color name="cpp_text_inverse">@color/grey_800</color>
+    <color name="cpp_text_inverse_error">@color/cpp_text</color>
+    <color name="cpp_widget_cursor">@color/grey_600</color>
+    <color name="cpp_wizard_disabled_text">#66ffffff</color>
+    <color name="deep_blue_800">#0a3980</color>
+    <color name="deep_blue_850">#082a5e</color>
+    <color name="deep_blue_900">#06224d</color>
+    <color name="default_circle_indicator_fill_color">#FFFFFFFF</color>
+    <color name="default_circle_indicator_page_color">#00000000</color>
+    <color name="default_circle_indicator_stroke_color">#ffc2c2c2</color>
+    <color name="default_line_indicator_selected_color">#FF33B5E5</color>
+    <color name="default_line_indicator_unselected_color">#FFBBBBBB</color>
+    <color name="default_title_indicator_footer_color">#FF33B5E5</color>
+    <color name="default_title_indicator_selected_color">#FFFFFFFF</color>
+    <color name="default_title_indicator_text_color">#BBFFFFFF</color>
+    <color name="default_underline_indicator_selected_color">#FF33B5E5</color>
+    <color name="drag_button_text">@color/cpp_button_text</color>
+    <color name="drag_text_inverse">@color/cpp_text_inverse</color>
+    <color name="green_800">#2e7d32</color>
+    <color name="grey_100">#f5f5f5</color>
+    <color name="grey_300">#e0e0e0</color>
+    <color name="grey_600">#757575</color>
+    <color name="grey_800">#424242</color>
+    <color name="grey_850">#313131</color>
+    <color name="grey_900">#212121</color>
+    <color name="grey_950">#101010</color>
+    <color name="grey_965">#0a0a0a</color>
+    <color name="ios_bg">#000000</color>
+    <color name="ios_control_bg">#A5A5A5</color>
+    <color name="ios_control_bg_pressed">#D9D9D9</color>
+    <color name="ios_digit_bg">#333333</color>
+    <color name="ios_digit_bg_pressed">#737373</color>
+    <color name="ios_operation_bg">#FF9F0A</color>
+    <color name="ios_operation_bg_pressed">#FFB340</color>
+    <color name="pink_900">#880e4f</color>
+    <color name="premium_bg">#0C0C0C</color>
+    <color name="premium_control_bg">#2C2C2C</color>
+    <color name="premium_control_bg_pressed">#404040</color>
+    <color name="premium_digit_bg">#1E1E1E</color>
+    <color name="premium_digit_bg_pressed">#333333</color>
+    <color name="premium_operation_bg">#D4AF37</color>
+    <color name="premium_operation_bg_pressed">#E6C25B</color>
+    <color name="red_300">#ff6e6e</color>
+    <color name="red_a700">#d50000</color>
+    <color name="teal_400">#26A69A</color>
+    <color name="teal_500">#009688</color>
+    <color name="teal_600">#00897B</color>
+    <color name="yellow_100">#ffff8d</color>
+    <dimen name="activity_horizontal_margin">5dp</dimen>
+    <dimen name="activity_vertical_margin">5dp</dimen>
+    <dimen name="control_margin">5dp</dimen>
+    <dimen name="cpp_button_corner">1dp</dimen>
+    <dimen name="cpp_button_padding">1px</dimen>
+    <dimen name="cpp_clickable_area_size">50dp</dimen>
+    <dimen name="cpp_dialog_spacing">20dp</dimen>
+    <dimen name="cpp_display_padding_side">10dp</dimen>
+    <dimen name="cpp_display_text_size">25sp</dimen>
+    <dimen name="cpp_image_button_padding">5dp</dimen>
+    <dimen name="cpp_image_button_size">30dp</dimen>
+    <dimen name="cpp_keyboard_button_direction_text_padding_left">2dp</dimen>
+    <dimen name="cpp_keyboard_button_direction_text_padding_updown">4dp</dimen>
+    <dimen name="cpp_keyboard_button_text_size">30dp</dimen>
+    <dimen name="cpp_keyboard_simple_image_button_padding">12dp</dimen>
+    <dimen name="cpp_min_editor_text_size">24sp</dimen>
+    <dimen name="cpp_onscreen_display_text_size">20sp</dimen>
+    <dimen name="cpp_onscreen_header_button_text_size">10dp</dimen>
+    <dimen name="cpp_onscreen_main_padding">1dp</dimen>
+    <dimen name="cpp_plot_icon_margin">10dp</dimen>
+    <dimen name="cpp_plot_icon_size">70dp</dimen>
+    <dimen name="cpp_widget_display_text_size">25sp</dimen>
+    <dimen name="cpp_widget_display_text_size_collapsed">16sp</dimen>
+    <dimen name="cpp_widget_editor_text_size">25sp</dimen>
+    <dimen name="cpp_widget_editor_text_size_collapsed">16sp</dimen>
+    <dimen name="cpp_widget_keyboard_button_text_size">20dp</dimen>
+    <dimen name="cpp_widget_margin">6dp</dimen>
+    <dimen name="cpp_wizard_max_width">300dp</dimen>
+    <dimen name="cpp_wizard_preview_button_size">100dp</dimen>
+    <dimen name="cpp_wizard_preview_row_height">64dp</dimen>
+    <dimen name="cpp_wizard_preview_width">200dp</dimen>
+    <dimen name="default_circle_indicator_radius">3dp</dimen>
+    <dimen name="default_circle_indicator_stroke_width">1px</dimen>
+    <dimen name="default_line_indicator_gap_width">4dp</dimen>
+    <dimen name="default_line_indicator_line_width">12dp</dimen>
+    <dimen name="default_line_indicator_stroke_width">1dp</dimen>
+    <dimen name="default_title_indicator_clip_padding">4dp</dimen>
+    <dimen name="default_title_indicator_footer_indicator_height">4dp</dimen>
+    <dimen name="default_title_indicator_footer_indicator_underline_padding">20dp</dimen>
+    <dimen name="default_title_indicator_footer_line_height">2dp</dimen>
+    <dimen name="default_title_indicator_footer_padding">7dp</dimen>
+    <dimen name="default_title_indicator_text_size">15dp</dimen>
+    <dimen name="default_title_indicator_title_padding">5dp</dimen>
+    <dimen name="default_title_indicator_top_padding">7dp</dimen>
+    <dimen name="list_item_height">48dp</dimen>
+    <dimen name="list_item_text_size">16sp</dimen>
+    <dimen name="list_item_text_size_small">14sp</dimen>
+    <dimen name="min_expanded_height_lock_screen">300dp</dimen>
+    <item name="cpm_default_view_tag_key" type="id"/>
+    <item name="cpp_ad" type="id"/>
+    <item name="cpp_button_0" type="id"/>
+    <item name="cpp_button_1" type="id"/>
+    <item name="cpp_button_2" type="id"/>
+    <item name="cpp_button_3" type="id"/>
+    <item name="cpp_button_4" type="id"/>
+    <item name="cpp_button_5" type="id"/>
+    <item name="cpp_button_6" type="id"/>
+    <item name="cpp_button_7" type="id"/>
+    <item name="cpp_button_8" type="id"/>
+    <item name="cpp_button_9" type="id"/>
+    <item name="cpp_button_app" type="id"/>
+    <item name="cpp_button_clear" type="id"/>
+    <item name="cpp_button_copy" type="id"/>
+    <item name="cpp_button_division" type="id"/>
+    <item name="cpp_button_equals" type="id"/>
+    <item name="cpp_button_erase" type="id"/>
+    <item name="cpp_button_functions" type="id"/>
+    <item name="cpp_button_history" type="id"/>
+    <item name="cpp_button_left" type="id"/>
+    <item name="cpp_button_like" type="id"/>
+    <item name="cpp_button_memory" type="id"/>
+    <item name="cpp_button_multiplication" type="id"/>
+    <item name="cpp_button_operators" type="id"/>
+    <item name="cpp_button_paste" type="id"/>
+    <item name="cpp_button_percent" type="id"/>
+    <item name="cpp_button_period" type="id"/>
+    <item name="cpp_button_plus" type="id"/>
+    <item name="cpp_button_power" type="id"/>
+    <item name="cpp_button_right" type="id"/>
+    <item name="cpp_button_round_brackets" type="id"/>
+    <item name="cpp_button_settings" type="id"/>
+    <item name="cpp_button_settings_onscreen" type="id"/>
+    <item name="cpp_button_settings_widget" type="id"/>
+    <item name="cpp_button_subtraction" type="id"/>
+    <item name="cpp_button_vars" type="id"/>
+    <item name="cpp_kb_button_backspace" type="id"/>
+    <item name="cpp_kb_button_brackets" type="id"/>
+    <item name="cpp_kb_button_change_case" type="id"/>
+    <item name="cpp_kb_button_clear" type="id"/>
+    <item name="cpp_kb_button_close" type="id"/>
+    <item name="cpp_kb_button_constants" type="id"/>
+    <item name="cpp_kb_button_divide" type="id"/>
+    <item name="cpp_kb_button_functions" type="id"/>
+    <item name="cpp_kb_button_functions_constants" type="id"/>
+    <item name="cpp_kb_button_keyboard" type="id"/>
+    <item name="cpp_kb_button_minus" type="id"/>
+    <item name="cpp_kb_button_multiply" type="id"/>
+    <item name="cpp_kb_button_plus" type="id"/>
+    <item name="cpp_kb_button_space" type="id"/>
+    <item name="function_params_add" type="id"/>
+    <integer name="default_circle_indicator_orientation">0</integer>
+    <integer name="default_title_indicator_footer_indicator_style">2</integer>
+    <integer name="default_title_indicator_line_position">0</integer>
+    <integer name="default_underline_indicator_fade_delay">300</integer>
+    <integer name="default_underline_indicator_fade_length">400</integer>
+    <string name="admob" translatable="false">ca-app-pub-9736972200639245/2739504202</string>
+    <string name="c_about_content">Copyright © 2009–2015\n\n<b>Created by serso aka se.solovyev</b>\n\n
+		We are on Facebook: <a href="http://facebook.com/calculatorpp">http://facebook.com/calculatorpp</a>\n\n
+		This program is distributed under Apache 2.0 License:\nsource code can be found on\n
+		<a href="https://github.com/serso/android-calculatorpp">http://github.com</a>\n\n
+		For more information please\ncontact the author by email\n
+		<a href="mailto:se.solovyev@gmail.com">se.solovyev@gmail.com</a>
+		\nor visit\n<a href="http://se.solovyev.org">http://se.solovyev.org</a>\n\n
+		If you want to support the project\nyou can buy a special option from application preferences\n\n
+		If you like the application\nrate it with 5 stars on\n
+		<a href="https://market.android.com/details?id=org.solovyev.android.calculator">Google Play</a>\n\n
+		This application uses next open source libraries:\n
+		<a href="http://simple.sourceforge.net">Simple (XML serialization)</a>\n
+		<a href="http://meditorworld.appspot.com/meditor.txt">JSCL</a>
+	</string>
+    <string name="c_calc_ad_free_summary">And remove the advertisement</string>
+    <string name="c_calc_ad_free_title">Support the project</string>
+    <string name="c_calc_show_release_notes_title">Show release notes</string>
+    <string name="c_calc_use_back_button_as_prev_title">Use Back button for previous history</string>
+    <string name="c_char_is_not_accepted">Character \'%s\' is not accepted in variable name!</string>
+    <string name="c_conversion_tool">Conversion tool</string>
+    <string name="c_convert">Convert to…</string>
+    <string name="c_copy_expression">Copy expression</string>
+    <string name="c_copy_result">Copy result</string>
+    <string name="c_error">Error</string>
+    <string name="c_first_start_text">Thank you for choosing Calculator++!\n\nCalculator++ is a powerful tool for making everyday calculations.</string>
+    <string name="c_fun_category_common">Common</string>
+    <string name="c_fun_category_comparison">Comparison</string>
+    <string name="c_fun_category_hyper_trig">Hyperbolic trigonometric</string>
+    <string name="c_fun_category_my">My</string>
+    <string name="c_fun_category_trig">Trigonometric</string>
+    <string name="c_fun_description_abs">Gives absolute value of an argument</string>
+    <string name="c_fun_description_acos">Arccosine - inverse cosine function</string>
+    <string name="c_fun_description_acot">Arccotangent - inverse cotangent function</string>
+    <string name="c_fun_description_asin">Arcsine - inverse sine function</string>
+    <string name="c_fun_description_atan">Arctangent - inverse tangent function</string>
+    <string name="c_fun_description_cos">Trigonometric cosine function</string>
+    <string name="c_fun_description_cot">Trigonometric cotangent function</string>
+    <string name="c_fun_description_cubic">Cubic root function</string>
+    <string name="c_fun_description_deg">Converts radians into degrees</string>
+    <string name="c_fun_description_dms">Converts degrees from DMS notation to decimal notation: d - degrees, m -
+		minutes (default = 0), s - seconds (default = 0)
+	</string>
+    <string name="c_fun_description_eq">Equals function - gives 1 if two arguments are equals, otherwise 0</string>
+    <string name="c_fun_description_exp">Exponential function</string>
+    <string name="c_fun_description_ge">Greater-or-equals function - gives 1 if two arguments are equals or the first is
+		greater than the second, otherwise 0
+	</string>
+    <string name="c_fun_description_gt">Greater function - gives 1 if the first argument is greater than the second, oherwise 0
+	</string>
+    <string name="c_fun_description_le">Lesser-or-equals function - gives 1 if two arguments are equals or the first is less
+		than the second, otherwise 0
+	</string>
+    <string name="c_fun_description_lg">Decadic logarithm - logarithm to base 10</string>
+    <string name="c_fun_description_ln">Natural logarithm - logarithm to base e</string>
+    <string name="c_fun_description_log">Logarithm - logarithm the specified base</string>
+    <string name="c_fun_description_lt">Lesser function - gives 1 if the first argument is less than the second, otherwise 0
+	</string>
+    <string name="c_fun_description_ne">Not-equals function - gives 1 if two arguments are not equals, otherwise 0
+	</string>
+    <string name="c_fun_description_rad">Converts degrees into radians: d - degrees, m - minutes (default = 0), s -
+		seconds (default = 0)
+	</string>
+    <string name="c_fun_description_sgn">Gives the sign of an argument: -1 if an argument is less than 0, 0
+		if equals to 0, 1 if more than 0
+	</string>
+    <string name="c_fun_description_sin">Trigonometric sine function</string>
+    <string name="c_fun_description_sqrt">Square root function</string>
+    <string name="c_fun_description_tan">Trigonometric tangent function</string>
+    <string name="c_functions">Functions</string>
+    <string name="c_history">History</string>
+    <string name="c_history_comment">Comment</string>
+    <string name="c_history_expression">Value</string>
+    <string name="c_op_description_derivative">Gives derivative of order \'order\' (default = 1) of functions \'f(x)\'
+		by \'x\' variable and calculates at point \'x_point\' (default = same as \'x\')
+	</string>
+    <string name="c_op_description_integral">Gives integral of function \'f(x)\' by \'x\' variable</string>
+    <string name="c_op_description_integral_ab">Integrates function \'f(x)\' by \'x\' variable from \'a\' to \'b\'
+	</string>
+    <string name="c_op_description_mod">Modulo operation finds the remainder of division of \'x\' by \'y\'</string>
+    <string name="c_op_description_product">Gives product of functions \'f(i)\', iterating through \'i\' from \'from\'
+		to \'to\'
+	</string>
+    <string name="c_op_description_sum">Sums functions \'f(i)\', iterating through \'i\' from \'from\' to \'to\'
+	</string>
+    <string name="c_operators">Operators</string>
+    <string name="c_pf_description_degree">Converts degrees to radians.\n
+		Examples:\n
+		268° = 4.67748\n
+		30.21° = 0.52726
+	</string>
+    <string name="c_pf_description_double_factorial">Gives the double factorial of the previous expression</string>
+    <string name="c_pf_description_factorial">Gives the factorial of the previous expression</string>
+    <string formatted="false" name="c_pf_description_percent">Gives the percent value of the expression
+		before.\nExamples:\n
+		100 + 50% = 150\n
+		100 * 50% = 50\n
+		100 + 100 * 50% * 50% = 125
+	</string>
+    <string name="c_plot">Plot graph</string>
+    <string name="c_release_notes">Release notes</string>
+    <string name="c_release_notes_for_title">"Release notes for version "</string>
+    <string name="c_save">Save</string>
+    <string name="c_use">Use</string>
+    <string name="c_value_is_not_a_number">Value must be either a number or left empty: if you have parameters - create a function instead!</string>
+    <string name="c_var_already_exists">Variable with the same name already exists!</string>
+    <string name="c_var_create_var">Create variable</string>
+    <string name="c_var_description">Description</string>
+    <string name="c_var_description_G">The gravitational constant is an empirical physical constant involved in the calculation of the gravitational attraction between objects with mass, m^3·kg^−1·s^−2</string>
+    <string name="c_var_description_PI">Ratio of any circle\'s circumference to its diameter. Note: this constant is degree unit dependent => rad: 3.14, deg: 180.0</string>
+    <string name="c_var_description_c">Speed of the light in vacuum, m/s</string>
+    <string name="c_var_description_e">Unique real number such that the value of the derivative (slope of the tangent line) of the function f(x) = e^x at the point x = 0 is equal to 1</string>
+    <string name="c_var_description_h_reduced">Reduced Planck constant, J·s</string>
+    <string name="c_var_description_i">Imaginary unit, defined such as i^2 = −1</string>
+    <string name="c_var_description_inf">Infinity</string>
+    <string name="c_var_description_nan">Not a number</string>
+    <string name="c_var_description_pi">Ratio of any circle\'s circumference to its diameter. Note: this constant is degree unit independent => rad: 3.14, deg: 3.14</string>
+    <string name="c_var_edit_var">Edit variable</string>
+    <string name="c_var_my">My</string>
+    <string name="c_var_name_clashes">Variable name clashes with function name!</string>
+    <string name="c_var_removal_confirmation_question">Do you really want to delete \'%s\' variable?</string>
+    <string name="c_var_system">Built-in</string>
+    <string name="c_var_value">Value</string>
+    <string name="close">Close</string>
+    <string name="com.google.firebase.crashlytics.mapping_file_id" ns1:ignore="UnusedResources,TypographyDashes" translatable="false">00000000000000000000000000000000</string>
+    <string name="convert_to_bin">Convert to bin</string>
+    <string name="convert_to_dec">Convert to dec</string>
+    <string name="convert_to_hex">Convert to hex</string>
+    <string name="cpp_about">About</string>
+    <string name="cpp_add">Add</string>
+    <string comment="Visio-2016" name="cpp_angles">Angles</string>
+    <string comment="Application name. Shown in the app drawer and tasks manager. Should be short enough to be fully visible on the screen" name="cpp_app_name">高级计算器</string>
+    <string comment="Floating calculator name. Shown in the app drawer. Should be short enough to be fully visible on the screen" name="cpp_app_name_on_screen">Calculator++ (Window mode)</string>
+    <string comment="Visual Studio-2013" name="cpp_appearance">Appearance</string>
+    <string name="cpp_bin">Binary</string>
+    <string name="cpp_cancel">Cancel</string>
+    <string name="cpp_clear_history">Clear</string>
+    <string name="cpp_clear_history_message">All history will be cleared.</string>
+    <string name="cpp_clear_history_title">Clear history?</string>
+    <string name="cpp_close">Close</string>
+    <string name="cpp_continue">Continue</string>
+    <string name="cpp_continue_without_permissions">Continue without permission</string>
+    <string name="cpp_converter_amount_of_substance">Amount of substance</string>
+    <string name="cpp_converter_electric_current">Electric current</string>
+    <string name="cpp_converter_length">Length</string>
+    <string name="cpp_converter_mass">Mass</string>
+    <string name="cpp_converter_temperature">Temperature</string>
+    <string name="cpp_converter_time">Time</string>
+    <string name="cpp_copy">Copy</string>
+    <string name="cpp_copy_text">Copy to clipboard</string>
+    <string name="cpp_create">Create</string>
+    <string name="cpp_dec">Decimal</string>
+    <string name="cpp_deg">Degrees</string>
+    <string name="cpp_delete">Delete</string>
+    <string name="cpp_description">Description</string>
+    <string name="cpp_dimensions_x_min" translatable="false">X min</string>
+    <string name="cpp_done">Done</string>
+    <string name="cpp_dont_show_again">Do not show again</string>
+    <string comment=".NET Framework-4.5" name="cpp_duplicate_parameter">Duplicate parameter: \'%1$s\'.</string>
+    <string name="cpp_edit">Edit</string>
+    <string name="cpp_enable">Enable</string>
+    <string name="cpp_error">Error</string>
+    <string comment=".NET Framework-4.5" name="cpp_examples">Examples</string>
+    <string name="cpp_exponent" translatable="false">E</string>
+    <string comment="System Center Operations Manager" name="cpp_field_cannot_be_empty">Field can not be empty</string>
+    <string name="cpp_floating_calculator">Floating calculator</string>
+    <string name="cpp_floating_calculator_notification_description">A notification displayed when a floating window is minimized</string>
+    <string name="cpp_floating_calculator_notification_name">@string/cpp_floating_calculator</string>
+    <string comment="Visual Studio-2013" name="cpp_format">Format</string>
+    <string name="cpp_function_body" translatable="false">f(x, y)</string>
+    <string name="cpp_glyph_backspace" translatable="false">"\ue004"</string>
+    <string name="cpp_glyph_copy" translatable="false">"\ue001"</string>
+    <string name="cpp_glyph_fast_back" translatable="false">"\ue00a"</string>
+    <string name="cpp_glyph_fast_forward" translatable="false">"\ue00b"</string>
+    <string name="cpp_glyph_graph" translatable="false">"\ue009"</string>
+    <string name="cpp_glyph_heart" translatable="false">"\ue006"</string>
+    <string name="cpp_glyph_history" translatable="false">"\ue005"</string>
+    <string name="cpp_glyph_left" translatable="false">"\ue002"</string>
+    <string name="cpp_glyph_paste" translatable="false">"\ue000"</string>
+    <string name="cpp_glyph_redo" translatable="false">"\ue008"</string>
+    <string name="cpp_glyph_right" translatable="false">"\ue003"</string>
+    <string name="cpp_glyph_undo" translatable="false">"\ue007"</string>
+    <string name="cpp_grad">Gradians</string>
+    <string name="cpp_help">Help</string>
+    <string name="cpp_hex">Hexadecimal</string>
+    <string name="cpp_high_contrast_text">High contrast text</string>
+    <string name="cpp_history_tab_recent">Recent</string>
+    <string name="cpp_history_tab_saved">Saved</string>
+    <string name="cpp_introduction">Introduction</string>
+    <string name="cpp_kb_clear" translatable="false">C</string>
+    <string name="cpp_kb_functions" translatable="false">ƒ</string>
+    <string name="cpp_kb_memory_clear" translatable="false">MC</string>
+    <string name="cpp_kb_memory_minus" translatable="false">M-</string>
+    <string name="cpp_kb_memory_plus" translatable="false">M+</string>
+    <string name="cpp_kb_memory_recall" translatable="false">M</string>
+    <string name="cpp_kb_operators" translatable="false">∂</string>
+    <string name="cpp_kb_variables" translatable="false">π</string>
+    <string name="cpp_language">Language</string>
+    <string name="cpp_missing_permission_message">Please enable %1$s permission in system settings</string>
+    <string name="cpp_missing_permission_title">Missing permission</string>
+    <string name="cpp_mode">Mode</string>
+    <string name="cpp_mode_engineer">Engineer</string>
+    <string name="cpp_mode_simple">Simple</string>
+    <string name="cpp_name">Name</string>
+    <string comment="SharePoint Server-2016" name="cpp_name_contains_invalid_characters">The name contains invalid characters.</string>
+    <string name="cpp_nan">Not a number</string>
+    <string name="cpp_new_in_version">New in %1$s version</string>
+    <string name="cpp_no">No</string>
+    <string comment="Excel-2016" name="cpp_number_format">Number format</string>
+    <string name="cpp_number_format_dec">Decimal</string>
+    <string name="cpp_number_format_eng">Engineering</string>
+    <string name="cpp_number_format_sci">Scientific</string>
+    <string name="cpp_numeral_system">Numeral system</string>
+    <string name="cpp_oct">Octal</string>
+    <string name="cpp_other">Other</string>
+    <string comment=".NET Framework-4.5" name="cpp_parameter">Parameter</string>
+    <string name="cpp_permission_overlay">Draw over other apps</string>
+    <string name="cpp_permission_post_notifications">Post notifications</string>
+    <string name="cpp_plot_empty_function_error">Unable to plot empty function!</string>
+    <string name="cpp_plot_function_line_color">Line color</string>
+    <string name="cpp_plot_function_line_width">Line width</string>
+    <string name="cpp_plot_range">Graph range</string>
+    <string name="cpp_plot_too_many_variables">Unable to plot: too many variables!</string>
+    <string name="cpp_plotter">Function plotter</string>
+    <string name="cpp_precision">Precision</string>
+    <string name="cpp_prefs_advanced">Advanced</string>
+    <string name="cpp_prefs_auto_rotate_screen">Auto-rotate screen</string>
+    <string name="cpp_prefs_basic">Basic</string>
+    <string name="cpp_prefs_keep_screen_on">Stay awake</string>
+    <string name="cpp_prefs_vibrate_on_keypress">Vibrate on touch</string>
+    <string name="cpp_purchase_text">Supporting the project is easy and secure: purchase process is provided by Google
+		and all you need is a properly configured Google account.\n\n
+		Payment information is stored in Google servers with your Google account and you can easily use this application on
+		several devices.\n\n
+		By clicking \'Continue\' button you will be redirected to the Google Play app to make the payment.</string>
+    <string name="cpp_purchase_title">Purchase</string>
+    <string name="cpp_rad">Radians</string>
+    <string name="cpp_radix">Radix</string>
+    <string name="cpp_rateus_cancel">No, thanks</string>
+    <string name="cpp_rateus_message">If you enjoy %1$s, please take a moment and give us a five-star rating in Google Play.</string>
+    <string name="cpp_rateus_ok">Rate it now</string>
+    <string name="cpp_rateus_title">Rate %1$s</string>
+    <string name="cpp_release_notes_143">
+        ★ App language can be changed in settings\n
+        ★ Floating calculator themes\n
+        ★ Widget themes\n
+        ★ Various bugfixes, stability and usability improvements
+    </string>
+    <string name="cpp_release_notes_148">
+        ★ New graph plotter\n
+        ★ Improved user interface: main and additional screens, dialogs, menus, etc\n
+        ★ Redesigned unit converter\n
+        ★ Memory button (MC, M+, M-, M)\n
+        ★ Floating calculator for Android M\n
+        ★ Auto-save of recent history\n
+        ★ Faster start-ups, less memory consumption
+    </string>
+    <string name="cpp_release_notes_150">
+        ★ Copy/paste buttons\n
+        ★ AMOLED theme\n
+        ★ Fixed formatting of small numbers\n
+        ★ Faster graph plotter\n
+        ★ Numeral base conversion\n
+        ★ E button in Variables Editor
+    </string>
+    <string name="cpp_release_notes_152">
+        ★ High contrast text option\n
+        ★ Redesigned settings\n
+        ★ More number format options: scientific and engineering notations\n
+        ★ Small UI tweaks\n
+        ★ Bugs fixes
+    </string>
+    <string name="cpp_release_notes_choose_theme">Do you want to try new Material themes? Choose them from the list:</string>
+    <string name="cpp_report_problem">Report a problem</string>
+    <string name="cpp_settings">Settings</string>
+    <string name="cpp_share_link">http://www.facebook.com/calculatorpp</string>
+    <string name="cpp_show_greek_keyboard" translatable="false">αβγ</string>
+    <string name="cpp_switch">Switch</string>
+    <string comment="Windows-8" name="cpp_system_language">System language</string>
+    <string name="cpp_text_copied">Text copied</string>
+    <string name="cpp_theme">Theme</string>
+    <string name="cpp_theme_app">App theme</string>
+    <string name="cpp_theme_black" translatable="false">%1$s (AMOLED)</string>
+    <string name="cpp_theme_dark">Dark</string>
+    <string name="cpp_theme_ios">Apple iOS Style</string>
+    <string name="cpp_theme_light">Light</string>
+    <string name="cpp_theme_metro_blue">Metro Blue</string>
+    <string name="cpp_theme_premium">Premium Obsidian - Metallic</string>
+    <string name="cpp_theme_premium_glass">Premium Obsidian - Glass</string>
+    <string name="cpp_theme_premium_neumorphism">Premium Obsidian - Soft</string>
+    <string comment="Dynamics AX" name="cpp_thousands_separator">Thousands separator</string>
+    <string name="cpp_thousands_separator_apostrophe">Apostrophe (\')</string>
+    <string name="cpp_thousands_separator_no">No grouping separator</string>
+    <string name="cpp_thousands_separator_space">Space ( )</string>
+    <string name="cpp_translators_list">Sergey Solovyev</string>
+    <string name="cpp_translators_text">This app is translated to English by: </string>
+    <string name="cpp_turns">Turns</string>
+    <string name="cpp_units_aos_atoms">atoms</string>
+    <string name="cpp_units_aos_mol">mol</string>
+    <string name="cpp_units_ec_a">A</string>
+    <string name="cpp_units_ec_gi">Gi</string>
+    <string name="cpp_units_length_angstroms">Å</string>
+    <string name="cpp_units_length_astronomical_units">au</string>
+    <string name="cpp_units_length_feet">ft</string>
+    <string name="cpp_units_length_inches">in</string>
+    <string name="cpp_units_length_light_years">light years</string>
+    <string name="cpp_units_length_meters">m</string>
+    <string name="cpp_units_length_miles">miles</string>
+    <string name="cpp_units_length_nautical_miles">miles (nau)</string>
+    <string name="cpp_units_length_parsecs">pc</string>
+    <string name="cpp_units_length_pixels">px</string>
+    <string name="cpp_units_length_points">pt</string>
+    <string name="cpp_units_length_yards">yards</string>
+    <string name="cpp_units_mass_kg">kg</string>
+    <string name="cpp_units_mass_lb">lb</string>
+    <string name="cpp_units_mass_oz">oz</string>
+    <string name="cpp_units_mass_t">t</string>
+    <string name="cpp_units_mass_tons_uk">t (UK)</string>
+    <string name="cpp_units_mass_tons_us">t (US)</string>
+    <string name="cpp_units_time_days">days</string>
+    <string name="cpp_units_time_hours">hours</string>
+    <string name="cpp_units_time_minutes">min</string>
+    <string name="cpp_units_time_months">months</string>
+    <string name="cpp_units_time_seconds">s</string>
+    <string name="cpp_units_time_weeks">weeks</string>
+    <string name="cpp_units_time_years">years</string>
+    <string comment="Name of `Constants and variables` activity and an entry in the context menu which opens a list of all constants and variables" name="cpp_vars_and_constants">Variables And Constants</string>
+    <string name="cpp_widget">Widget</string>
+    <string name="cpp_wizard_back">Back</string>
+    <string name="cpp_wizard_dragbutton_action_center">Tap the button below once to use 9</string>
+    <string name="cpp_wizard_dragbutton_action_down">Swipe from the center of the button down to use ^2</string>
+    <string name="cpp_wizard_dragbutton_action_end">Excellent! Tap the button one more time to try again</string>
+    <string name="cpp_wizard_dragbutton_action_up">Swipe from the center of the button up to use %</string>
+    <string name="cpp_wizard_dragbutton_description">Swipe button is an exclusive feature of Calculator++ which provides
+		fast access to the secondary functions
+	</string>
+    <string name="cpp_wizard_dragbutton_title">Swipe button basics</string>
+    <string name="cpp_wizard_final_done">The app is set up and ready to use.</string>
+    <string name="cpp_wizard_final_title">Almost done!</string>
+    <string name="cpp_wizard_finish">Done</string>
+    <string name="cpp_wizard_finish_confirmation">Do you really want to finish wizard?</string>
+    <string name="cpp_wizard_finish_confirmation_title">Finish?</string>
+    <string name="cpp_wizard_mode_engineer_description">In engineer mode special functions will be used on the main
+		screen.
+		Result is not rounded and is presented in engineer notation, radians are used as the default angle units.
+	</string>
+    <string name="cpp_wizard_mode_simple_description">In simple mode only basic functionality will be available from the
+		main screen.
+		Result is rounded up to 5 digits, degrees are used as the default angle units.
+	</string>
+    <string name="cpp_wizard_mode_title">Choose mode</string>
+    <string name="cpp_wizard_next">Next</string>
+    <string name="cpp_wizard_onscreen_calculator_title">Calculator in a separate window</string>
+    <string name="cpp_wizard_onscreen_checkbox">Enable</string>
+    <string name="cpp_wizard_onscreen_description">Calculator in separate window allows you to do calculations while
+		using other apps on your device
+	</string>
+    <string name="cpp_wizard_skip">Skip</string>
+    <string name="cpp_wizard_start">Start wizard</string>
+    <string name="cpp_wizard_theme_title">Choose theme</string>
+    <string name="cpp_wizard_welcome_title">Welcome</string>
+    <string name="cpp_yes">Yes</string>
+    <string name="derivatives">Derivatives/Integrals</string>
+    <string name="dimensions_x_max" translatable="false">X max</string>
+    <string name="dimensions_y_max" translatable="false">Y max</string>
+    <string name="dimensions_y_min" translatable="false">Y min</string>
+    <string name="fix">Fix</string>
+    <string name="function_already_exists">Function with the same name already exists!</string>
+    <string name="function_create_function">Create function</string>
+    <string name="function_edit_function">Edit function</string>
+    <string name="function_removal_confirmation_question">Do you really want to delete \'%s\' function?</string>
+    <string name="gcm_defaultSenderId" translatable="false">256354490244</string>
+    <string name="google_api_key" translatable="false">AIzaSyDmabRGhOstItse_rveL5ReDooqfK2hDHo</string>
+    <string name="google_app_id" translatable="false">1:256354490244:android:4674f70d035e4bbdb5efd1</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDmabRGhOstItse_rveL5ReDooqfK2hDHo</string>
+    <string name="google_storage_bucket" translatable="false">calculatorpp-86d8a.appspot.com</string>
+    <string name="not_valid_result">Current result is not valid!</string>
+    <string name="open_onscreen_calculator">Click to open calculator in window mode</string>
+    <string name="other">Other</string>
+    <string name="p_calculations_calculate_on_fly_title">Result is calculated while typing</string>
+    <string name="p_metro_green_theme">Metro Green</string>
+    <string name="p_metro_purple_theme">Metro Purple</string>
+    <string name="project_id" translatable="false">calculatorpp-86d8a</string>
+    <string name="removal_confirmation">Removal confirmation</string>
+    <style name="BaseCppKeyboardButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">@drawable/metro_button_dark</item>
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:padding">@dimen/cpp_button_padding</item>
+        <item name="android:textSize">@dimen/cpp_keyboard_button_text_size</item>
+        <item name="android:textColor">@color/cpp_button_text</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="directionTextColor">@color/cpp_button_text</item>
+        <item name="directionTextScale">0.35</item>
+        <item name="directionTextPaddingUp">@dimen/cpp_keyboard_button_direction_text_padding_updown</item>
+        <item name="directionTextPaddingDown">@dimen/cpp_keyboard_button_direction_text_padding_updown</item>
+        <item name="directionTextPaddingRight">@dimen/cpp_keyboard_button_direction_text_padding_updown</item>
+        <item name="directionTextPaddingLeft">@dimen/cpp_keyboard_button_direction_text_padding_left</item>
+    </style>
+    <style name="Cpp.Theme" parent="@style/Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/cpp_text</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorAccent">@color/cpp_material_accent</item>
+        <item name="colorError">@color/red_300</item>
+
+        <item name="android:windowBackground">@color/cpp_bg</item>
+
+        <item name="cpp_editor_bg">@color/cpp_editor_bg</item>
+        <item name="cpp_fab_bg">@color/blue_900</item>
+        <item name="cpp_text_color">@color/cpp_text</item>
+        <item name="cpp_text_color_error">@color/cpp_text_error</item>
+        <item name="cpp_toolbar_style">@style/CppToolbar</item>
+
+        <item name="android:listDivider">@drawable/divider_dark</item>
+        <item name="actionOverflowMenuStyle">@style/Cpp.Widget.AppCompat.PopupMenu.Overflow</item>
+    </style>
+    <style name="Cpp.Theme.Blue" parent="Cpp.Theme">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Blue.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Blue.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Blue.Operation</item>
+    </style>
+    <style name="Cpp.Theme.Calculator" parent="@style/Cpp.Theme">
+        <item name="android:windowBackground">@color/cpp_editor_bg</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.Dialog" parent="@style/Theme.Material3.Dark.DialogWhenLarge">
+        <item name="colorPrimary">@color/cpp_text</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorAccent">@color/cpp_material_accent</item>
+        <item name="colorError">@color/red_300</item>
+
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+
+        <item name="cpp_editor_bg">@color/cpp_bg</item>
+        <item name="cpp_fab_bg">@color/blue_900</item>
+        <item name="cpp_text_color">@color/cpp_text</item>
+        <item name="cpp_text_color_error">@color/cpp_text_error</item>
+        <item name="cpp_toolbar_style">@style/CppToolbar</item>
+
+        <item name="android:listDivider">@drawable/divider_dark</item>
+    </style>
+    <style name="Cpp.Theme.Dialog.Alert" parent="@style/Theme.Material3.Dark.Dialog.Alert">
+        <item name="colorPrimary">@color/cpp_text</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorAccent">@color/cpp_material_accent</item>
+        <item name="colorError">@color/red_300</item>
+
+        <item name="cpp_editor_bg">@color/cpp_bg</item>
+        <item name="cpp_fab_bg">@color/blue_900</item>
+        <item name="cpp_text_color">@color/cpp_text</item>
+        <item name="cpp_text_color_error">@color/cpp_text_error</item>
+        <item name="cpp_toolbar_style">@style/CppToolbar</item>
+
+        <item name="android:listDivider">@drawable/divider_dark</item>
+    </style>
+    <style name="Cpp.Theme.Dialog.Gray" parent="Cpp.Theme.Dialog">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Gray.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Gray.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Gray.Operation</item>
+    </style>
+    <style name="Cpp.Theme.Gray" parent="Cpp.Theme">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Gray.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Gray.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Gray.Operation</item>
+    </style>
+    <style name="Cpp.Theme.IOS" parent="Cpp.Theme">
+        <item name="android:windowBackground">@color/ios_bg</item>
+        <item name="cpp_editor_bg">@color/ios_bg</item>
+        <item name="cpp_fab_bg">@color/ios_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.IOS.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.IOS.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.IOS.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.IOS.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.IOS.Operation</item>
+    </style>
+    <style name="Cpp.Theme.IOS.Calculator" parent="Cpp.Theme.IOS">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.IOS.Dialog" parent="Cpp.Theme.Dialog">
+        <item name="cpp_editor_bg">@color/ios_bg</item>
+        <item name="cpp_fab_bg">@color/ios_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.IOS.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.IOS.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.IOS.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.IOS.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.IOS.Operation</item>
+    </style>
+    <style name="Cpp.Theme.IOS.Dialog.Alert" parent="Cpp.Theme.Dialog.Alert">
+        <item name="cpp_editor_bg">@color/ios_bg</item>
+        <item name="cpp_fab_bg">@color/ios_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.IOS.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.IOS.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.IOS.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.IOS.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.IOS.Operation</item>
+    </style>
+    <style name="Cpp.Theme.Light" parent="@style/Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">@color/cpp_bg_light</item>
+
+        <item name="colorPrimary">@color/teal_400</item>
+        <item name="colorPrimaryDark">@color/teal_400</item>
+        <item name="colorAccent">@color/teal_400</item>
+        <item name="colorError">@color/red_a700</item>
+
+        <item name="cpp_editor_bg">@color/cpp_bg_light</item>
+        <item name="cpp_fab_bg">@color/teal_400</item>
+        <item name="cpp_text_color">@color/cpp_text_inverse</item>
+        <item name="cpp_text_color_error">@color/cpp_text_inverse_error</item>
+        <item name="cpp_toolbar_style">@style/CppToolbar.Light</item>
+
+        <item name="android:listDivider">@drawable/divider</item>
+        <item name="actionOverflowMenuStyle">@style/Cpp.Widget.AppCompat.Light.PopupMenu.Overflow</item>
+    </style>
+    <style name="Cpp.Theme.Light.Dialog" parent="@style/Theme.Material3.Light.DialogWhenLarge">
+        <item name="colorPrimary">@color/teal_400</item>
+        <item name="colorPrimaryDark">@color/teal_400</item>
+        <item name="colorAccent">@color/teal_400</item>
+        <item name="colorError">@color/red_a700</item>
+
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+
+        <item name="cpp_editor_bg">@color/cpp_bg_light</item>
+        <item name="cpp_fab_bg">@color/teal_400</item>
+        <item name="cpp_text_color">@color/cpp_text_inverse</item>
+        <item name="cpp_text_color_error">@color/cpp_text_inverse_error</item>
+        <item name="cpp_toolbar_style">@style/CppToolbar.Light</item>
+
+        <item name="android:listDivider">@drawable/divider</item>
+    </style>
+    <style name="Cpp.Theme.Light.Dialog.Alert" parent="@style/Theme.Material3.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/teal_400</item>
+        <item name="colorPrimaryDark">@color/teal_400</item>
+        <item name="colorAccent">@color/teal_400</item>
+        <item name="colorError">@color/red_a700</item>
+
+        <item name="cpp_editor_bg">@color/cpp_bg_light</item>
+        <item name="cpp_fab_bg">@color/teal_400</item>
+        <item name="cpp_text_color">@color/cpp_text_inverse</item>
+        <item name="cpp_text_color_error">@color/cpp_text_inverse_error</item>
+        <item name="cpp_toolbar_style">@style/CppToolbar.Light</item>
+
+        <item name="android:listDivider">@drawable/divider</item>
+    </style>
+    <style name="Cpp.Theme.Material" parent="Cpp.Theme">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Operation.Highlighted</item>
+    </style>
+    <style name="Cpp.Theme.Material.Black" parent="Cpp.Theme">
+        <item name="android:windowBackground">@color/grey_965</item>
+        <item name="cpp_editor_bg">@color/grey_965</item>
+        <item name="cpp_fab_bg">@color/deep_blue_900</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Black.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Black.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Black.Digit.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Black.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Black.Operation.Highlighted</item>
+    </style>
+    <style name="Cpp.Theme.Material.Black.Calculator" parent="Cpp.Theme.Material.Black">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.Material.Black.Dialog" parent="Cpp.Theme.Dialog">
+        <item name="cpp_editor_bg">@color/grey_965</item>
+        <item name="cpp_fab_bg">@color/deep_blue_900</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Black.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Black.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Black.Digit.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Black.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Black.Operation.Highlighted</item>
+    </style>
+    <style name="Cpp.Theme.Material.Black.Dialog.Alert" parent="Cpp.Theme.Dialog.Alert">
+        <item name="cpp_editor_bg">@color/grey_965</item>
+        <item name="cpp_fab_bg">@color/deep_blue_900</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Black.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Black.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Black.Digit.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Black.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Black.Operation.Highlighted</item>
+    </style>
+    <style name="Cpp.Theme.Material.Calculator" parent="Cpp.Theme.Material">
+        <item name="android:windowBackground">@color/cpp_editor_bg</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.Material.Dialog" parent="Cpp.Theme.Dialog">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Operation.Highlighted</item>
+    </style>
+    <style name="Cpp.Theme.Material.Dialog.Alert" parent="Cpp.Theme.Dialog.Alert">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Operation.Highlighted</item>
+    </style>
+    <style name="Cpp.Theme.Material.Light" parent="Cpp.Theme.Light">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Light.Digit.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Light.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Light.Operation.Highlighted</item>
+    </style>
+    <style name="Cpp.Theme.Material.Light.Calculator" parent="Cpp.Theme.Material.Light">
+        <item name="android:windowBackground">@color/cpp_bg_light</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.Material.Light.Dialog" parent="Cpp.Theme.Light.Dialog">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Light.Digit.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Light.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Light.Operation.Highlighted</item>
+    </style>
+    <style name="Cpp.Theme.Material.Light.Dialog.Alert" parent="Cpp.Theme.Light.Dialog.Alert">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Material.Light.Digit</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Material.Light.Digit.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Material.Light.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Material.Light.Operation.Highlighted</item>
+    </style>
+    <style name="Cpp.Theme.Metro.Blue" parent="Cpp.Theme">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Metro.Blue.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Metro.Blue.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Metro.Blue.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Metro.Blue.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Metro.Blue.Operation</item>
+        <item name="cpp_fab_bg">@color/blue_900</item>
+    </style>
+    <style name="Cpp.Theme.Metro.Blue.Calculator" parent="Cpp.Theme.Metro.Blue">
+        <item name="android:windowBackground">@color/cpp_editor_bg</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.Metro.Blue.Dialog" parent="Cpp.Theme.Dialog">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Metro.Blue.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Metro.Blue.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Metro.Blue.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Metro.Blue.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Metro.Blue.Operation</item>
+        <item name="cpp_fab_bg">@color/blue_900</item>
+    </style>
+    <style name="Cpp.Theme.Metro.Green" parent="Cpp.Theme.Metro.Blue">
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Metro.Green.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Metro.Green.Operation</item>
+        <item name="cpp_fab_bg">@color/green_800</item>
+    </style>
+    <style name="Cpp.Theme.Metro.Green.Calculator" parent="Cpp.Theme.Metro.Green">
+        <item name="android:windowBackground">@color/cpp_editor_bg</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.Metro.Green.Dialog" parent="Cpp.Theme.Metro.Blue.Dialog">
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Metro.Green.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Metro.Green.Operation</item>
+        <item name="cpp_fab_bg">@color/green_800</item>
+    </style>
+    <style name="Cpp.Theme.Metro.Purple" parent="Cpp.Theme.Metro.Blue">
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Metro.Purple.Digit</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Metro.Purple.Digit</item>
+        <item name="cpp_fab_bg">@color/pink_900</item>
+    </style>
+    <style name="Cpp.Theme.Metro.Purple.Calculator" parent="Cpp.Theme.Metro.Purple">
+        <item name="android:windowBackground">@color/cpp_editor_bg</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.Metro.Purple.Dialog" parent="Cpp.Theme.Metro.Blue.Dialog">
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Metro.Purple.Digit</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Metro.Purple.Digit</item>
+        <item name="cpp_fab_bg">@color/pink_900</item>
+    </style>
+    <style name="Cpp.Theme.Premium" parent="Cpp.Theme">
+        <item name="android:windowBackground">@color/premium_bg</item>
+        <item name="cpp_editor_bg">@color/premium_bg</item>
+        <item name="cpp_fab_bg">@color/premium_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Premium.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Premium.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Premium.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Premium.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Premium.Operation</item>
+    </style>
+    <style name="Cpp.Theme.Premium.Calculator" parent="Cpp.Theme.Premium">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.Premium.Dialog" parent="Cpp.Theme.Dialog">
+        <item name="cpp_editor_bg">@color/premium_bg</item>
+        <item name="cpp_fab_bg">@color/premium_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Premium.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Premium.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Premium.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Premium.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Premium.Operation</item>
+    </style>
+    <style name="Cpp.Theme.Premium.Dialog.Alert" parent="Cpp.Theme.Dialog.Alert">
+        <item name="cpp_editor_bg">@color/premium_bg</item>
+        <item name="cpp_fab_bg">@color/premium_operation_bg</item>
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Premium.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Premium.Control</item>
+        <item name="cpp_button_style_control_highlighted">@style/CppKeyboardButton.Premium.Control.Highlighted</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Premium.Operation</item>
+        <item name="cpp_button_style_operation_highlighted">@style/CppKeyboardButton.Premium.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumGlass" parent="Cpp.Theme.Premium">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumGlass.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumGlass.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumGlass.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumGlass.Calculator" parent="Cpp.Theme.PremiumGlass">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.PremiumGlass.Dialog" parent="Cpp.Theme.Premium.Dialog">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumGlass.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumGlass.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumGlass.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumGlass.Dialog.Alert" parent="Cpp.Theme.Premium.Dialog.Alert">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumGlass.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumGlass.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumGlass.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumNeumorphism" parent="Cpp.Theme.Premium">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumNeumorphism.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumNeumorphism.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumNeumorphism.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumNeumorphism.Calculator" parent="Cpp.Theme.PremiumNeumorphism">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Cpp.Theme.PremiumNeumorphism.Dialog" parent="Cpp.Theme.Premium.Dialog">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumNeumorphism.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumNeumorphism.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumNeumorphism.Operation</item>
+    </style>
+    <style name="Cpp.Theme.PremiumNeumorphism.Dialog.Alert" parent="Cpp.Theme.Premium.Dialog.Alert">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.PremiumNeumorphism.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.PremiumNeumorphism.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.PremiumNeumorphism.Operation</item>
+    </style>
+    <style name="Cpp.Theme.Translucent" parent="@style/Theme.Material3.Dark.Dialog">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="windowActionBar">false</item>
+    </style>
+    <style name="Cpp.Theme.Violet" parent="Cpp.Theme">
+        <item name="cpp_button_style_digit">@style/CppKeyboardButton.Violet.Digit</item>
+        <item name="cpp_button_style_control">@style/CppKeyboardButton.Violet.Control</item>
+        <item name="cpp_button_style_operation">@style/CppKeyboardButton.Violet.Operation</item>
+    </style>
+    <style name="Cpp.Theme.Wizard" parent="Cpp.Theme.Material">
+        <item name="android:windowBackground">@color/grey_950</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="cpp_wizard_button_bg">@color/cpp_wizard_button_selector</item>
+    </style>
+    <style name="Cpp.Theme.Wizard.Light" parent="Cpp.Theme.Material.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="cpp_wizard_button_bg">@color/cpp_wizard_button_selector_light</item>
+    </style>
+    <style name="Cpp.Widget.AppCompat.Light.PopupMenu.Overflow" parent="Widget.AppCompat.Light.PopupMenu.Overflow">
+        <item name="android:dropDownVerticalOffset">4dip</item>
+    </style>
+    <style name="Cpp.Widget.AppCompat.PopupMenu.Overflow" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:dropDownVerticalOffset">4dip</item>
+    </style>
+    <style name="CppAd">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:visibility">gone</item>
+    </style>
+    <style name="CppFab" parent="@style/Widget.Material3.FloatingActionButton.Surface">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">bottom|end</item>
+        <item name="android:layout_margin">16dp</item>
+        <item name="android:visibility">gone</item>
+        <item name="android:clickable">false</item>
+        <item name="backgroundTint">?attr/cpp_fab_bg</item>
+        <item name="tint">@color/cpp_button_text</item>
+    </style>
+    <style name="CppFragment">
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+    <style name="CppHeaderButton.Material" parent="CppKeyboardButton.Material.Control">
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_weight">0</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:textSize">@dimen/cpp_onscreen_header_button_text_size</item>
+    </style>
+    <style name="CppHeaderButton.Material.Light" parent="CppKeyboardButton.Material.Light.Control">
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_weight">0</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:textSize">@dimen/cpp_onscreen_header_button_text_size</item>
+    </style>
+    <style name="CppHeaderButton.Metro.Blue" parent="CppKeyboardButton.Metro.Blue.Control">
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_weight">0</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:textSize">@dimen/cpp_onscreen_header_button_text_size</item>
+        <item name="android:background">@drawable/metro_widget_button_light</item>
+    </style>
+    <style name="CppImageButton">
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:padding">@dimen/cpp_image_button_padding</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
+    <style name="CppKeyboardButton" parent="BaseCppKeyboardButton"/>
+    <style name="CppKeyboardButton.Blue.Control" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/blue_button_dark</item>
+    </style>
+    <style name="CppKeyboardButton.Blue.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/blue_button</item>
+    </style>
+    <style name="CppKeyboardButton.Blue.Operation" parent="CppKeyboardButton.Blue.Digit">
+        <item name="android:textColor">@color/yellow_100</item>
+    </style>
+    <style name="CppKeyboardButton.Gray.Control" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/gray_button_dark</item>
+    </style>
+    <style name="CppKeyboardButton.Gray.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/gray_button</item>
+    </style>
+    <style name="CppKeyboardButton.Gray.Operation" parent="CppKeyboardButton.Gray.Digit">
+        <item name="android:textColor">@color/yellow_100</item>
+    </style>
+    <style name="CppKeyboardButton.IOS.Control" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_ios_control</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+    <style name="CppKeyboardButton.IOS.Control.Highlighted" parent="CppKeyboardButton.IOS.Control">
+    </style>
+    <style name="CppKeyboardButton.IOS.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_ios_digit</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    <style name="CppKeyboardButton.IOS.Digit.Highlighted" parent="CppKeyboardButton.IOS.Digit">
+    </style>
+    <style name="CppKeyboardButton.IOS.Operation" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_ios_operation</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="directionTextAlpha">0.7</item>
+    </style>
+    <style name="CppKeyboardButton.IOS.Operation.Highlighted" parent="CppKeyboardButton.IOS.Operation">
+    </style>
+    <style name="CppKeyboardButton.Material.Black.Control" parent="CppKeyboardButton.Material.Black.Digit"/>
+    <style name="CppKeyboardButton.Material.Black.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/material_button_black</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Black.Digit.Highlighted" parent="CppKeyboardButton.Material.Black.Digit">
+        <item name="android:background">@drawable/material_button_black_lighter</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Black.Operation" parent="CppKeyboardButton.Material.Digit">
+        <item name="android:background">@drawable/material_button_deep_blue</item>
+        <item name="directionTextAlpha">0.7</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Black.Operation.Highlighted" parent="CppKeyboardButton.Material.Black.Operation">
+        <item name="android:background">@drawable/material_button_deep_blue_lighter</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Control" parent="CppKeyboardButton.Material.Digit"/>
+    <style name="CppKeyboardButton.Material.Control.Highlighted" parent="CppKeyboardButton.Material.Digit">
+        <item name="android:background">@drawable/material_button_dark_lighter</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/material_button_dark</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Control" parent="CppKeyboardButton.Material.Light.Digit"/>
+    <style name="CppKeyboardButton.Material.Light.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/material_button_light</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Digit.Highlighted" parent="CppKeyboardButton.Material.Light.Digit">
+        <item name="android:background">@drawable/material_button_light_darker</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Operation" parent="CppKeyboardButton.Material.Digit">
+        <item name="android:background">@drawable/material_button_light_primary</item>
+        <item name="directionTextAlpha">0.7</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Operation.Highlighted" parent="CppKeyboardButton.Material.Light.Operation">
+        <item name="android:background">@drawable/material_button_light_primary_darker</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Simple.Control" parent="CppKeyboardButton.Material.Light.Control">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Simple.Control.Highlighted" parent="CppKeyboardButton.Material.Light.Simple.Control">
+        <item name="android:background">@drawable/material_button_light_darker</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Simple.Control.Image" parent="CppKeyboardButton.Material.Light.Control">
+        <item name="android:padding">@dimen/cpp_keyboard_simple_image_button_padding</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Simple.Control.Image.Highlighted" parent="CppKeyboardButton.Material.Light.Simple.Control.Image">
+        <item name="android:background">@drawable/material_button_light_primary_darker</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Simple.Digit" parent="CppKeyboardButton.Material.Light.Digit">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Simple.NoBg" parent="CppKeyboardButton.Material.Light.Control">
+        <item name="android:background">@drawable/widget_button_no_bg_light</item>
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Light.Simple.Operation" parent="CppKeyboardButton.Material.Light.Operation">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Operation" parent="CppKeyboardButton.Material.Digit">
+        <item name="android:background">@drawable/material_blue_button</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Operation.Highlighted" parent="CppKeyboardButton.Material.Digit">
+        <item name="android:background">@drawable/material_blue_button_lighter</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Simple.Control" parent="CppKeyboardButton.Material.Control">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Simple.Control.Highlighted" parent="CppKeyboardButton.Material.Simple.Control">
+        <item name="android:background">@drawable/material_button_light</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Simple.Control.Image" parent="CppKeyboardButton.Material.Control">
+        <item name="android:padding">@dimen/cpp_keyboard_simple_image_button_padding</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Simple.Control.Image.Highlighted" parent="CppKeyboardButton.Material.Simple.Control.Image">
+        <item name="android:background">@drawable/material_blue_button_lighter</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Simple.Digit" parent="CppKeyboardButton.Material.Digit">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Simple.NoBg" parent="CppKeyboardButton.Material.Simple.Control">
+        <item name="android:background">@drawable/widget_button_no_bg</item>
+    </style>
+    <style name="CppKeyboardButton.Material.Simple.Operation" parent="CppKeyboardButton.Material.Operation">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Blue.Control" parent="CppKeyboardButton.Metro.Blue.Digit">
+        <item name="android:background">@drawable/metro_button_light</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Blue.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/metro_button_dark</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Blue.Operation" parent="CppKeyboardButton.Metro.Blue.Digit">
+        <item name="android:background">@drawable/metro_blue_button</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Green.Operation" parent="CppKeyboardButton.Metro.Blue.Digit">
+        <item name="android:background">@drawable/metro_button_green</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Purple.Digit" parent="CppKeyboardButton.Metro.Blue.Digit">
+        <item name="android:background">@drawable/metro_button_purple</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Simple.Control" parent="CppKeyboardButton.Metro.Blue.Control">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+        <item name="android:background">@drawable/metro_widget_button_light</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Simple.Control.Image" parent="CppKeyboardButton.Metro.Blue.Control">
+        <item name="android:background">@drawable/metro_widget_button_light</item>
+        <item name="android:padding">@dimen/cpp_keyboard_simple_image_button_padding</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Simple.Digit" parent="CppKeyboardButton.Metro.Blue.Digit">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+        <item name="android:background">@drawable/metro_widget_button_dark</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Simple.NoBg" parent="CppKeyboardButton.Metro.Simple.Control">
+        <item name="android:background">@drawable/widget_button_no_bg</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Simple.Operation" parent="CppKeyboardButton.Metro.Blue.Operation">
+        <item name="android:textSize">@dimen/cpp_widget_keyboard_button_text_size</item>
+        <item name="android:background">@drawable/metro_widget_button</item>
+    </style>
+    <style name="CppKeyboardButton.Metro.Simple.Operation.Image" parent="CppKeyboardButton.Metro.Simple.Operation">
+        <item name="android:background">@drawable/metro_widget_button</item>
+        <item name="android:padding">@dimen/cpp_keyboard_simple_image_button_padding</item>
+    </style>
+    <style name="CppKeyboardButton.Premium.Control" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_premium_control</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    <style name="CppKeyboardButton.Premium.Control.Highlighted" parent="CppKeyboardButton.Premium.Control">
+    </style>
+    <style name="CppKeyboardButton.Premium.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_premium_digit</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    <style name="CppKeyboardButton.Premium.Digit.Highlighted" parent="CppKeyboardButton.Premium.Digit">
+    </style>
+    <style name="CppKeyboardButton.Premium.Operation" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/btn_premium_operation</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="directionTextAlpha">0.7</item>
+    </style>
+    <style name="CppKeyboardButton.Premium.Operation.Highlighted" parent="CppKeyboardButton.Premium.Operation">
+    </style>
+    <style name="CppKeyboardButton.PremiumGlass.Control" parent="CppKeyboardButton.Premium.Control">
+        <item name="android:background">@drawable/btn_premium_glass_control</item>
+    </style>
+    <style name="CppKeyboardButton.PremiumGlass.Digit" parent="CppKeyboardButton.Premium.Digit">
+        <item name="android:background">@drawable/btn_premium_glass_digit</item>
+    </style>
+    <style name="CppKeyboardButton.PremiumGlass.Operation" parent="CppKeyboardButton.Premium.Operation">
+        <item name="android:background">@drawable/btn_premium_glass_operation</item>
+    </style>
+    <style name="CppKeyboardButton.PremiumNeumorphism.Control" parent="CppKeyboardButton.Premium.Control">
+        <item name="android:background">@drawable/btn_premium_neumorphism_control</item>
+    </style>
+    <style name="CppKeyboardButton.PremiumNeumorphism.Digit" parent="CppKeyboardButton.Premium.Digit">
+        <item name="android:background">@drawable/btn_premium_neumorphism_digit</item>
+    </style>
+    <style name="CppKeyboardButton.PremiumNeumorphism.Operation" parent="CppKeyboardButton.Premium.Operation">
+        <item name="android:background">@drawable/btn_premium_neumorphism_operation</item>
+    </style>
+    <style name="CppKeyboardButton.Violet.Control" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/violet_button_dark</item>
+    </style>
+    <style name="CppKeyboardButton.Violet.Digit" parent="CppKeyboardButton">
+        <item name="android:background">@drawable/violet_button</item>
+    </style>
+    <style name="CppKeyboardButton.Violet.Operation" parent="CppKeyboardButton.Violet.Digit">
+        <item name="android:textColor">@color/yellow_100</item>
+    </style>
+    <style name="CppLabel" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
+    </style>
+    <style name="CppListItem">
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+    <style name="CppListItem.OneLine" parent="CppListItem">
+        <item name="android:minHeight">48dp</item>
+    </style>
+    <style name="CppListItem.TwoLines" parent="CppListItem">
+        <item name="android:minHeight">72dp</item>
+    </style>
+    <style name="CppListItemText">
+        <item name="android:textSize">@dimen/list_item_text_size</item>
+    </style>
+    <style name="CppListItemText.Primary" parent="CppListItemText">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    <style name="CppListItemText.Secondary" parent="CppListItemText">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+    <style name="CppListItemText.Secondary.OneLine" parent="CppListItemText.Secondary">
+        <item name="android:singleLine">true</item>
+        <item name="android:minLines">1</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+    <style name="CppListView">
+        <item name="android:id">@android:id/list</item>
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:fadingEdge">none</item>
+        <item name="android:padding">0dp</item>
+    </style>
+    <style name="CppListViewItemTextPrimary.History" parent="CppListItemText.Primary">
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+    <style name="CppMain">
+        <item name="android:baselineAligned">false</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+    <style name="CppMain.Onscreen" parent="CppMain">
+        <item name="android:background">@color/cpp_editor_bg</item>
+        <item name="android:padding">@dimen/cpp_onscreen_main_padding</item>
+    </style>
+    <style name="CppMain.Onscreen.Light" parent="CppMain.Onscreen">
+        <item name="android:background">@color/cpp_bg_light</item>
+    </style>
+    <style name="CppMain.Widget" parent="CppMain">
+        <item name="android:background">@color/cpp_editor_bg</item>
+        <item name="android:padding">1dp</item>
+        <item name="android:layout_margin">@dimen/cpp_widget_margin</item>
+    </style>
+    <style name="CppMain.Widget.Light" parent="CppMain.Widget">
+        <item name="android:background">@color/cpp_bg_light</item>
+    </style>
+    <style name="CppPlotButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/cpp_button_text</item>
+        <item name="backgroundTint">@color/cpp_wizard_button_selector</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
+        <item name="android:minWidth">40dp</item>
+        <item name="android:minHeight">40dp</item>
+    </style>
+    <style name="CppText">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    <style name="CppText.About">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:padding">5dp</item>
+    </style>
+    <style name="CppText.Display" parent="CppText">
+        <item name="android:gravity">center_vertical|right</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:textSize">@dimen/cpp_display_text_size</item>
+        <item name="android:scrollHorizontally">false</item>
+        <item name="android:scrollbars">none</item>
+        <item name="android:paddingRight">3dp</item>
+        <item name="android:paddingLeft">3dp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
+    </style>
+    <style name="CppText.Display.Onscreen" parent="CppText.Display">
+        <item name="android:textSize">@dimen/cpp_onscreen_display_text_size</item>
+        <item name="android:textColor">@color/cpp_text</item>
+    </style>
+    <style name="CppText.Display.Onscreen.Light" parent="CppText.Display.Onscreen">
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+    <style name="CppText.Display.Widget" parent="CppText.Display">
+        <item name="android:textSize">@dimen/cpp_widget_display_text_size</item>
+        <item name="android:textColor">@color/cpp_text</item>
+    </style>
+    <style name="CppText.Display.Widget.Light" parent="CppText.Display.Widget">
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+    <style name="CppText.Editor">
+        <item name="android:text">""</item>
+        <item name="android:gravity">left|top</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textSize">@dimen/cpp_min_editor_text_size</item>
+        <item name="android:textColor">?attr/cpp_text_color</item>
+        
+        <item name="android:inputType">textMultiLine|textNoSuggestions|textVisiblePassword</item>
+        <item name="android:scrollbars">vertical</item>
+        <item name="android:paddingRight">3dp</item>
+        <item name="android:paddingLeft">3dp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
+        <item name="android:importantForAutofill">no</item>
+    </style>
+    <style name="CppText.Editor.BaseWidget" parent="CppText.Editor">
+        <item name="android:textSize">@dimen/cpp_widget_editor_text_size</item>
+        <item name="android:textColor">@color/cpp_text</item>
+        <item name="android:scrollbars">vertical</item>
+        <item name="android:singleLine">false</item>
+    </style>
+    <style name="CppText.Editor.Onscreen" parent="CppText.Editor">
+        <item name="android:ellipsize">none</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:minLines">1</item>
+        <item name="android:lines">1</item>
+        <item name="android:inputType">text|textNoSuggestions</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:scrollbars">horizontal</item>
+        <item name="android:textColor">@color/cpp_text</item>
+    </style>
+    <style name="CppText.Editor.Onscreen.Light" parent="CppText.Editor.Onscreen">
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+    <style name="CppText.Editor.Widget" parent="CppText.Editor.BaseWidget"/>
+    <style name="CppText.Editor.Widget.Light" parent="CppText.Editor.Widget">
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+    <style name="CppToolbar" parent="@style/Widget.Material3.Toolbar.Surface">
+        <item name="android:background">@color/grey_900</item>
+        <item name="popupTheme">@style/ThemeOverlay.Material3.Dark</item>
+        <item name="theme">@style/ThemeOverlay.Material3.Dark</item>
+    </style>
+    <style name="CppToolbar.Light" parent="CppToolbar">
+        <item name="android:background">@color/grey_800</item>
+        <item name="popupTheme">@style/ThemeOverlay.Material3.Light</item>
+    </style>
+    <style name="DimensionEditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:imeOptions">actionNext|flagNoExtractUi</item>
+        <item name="android:inputType">numberDecimal|numberSigned</item>
+        <item name="android:selectAllOnFocus">true</item>
+        <item name="android:gravity">start|center_vertical</item>
+    </style>
+    <style name="DimensionEditText.Last" parent="DimensionEditText">
+        <item name="android:imeOptions">actionDone|flagNoExtractUi</item>
+    </style>
+    <style name="DimensionTextInput">
+        <item name="android:layout_width">100dp</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="MaterialButton.Wizard" parent="Widget.Material3.Button">
+        <item name="android:singleLine">true</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.M3.Sys.Shape.Corner.Small</item>
+        <item name="android:textColor">@color/cpp_button_text</item>
+        <item name="backgroundTint">?attr/cpp_wizard_button_bg</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
+    </style>
+    <style name="PrimaryButton" parent="Widget.Material3.Button.ElevatedButton"/>
+    <style name="WizardLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:drawablePadding">40dp</item>
+        <item name="android:layout_marginBottom">40dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
+    </style>
+    <style name="WizardLabel.Last" parent="WizardLabel">
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+    <style name="WizardPrimaryButton" parent="PrimaryButton">
+        <item name="android:singleLine">true</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
+    </style>
+    <declare-styleable name="CirclePageIndicator">
+        
+        <attr name="centered"/>
+        
+        <attr format="color" name="fillColor"/>
+        
+        <attr format="color" name="pageColor"/>
+        
+        <attr name="android:orientation"/>
+        
+        <attr format="dimension" name="radius"/>
+        
+        <attr format="boolean" name="snap"/>
+        
+        <attr format="color" name="strokeColor"/>
+        
+        <attr name="strokeWidth"/>
+        
+        <attr name="android:background"/>
+    </declare-styleable>
+    <declare-styleable name="DiscreteSeekBar">
+        <attr format="reference" name="values"/>
+        <attr format="dimension|reference" name="labelsSize"/>
+        <attr format="color|reference" name="labelsColor"/>
+    </declare-styleable>
+    <declare-styleable name="LineColorPicker">
+        <attr format="enum" name="lcp_orientation">
+            <enum name="horizontal" value="0"/>
+            <enum name="vertical" value="1"/>
+        </attr>
+        <attr format="reference" name="lcp_colors"/>
+        <attr format="integer" name="lcp_selectedColorIndex"/>
+    </declare-styleable>
+    <declare-styleable name="LinePageIndicator">
+        
+        <attr name="centered"/>
+        
+        <attr name="unselectedColor"/>
+        
+        <attr name="selectedColor"/>
+        
+        <attr format="dimension" name="lineWidth"/>
+        
+        <attr name="strokeWidth"/>
+        
+        <attr format="dimension" name="gapWidth"/>
+        
+        <attr name="android:background"/>
+    </declare-styleable>
+    <declare-styleable name="TitlePageIndicator">
+        
+        <attr format="dimension" name="clipPadding"/>
+        
+        <attr format="color" name="footerColor"/>
+        
+        <attr format="dimension" name="footerLineHeight"/>
+        
+        <attr name="footerIndicatorStyle">
+            <enum name="none" value="0"/>
+            <enum name="triangle" value="1"/>
+            <enum name="underline" value="2"/>
+        </attr>
+        
+        <attr format="dimension" name="footerIndicatorHeight"/>
+        
+        <attr format="dimension" name="footerIndicatorUnderlinePadding"/>
+        
+        <attr format="dimension" name="footerPadding"/>
+        
+        <attr name="linePosition">
+            <enum name="bottom" value="0"/>
+            <enum name="top" value="1"/>
+        </attr>
+        
+        <attr name="selectedColor"/>
+        
+        <attr format="boolean" name="selectedBold"/>
+        
+        <attr name="android:textColor"/>
+        
+        <attr name="android:textSize"/>
+        
+        <attr format="dimension" name="titlePadding"/>
+        
+        <attr format="dimension" name="topPadding"/>
+        
+        <attr name="android:background"/>
+    </declare-styleable>
+    <declare-styleable name="UnderlinePageIndicator">
+        
+        <attr format="boolean" name="fades"/>
+        
+        <attr format="integer" name="fadeDelay"/>
+        
+        <attr format="integer" name="fadeLength"/>
+        
+        <attr name="selectedColor"/>
+        
+        <attr name="android:background"/>
+    </declare-styleable>
+    <declare-styleable name="ViewPagerIndicator">
+        
+        <attr format="reference" name="vpiCirclePageIndicatorStyle"/>
+        
+        <attr format="reference" name="vpiIconPageIndicatorStyle"/>
+        
+        <attr format="reference" name="vpiLinePageIndicatorStyle"/>
+        
+        <attr format="reference" name="vpiTitlePageIndicatorStyle"/>
+        
+        <attr format="reference" name="vpiTabPageIndicatorStyle"/>
+        
+        <attr format="reference" name="vpiUnderlinePageIndicatorStyle"/>
+    </declare-styleable>
+</resources>

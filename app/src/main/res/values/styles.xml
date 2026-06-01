@@ -1,0 +1,321 @@
+<!--
+  ~ Copyright 2013 serso aka se.solovyev
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  ~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Contact details
+  ~
+  ~ Email: se.solovyev@gmail.com
+  ~ Site:  http://se.solovyev.org
+  -->
+
+<resources>
+
+    <style name="CppKeyboardButton" parent="BaseCppKeyboardButton"/>
+    <style name="BaseCppKeyboardButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">@drawable/metro_button_dark</item>
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:padding">@dimen/cpp_button_padding</item>
+        <item name="android:textSize">@dimen/cpp_keyboard_button_text_size</item>
+        <item name="android:textColor">@color/cpp_button_text</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="directionTextColor">@color/cpp_button_text</item>
+        <item name="directionTextScale">0.35</item>
+        <item name="directionTextPaddingUp">@dimen/cpp_keyboard_button_direction_text_padding_updown</item>
+        <item name="directionTextPaddingDown">@dimen/cpp_keyboard_button_direction_text_padding_updown</item>
+        <item name="directionTextPaddingRight">@dimen/cpp_keyboard_button_direction_text_padding_updown</item>
+        <item name="directionTextPaddingLeft">@dimen/cpp_keyboard_button_direction_text_padding_left</item>
+    </style>
+
+    <style name="CppText.Editor.Onscreen.Light" parent="CppText.Editor.Onscreen">
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+
+    <style name="CppText.Editor.Onscreen" parent="CppText.Editor">
+        <item name="android:ellipsize">none</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:minLines">1</item>
+        <item name="android:lines">1</item>
+        <item name="android:inputType">text|textNoSuggestions</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:scrollbars">horizontal</item>
+        <item name="android:textColor">@color/cpp_text</item>
+    </style>
+
+    <style name="CppText.Editor">
+        <item name="android:text">""</item>
+        <item name="android:gravity">left|top</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textSize">@dimen/cpp_min_editor_text_size</item>
+        <item name="android:textColor">?attr/cpp_text_color</item>
+        <!-- textVisiblePassword is to avoid composing mode (underlined words) for some keyboards,
+         like Swiftkey-->
+        <item name="android:inputType">textMultiLine|textNoSuggestions|textVisiblePassword</item>
+        <item name="android:scrollbars">vertical</item>
+        <item name="android:paddingRight">3dp</item>
+        <item name="android:paddingLeft">3dp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
+        <item name="android:importantForAutofill">no</item>
+    </style>
+
+    <style name="CppText.Display" parent="CppText">
+        <item name="android:gravity">center_vertical|right</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:textSize">@dimen/cpp_display_text_size</item>
+        <item name="android:scrollHorizontally">false</item>
+        <item name="android:scrollbars">none</item>
+        <item name="android:paddingRight">3dp</item>
+        <item name="android:paddingLeft">3dp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
+    </style>
+
+    <style name="CppImageButton">
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:padding">@dimen/cpp_image_button_padding</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
+
+    <style name="CppText.Display.Onscreen" parent="CppText.Display">
+        <item name="android:textSize">@dimen/cpp_onscreen_display_text_size</item>
+        <item name="android:textColor">@color/cpp_text</item>
+    </style>
+
+    <style name="CppText.Display.Onscreen.Light" parent="CppText.Display.Onscreen">
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+
+    <style name="CppText.About">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:padding">5dp</item>
+    </style>
+
+    <style name="CppText">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="CppMain.Widget" parent="CppMain">
+        <item name="android:background">@color/cpp_editor_bg</item>
+        <item name="android:padding">1dp</item>
+        <item name="android:layout_margin">@dimen/cpp_widget_margin</item>
+    </style>
+
+    <style name="CppMain.Widget.Light" parent="CppMain.Widget">
+        <item name="android:background">@color/cpp_bg_light</item>
+    </style>
+
+    <style name="CppText.Editor.Widget" parent="CppText.Editor.BaseWidget"/>
+    <style name="CppText.Editor.BaseWidget" parent="CppText.Editor">
+        <item name="android:textSize">@dimen/cpp_widget_editor_text_size</item>
+        <item name="android:textColor">@color/cpp_text</item>
+        <item name="android:scrollbars">vertical</item>
+        <item name="android:singleLine">false</item>
+    </style>
+
+    <style name="CppText.Editor.Widget.Light" parent="CppText.Editor.Widget">
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+
+    <style name="CppText.Display.Widget" parent="CppText.Display">
+        <item name="android:textSize">@dimen/cpp_widget_display_text_size</item>
+        <item name="android:textColor">@color/cpp_text</item>
+    </style>
+
+    <style name="CppText.Display.Widget.Light" parent="CppText.Display.Widget">
+        <item name="android:textColor">@color/cpp_text_inverse</item>
+    </style>
+
+    <style name="CppMain.Onscreen" parent="CppMain">
+        <item name="android:background">@color/cpp_editor_bg</item>
+        <item name="android:padding">@dimen/cpp_onscreen_main_padding</item>
+    </style>
+
+    <style name="CppMain.Onscreen.Light" parent="CppMain.Onscreen">
+        <item name="android:background">@color/cpp_bg_light</item>
+    </style>
+
+    <style name="WizardLabel.Last" parent="WizardLabel">
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
+    <style name="WizardLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:drawablePadding">40dp</item>
+        <item name="android:layout_marginBottom">40dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
+    </style>
+
+    <style name="WizardPrimaryButton" parent="PrimaryButton">
+        <item name="android:singleLine">true</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
+    </style>
+
+    <style name="PrimaryButton" parent="Widget.Material3.Button.ElevatedButton"/>
+
+    <style name="MaterialButton.Wizard" parent="Widget.Material3.Button">
+        <item name="android:singleLine">true</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.M3.Sys.Shape.Corner.Small</item>
+        <item name="android:textColor">@color/cpp_button_text</item>
+        <item name="backgroundTint">?attr/cpp_wizard_button_bg</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
+    </style>
+
+    <style name="CppPlotButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/cpp_button_text</item>
+        <item name="backgroundTint">@color/cpp_wizard_button_selector</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Medium</item>
+        <item name="android:minWidth">40dp</item>
+        <item name="android:minHeight">40dp</item>
+    </style>
+
+    <style name="DimensionEditText.Last" parent="DimensionEditText">
+        <item name="android:imeOptions">actionDone|flagNoExtractUi</item>
+    </style>
+
+    <style name="DimensionEditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:imeOptions">actionNext|flagNoExtractUi</item>
+        <item name="android:inputType">numberDecimal|numberSigned</item>
+        <item name="android:selectAllOnFocus">true</item>
+        <item name="android:gravity">start|center_vertical</item>
+    </style>
+
+    <style name="DimensionTextInput">
+        <item name="android:layout_width">100dp</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="CppMain">
+        <item name="android:baselineAligned">false</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="CppFragment">
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="CppListItem.OneLine" parent="CppListItem">
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <style name="CppListItem.TwoLines" parent="CppListItem">
+        <item name="android:minHeight">72dp</item>
+    </style>
+
+    <style name="CppListItem">
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="CppFab" parent="@style/Widget.Material3.FloatingActionButton.Surface">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">bottom|end</item>
+        <item name="android:layout_margin">16dp</item>
+        <item name="android:visibility">gone</item>
+        <item name="android:clickable">false</item>
+        <item name="backgroundTint">?attr/cpp_fab_bg</item>
+        <item name="tint">@color/cpp_button_text</item>
+    </style>
+
+    <style name="CppListItemText">
+        <item name="android:textSize">@dimen/list_item_text_size</item>
+    </style>
+
+    <style name="CppListItemText.Primary" parent="CppListItemText">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="CppListItemText.Secondary" parent="CppListItemText">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="CppListItemText.Secondary.OneLine" parent="CppListItemText.Secondary">
+        <item name="android:singleLine">true</item>
+        <item name="android:minLines">1</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="CppListViewItemTextPrimary.History" parent="CppListItemText.Primary">
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="CppListView">
+        <item name="android:id">@android:id/list</item>
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:fadingEdge">none</item>
+        <item name="android:padding">0dp</item>
+    </style>
+
+    <style name="CppToolbar" parent="@style/Widget.Material3.Toolbar.Surface">
+        <item name="android:background">@color/grey_900</item>
+        <item name="popupTheme">@style/ThemeOverlay.Material3.Dark</item>
+        <item name="theme">@style/ThemeOverlay.Material3.Dark</item>
+    </style>
+
+    <style name="CppToolbar.Light" parent="CppToolbar">
+        <item name="android:background">@color/grey_800</item>
+        <item name="popupTheme">@style/ThemeOverlay.Material3.Light</item>
+    </style>
+
+    <style name="CppAd">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="CppLabel" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
+    </style>
+
+    <dimen name="list_item_text_size">16sp</dimen>
+    <dimen name="list_item_text_size_small">14sp</dimen>
+</resources>

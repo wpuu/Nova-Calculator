@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+   <string name="cpp_prefs_vibrate_on_keypress">觸控時震動</string>
+   <string name="cpp_prefs_auto_rotate_screen">自動旋轉螢幕</string>
+   <string name="cpp_language">語言</string>
+   <string name="cpp_theme">主題</string>
+   <string name="cpp_theme_light">淺色</string>
+   <string name="cpp_theme_dark">深色</string>
+   <string name="cpp_prefs_keep_screen_on">螢幕不休眠</string>
+   <string name="cpp_permission_overlay">在其他應用程式上層繪製內容</string>
+   <string name="cpp_yes">是</string>
+   <string name="cpp_no">否</string>
+   <string name="cpp_create">建立</string>
+   <string name="cpp_close">關閉</string>
+   <string name="cpp_switch">切換</string>
+   <string name="cpp_add">新增</string>
+   <string name="cpp_mode">模式</string>
+   <string name="cpp_enable">啟用</string>
+   <string name="cpp_other">其他</string>
+   <string name="cpp_high_contrast_text">高對比文字</string>
+   <string name="cpp_edit">編輯</string>
+   <string name="cpp_delete">刪除</string>
+   <string name="cpp_done">完成</string>
+   <string name="cpp_cancel">取消</string>
+   <string name="cpp_description">說明</string>
+   <string name="cpp_about">相關資訊</string>
+   <string name="cpp_copy_text">複製到剪貼簿</string>
+   <string name="cpp_text_copied">文字已複製</string>
+   <string name="cpp_name">姓名</string>
+   <string name="cpp_settings">設定</string>
+   <string name="cpp_nan">非數字</string>
+   <string name="cpp_error">錯誤</string>
+   <string name="cpp_copy">複製</string>
+</resources>
