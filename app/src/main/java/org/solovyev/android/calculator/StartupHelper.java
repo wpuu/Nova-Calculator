@@ -90,6 +90,9 @@ public class StartupHelper {
     }
 
     private boolean shouldShowRateUsDialog(int opened) {
-        return opened > 30 && !UiPreferences.rateUsShown.getPreference(uiPreferences);
+        // 二开：隐藏「给高级计算器评分」弹窗，避免跳转原作者的 Google Play 商店页
+        // （org.solovyev.android.calculator）。若要恢复评分功能，把此返回值改为
+        // 「opened > 30 && !UiPreferences.rateUsShown.getPreference(uiPreferences)」即可。
+        return false;
     }
 }

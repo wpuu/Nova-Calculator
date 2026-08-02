@@ -257,6 +257,30 @@ public final class Preferences {
         public static final Preference<Boolean> calculateOnFly = BooleanPreference.of("calculations_calculate_on_fly", true);
     }
 
+    public static class AutoClicker {
+        // User's intent to enable the feature. Persisted independently of the actual
+        // effective state so that "toggle first, grant accessibility later" does not lose
+        // the intent. The service reads this to decide whether circles should be shown.
+        public static final Preference<Boolean> intent = BooleanPreference.of("auto_clicker_intent", false);
+        // Actual effective state (circles really shown). Owned and written ONLY by the
+        // service; the UI merely mirrors it. Never let any other writer set this.
+        public static final Preference<Boolean> enabled = BooleanPreference.of("auto_clicker_enabled", false);
+        public static final Preference<String> interval = StringPreference.of("auto_clicker_interval", "30");
+        public static final Preference<String> duration = StringPreference.of("auto_clicker_duration", "60");
+        // Diagnostics: last failure code when reconcile could not show the overlay.
+        // "" = none, "1" = overlay (SYSTEM_ALERT_WINDOW) permission missing.
+        public static final Preference<String> lastFailure = StringPreference.of("auto_clicker_last_failure", "");
+        // Last on-screen positions of the two click circles, formatted "x0,y0;x1,y1".
+        // Empty = not yet saved -> the service falls back to the default bottom positions.
+        // Persisted so re-enabling restores the circles where the user last placed them.
+        public static final Preference<String> positions = StringPreference.of("auto_clicker_positions", "");
+        // Last on-screen position of the floating toggle button, formatted "x,y".
+        // Empty = not yet saved -> the service falls back to the default top-left position.
+        // Persisted so the button stays where the user last dragged it (avoids blocking the
+        // calculator's top-right 3-dot menu every launch).
+        public static final Preference<String> floatingPosition = StringPreference.of("auto_clicker_floating_position", "");
+    }
+
     public static class App {
     }
 

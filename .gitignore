@@ -10,3 +10,23 @@
 local.properties
 app-old/
 0513/
+
+# Build outputs (per-module, e.g. app/build/)
+**/build/
+*.apk
+*.aar
+
+# Crash / JVM logs
+hs_err_pid*.log
+*.log
+
+# Release archives & backups (do not publish)
+*.zip
+*.rar
+
+# Local project memory (not for public repo)
+.workbuddy/
+
+# Python caches
+**/__pycache__/
+*.pyc

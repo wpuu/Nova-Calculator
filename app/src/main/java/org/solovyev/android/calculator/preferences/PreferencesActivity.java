@@ -40,6 +40,7 @@ public class PreferencesActivity extends BaseActivity implements SharedPreferenc
         preferenceDefs.append(R.xml.preferences_other, new PrefDef("screen-other", R.string.cpp_other));
         preferenceDefs.append(R.xml.preferences_onscreen, new PrefDef("screen-onscreen", R.string.cpp_floating_calculator));
         preferenceDefs.append(R.xml.preferences_widget, new PrefDef("screen-widget", R.string.cpp_widget));
+        preferenceDefs.append(R.xml.preferences_auto_clicker, new PrefDef("screen-auto-clicker", R.string.pref_auto_clicker_category));
     }
 
     ActivityCheckout checkout;

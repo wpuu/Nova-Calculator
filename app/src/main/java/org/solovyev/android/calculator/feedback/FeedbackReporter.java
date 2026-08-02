@@ -24,7 +24,8 @@ public class FeedbackReporter {
     public void report() {
         final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"se.solovyev@gmail.com"});
+        // 二开：反馈邮箱暂不硬编码，避免跳原作者；发布前请填入你自己的邮箱
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
         final String version = getVersion();
         intent.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.cpp_app_name) + " " + version + " // " + Build.MANUFACTURER + " " + Build.MODEL + " (" + Build.DEVICE + ") " + Build.VERSION.SDK_INT);
         intent.setType("plain/html");

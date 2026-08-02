@@ -124,7 +124,8 @@ public final class ActivityLauncher {
     }
 
     public void openFacebook() {
-        final Uri uri = Uri.parse(application.getString(R.string.cpp_share_link));
+        // 二开：分享/点赞链接改为占位（app_share_link），由开发者填自己的商店页或官网
+        final Uri uri = Uri.parse(application.getString(R.string.app_share_link));
         final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         application.startActivity(intent);

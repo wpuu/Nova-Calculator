@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="screen-auto-clicker"
+    android:title="@string/pref_auto_clicker_category">
+
+    <SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="auto_clicker_intent"
+        android:summary="@string/pref_auto_clicker_enable_summary"
+        android:title="@string/pref_auto_clicker_enable_title" />
+
+    <!-- Persistent hint, always visible below the switch, so the user knows how to stop the
+         autoclicker. Not selectable — informational only. -->
+    <Preference
+        android:key="auto_clicker_hint"
+        android:selectable="false"
+        android:summary="@string/pref_auto_clicker_hint" />
+
+    <!-- Diagnostics panel: hidden unless a concrete failure occurs. Shows the full fix
+         for the current error code and offers a one-tap repair for self-serviceable
+         errors (overlay permission / accessibility not truly on). -->
+    <Preference
+        android:key="auto_clicker_diagnostics"
+        android:selectable="true" />
+
+    <Preference
+        android:key="auto_clicker_retry_now"
+        android:title="@string/auto_clicker_retry_now"
+        android:summary="@string/auto_clicker_retry_summary"
+        android:selectable="true" />
+
+    <Preference
+        android:key="auto_clicker_open_accessibility"
+        android:title="@string/auto_clicker_open_accessibility_settings"
+        android:selectable="true" />
+
+    <Preference
+        android:key="auto_clicker_open_overlay"
+        android:title="@string/auto_clicker_open_overlay_settings"
+        android:selectable="true" />
+
+    <Preference
+        android:key="auto_clicker_copy_diagnostics"
+        android:title="@string/auto_clicker_copy_diagnostics"
+        android:selectable="true" />
+
+    <EditTextPreference
+        android:defaultValue="30"
+        android:inputType="number"
+        android:key="auto_clicker_interval"
+        android:summary="@string/pref_auto_clicker_interval_summary"
+        android:title="@string/pref_auto_clicker_interval_title" />
+
+    <EditTextPreference
+        android:defaultValue="60"
+        android:inputType="number"
+        android:key="auto_clicker_duration"
+        android:summary="@string/pref_auto_clicker_duration_summary"
+        android:title="@string/pref_auto_clicker_duration_title" />
+
+</PreferenceScreen>

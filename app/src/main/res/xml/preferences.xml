@@ -25,12 +25,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="screen-main">
 
-    <Preference
-        android:defaultValue="false"
-        android:key="prefs.supportProject"
-        android:summary="@string/c_calc_ad_free_summary"
-        android:title="@string/c_calc_ad_free_title" />
-
     <PreferenceCategory
         android:key="category-basic"
         android:title="@string/cpp_prefs_basic">
@@ -56,6 +50,10 @@
         <Preference
             android:key="screen-number-format"
             android:title="@string/cpp_number_format" />
+        <Preference
+            android:key="screen-auto-clicker"
+            android:title="@string/pref_auto_clicker_category" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -75,6 +73,7 @@
             android:key="screen-other"
             android:title="@string/cpp_other" />
 
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -84,14 +83,6 @@
         <Preference
             android:key="prefs.introduction"
             android:title="@string/cpp_introduction" />
-
-        <Preference
-            android:key="prefs.reportBug"
-            android:title="@string/cpp_report_problem" />
-
-        <Preference
-            android:key="prefs.about"
-            android:title="@string/cpp_about" />
 
     </PreferenceCategory>
 

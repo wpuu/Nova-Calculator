@@ -3,15 +3,19 @@ package org.solovyev.android.calculator
 import android.Manifest
 import android.content.ContentValues
 import android.content.pm.PackageManager
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import org.solovyev.android.calculator.autoclicker.AutoClickerService
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -29,6 +33,49 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, "权限已就绪", Toast.LENGTH_SHORT).show()
             }
         }
+
+    private val prefs: SharedPreferences by lazy {
+        PreferenceManager.getDefaultSharedPreferences(this)
+    }
+
+    // The switch reflects the user's INTENT (auto_clicker_intent) so it is always responsive
+    // — toggling off works immediately, even when the accessibility service is not bound yet.
+    // The service independently adds/removes the circles from this flag and reports the real
+    // (effective) state via auto_clicker_enabled. Guarded so a programmatic setChecked() does
+    // not feed back into the intent-writing listener.
+    private var updatingAutoClickerSwitch = false
+
+    private fun refreshAutoClickerSwitch() {
+        val switchEnabled = findViewById<Switch>(R.id.switchAutoClickerEnabled) ?: return
+        val intent = Preferences.AutoClicker.intent.getPreference(prefs)
+        if (switchEnabled.isChecked == intent) return
+        updatingAutoClickerSwitch = true
+        switchEnabled.isChecked = intent
+        updatingAutoClickerSwitch = false
+    }
+
+    private val autoClickerPreferenceListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == Preferences.AutoClicker.enabled.getKey()) {
+                runOnUiThread { refreshAutoClickerSwitch() }
+            }
+        }
+
+    override fun onStart() {
+        super.onStart()
+        prefs.registerOnSharedPreferenceChangeListener(autoClickerPreferenceListener)
+        refreshAutoClickerSwitch()
+    }
+
+    override fun onStop() {
+        prefs.unregisterOnSharedPreferenceChangeListener(autoClickerPreferenceListener)
+        super.onStop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshAutoClickerSwitch()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +127,6 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val tvCodePhoto = findViewById<TextView>(R.id.tvCodePhoto)
         val tvCodeVideoStart = findViewById<TextView>(R.id.tvCodeVideoStart)
         val tvCodeVideoStop = findViewById<TextView>(R.id.tvCodeVideoStop)
@@ -108,6 +154,77 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<LinearLayout>(R.id.llAudioStart).setOnClickListener { startSetup("audio_start") }
         findViewById<LinearLayout>(R.id.llAudioStop).setOnClickListener { startSetup("audio_stop") }
         findViewById<LinearLayout>(R.id.llSettings).setOnClickListener { startSetup("settings") }
+
+        // ===== 连点器参数设置 (Step C) =====
+        // 开关：连点器启用/禁用。开关直接反映用户意图(auto_clicker_intent)，所以拨动永远
+        // 即时生效（关得掉）；圆圈是否真的挂出由无障碍服务根据意图 reconcile，生效态写到
+        // auto_clicker_enabled 仅用于状态展示。
+        val switchEnabled = findViewById<Switch>(R.id.switchAutoClickerEnabled)
+        switchEnabled.isChecked = Preferences.AutoClicker.intent.getPreference(prefs)
+        switchEnabled.setOnCheckedChangeListener { _, isChecked ->
+            if (updatingAutoClickerSwitch) {
+                return@setOnCheckedChangeListener
+            }
+            prefs.edit()
+                .putBoolean(Preferences.AutoClicker.intent.getKey(), isChecked)
+                .apply()
+            if (isChecked && !AutoClickerService.isAccessibilityEnabled(this)) {
+                // 已写入开启意图但无障碍权限尚未授予：引导用户去授予。授予后服务会自动挂出
+                // 圆圈。开关保持“开”以反映用户意图，不再强制回弹为关。
+                try {
+                    startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                } catch (_: Exception) {
+                }
+            }
+        }
+
+        val etInterval = findViewById<EditText>(R.id.etClickInterval)
+        val etDuration = findViewById<EditText>(R.id.etClickDuration)
+
+        // 加载已有值到输入框（带非法值回退）
+        val savedInterval = Preferences.AutoClicker.interval.getPreference(prefs)
+        val savedDuration = Preferences.AutoClicker.duration.getPreference(prefs)
+        etInterval.setText(
+            try { if (savedInterval.toLong() in 10..5000) savedInterval else "50" } catch (_: Exception) { "50" }
+        )
+        etDuration.setText(
+            try { if (savedDuration.toLong() in 5..3600) savedDuration else "60" } catch (_: Exception) { "60" }
+        )
+
+        findViewById<Button>(R.id.btnSaveAutoClickerParams).setOnClickListener {
+            val rawInterval = etInterval.text.toString().trim()
+            val rawDuration = etDuration.text.toString().trim()
+
+            val finalInterval = try {
+                val v = rawInterval.toLong()
+                when {
+                    v < 10 -> "10"
+                    v > 5000 -> "5000"
+                    else -> rawInterval
+                }
+            } catch (_: Exception) { "50" }
+
+            val finalDuration = try {
+                val v = rawDuration.toLong()
+                when {
+                    v < 5 -> "5"
+                    v > 3600 -> "3600"
+                    else -> rawDuration
+                }
+            } catch (_: Exception) { "60" }
+
+            prefs.edit()
+                .putString(Preferences.AutoClicker.interval.getKey(), finalInterval)
+                .putString(Preferences.AutoClicker.duration.getKey(), finalDuration)
+                .apply()
+
+            etInterval.setText(finalInterval)
+            etDuration.setText(finalDuration)
+
+            Toast.makeText(this,
+                "✅ 连点器参数已保存<br>间隔=${finalInterval}ms · 时长=${finalDuration}秒",
+                Toast.LENGTH_SHORT).show()
+        }
     }
 
     // 核心重构：Android 11+ MediaStore 官方无权限注入

@@ -97,17 +97,7 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/menu_about"
-        android:title="@string/cpp_about"
-        app:showAsAction="never" />
-
-    <item
         android:title=""
         app:actionViewClass="org.solovyev.android.widget.menu.MenuItemDivider"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/menu_hidden_settings"
-        android:title="高级设置"
         app:showAsAction="never" />
 </menu>
