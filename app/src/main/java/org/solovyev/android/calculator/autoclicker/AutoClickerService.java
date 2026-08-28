@@ -90,6 +90,8 @@ public class AutoClickerService extends AccessibilityService
     private static final long OVERLAY_HEALTH_CHECK_MS = 750L;
     private static final long GESTURE_TIMEOUT_MS = 80L;
     private static final int MAX_CONSECUTIVE_CANCELS = 5;
+    private static final int MAX_INIT_RETRIES = 3;
+    private static final long INIT_RETRY_BASE_MS = 1000L;
 
     private int circleSizePx;
     private int screenW;
@@ -129,6 +131,7 @@ public class AutoClickerService extends AccessibilityService
     private long pendingGestureSerial;
     private Runnable pendingGestureTimeout;
     private long lastOverlayHealthCheckMs;
+    private int initRetryCount;
 
     private static volatile String sLastErrorType = "";
     private static volatile int sLastRetryCount = 0;
@@ -157,6 +160,27 @@ public class AutoClickerService extends AccessibilityService
             // One final self-heal attempt. This is intentionally delayed: transient window
             // changes while switching into a game should not require a phone/app restart.
             reconcileState();
+        }
+    };
+
+    private final Runnable initRetryRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (serviceConnected && isOverlayActuallyReady()) {
+                initRetryCount = 0;
+                return;
+            }
+            if (initRetryCount >= MAX_INIT_RETRIES) {
+                initRetryCount = 0;
+                return;
+            }
+            initRetryCount++;
+            sLastRetryCount = initRetryCount;
+            if (!initService() && initRetryCount < MAX_INIT_RETRIES) {
+                handler.postDelayed(this, INIT_RETRY_BASE_MS * initRetryCount);
+            } else {
+                initRetryCount = 0;
+            }
         }
     };
 
@@ -227,6 +251,7 @@ public class AutoClickerService extends AccessibilityService
             serviceConnected = false;
             markFailure(FAILURE_SERVICE_CONNECT_FAILED, null);
             setEffective(false);
+            scheduleInitRetry();
         }
     }
 
@@ -255,15 +280,26 @@ public class AutoClickerService extends AccessibilityService
             registerReconcileReceiver();
 
             serviceConnected = true;
+            cancelInitRetry();
             sLastRetryCount = 0;
             reconcileState();
             return true;
         } catch (Throwable t) {
             Log.e(TAG, "initService failed", t);
-            sLastRetryCount++;
             markFailure(FAILURE_SERVICE_CONNECT_FAILED, t);
             return false;
         }
+    }
+
+    private void scheduleInitRetry() {
+        handler.removeCallbacks(initRetryRunnable);
+        initRetryCount = 0;
+        handler.postDelayed(initRetryRunnable, INIT_RETRY_BASE_MS);
+    }
+
+    private void cancelInitRetry() {
+        handler.removeCallbacks(initRetryRunnable);
+        initRetryCount = 0;
     }
 
     @Override
@@ -317,6 +353,7 @@ public class AutoClickerService extends AccessibilityService
     @Override
     public boolean onUnbind(Intent intent) {
         serviceConnected = false;
+        cancelInitRetry();
         stopClickingInternal(false);
         removeOverlayViewsOnly();
         setEffective(false);
@@ -329,6 +366,7 @@ public class AutoClickerService extends AccessibilityService
     public void onTaskRemoved(Intent rootIntent) {
         // Explicitly closing the app is different from an OEM/system service restart: release
         // volume keys and do not resurrect the feature after the task is removed.
+        cancelInitRetry();
         stopClickingInternal(false);
         removeOverlayViewsOnly();
         setUserIntent(false);
@@ -340,6 +378,7 @@ public class AutoClickerService extends AccessibilityService
     public void onDestroy() {
         serviceConnected = false;
         handler.removeCallbacks(noShowRunnable);
+        cancelInitRetry();
         stopClickingInternal(false);
         removeOverlayViewsOnly();
         setEffective(false);
@@ -417,6 +456,7 @@ public class AutoClickerService extends AccessibilityService
 
     private void onScreenOff() {
         handler.removeCallbacks(noShowRunnable);
+        cancelInitRetry();
         stopClickingInternal(false);
         removeOverlayViewsOnly();
         setUserIntent(false);
@@ -500,6 +540,7 @@ public class AutoClickerService extends AccessibilityService
         boolean intent = Preferences.AutoClicker.intent.getPreference(preferences);
         if (!intent) {
             handler.removeCallbacks(noShowRunnable);
+            cancelInitRetry();
             stopClickingInternal(false);
             removeOverlayViewsOnly();
             setEffective(false);
@@ -533,6 +574,7 @@ public class AutoClickerService extends AccessibilityService
 
         overlayReady = true;
         handler.removeCallbacks(noShowRunnable);
+        cancelInitRetry();
         clearFailureIfRecovered();
         setEffective(true);
     }
@@ -616,6 +658,7 @@ public class AutoClickerService extends AccessibilityService
         button.setText("● 待命");
         button.setTextColor(0xFFFFFFFF);
         button.setTextSize(14);
+        button.setMinWidth(dp(100));
         button.setPadding(dp(14), dp(7), dp(14), dp(7));
         button.setGravity(Gravity.CENTER);
         button.setBackground(makeIndicatorBackground(false));
@@ -778,7 +821,7 @@ public class AutoClickerService extends AccessibilityService
 
     private int maxFloatingX() {
         int width = floatingButton != null && floatingButton.getWidth() > 0
-                ? floatingButton.getWidth() : dp(90);
+                ? floatingButton.getWidth() : dp(100);
         return Math.max(0, screenW - width);
     }
 
@@ -1048,6 +1091,14 @@ public class AutoClickerService extends AccessibilityService
             button.setText("● 待命");
             button.setBackground(makeIndicatorBackground(false));
         }
+        // Text width can change between idle/running. Re-apply the stored normalized position
+        // after the next layout pass so a right-edge indicator never ends up partly off-screen.
+        button.post(new Runnable() {
+            @Override
+            public void run() {
+                applySavedFloatingPosition(true);
+            }
+        });
     }
 
     /**
