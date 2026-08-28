@@ -2,7 +2,7 @@
 <resources>
     <string name="cpp_app_name" comment="Application name. Shown in the app drawer and tasks manager. Should be short enough to be fully visible on the screen">高级计算器</string>
     <string name="app_share_link" comment="二开占位：分享/点赞链接，改成你自己的商店页或官网">https://example.com</string>
-    <string name="cpp_app_name_on_screen" comment="Floating calculator name. Shown in the app drawer and tasks manager. Should be short enough to be fully visible on the screen">Calculator++ (Window mode)</string>
+    <string name="cpp_app_name_on_screen" comment="Floating calculator name. Shown in the app drawer. Should be short enough to be fully visible on the screen">Calculator++ (Window mode)</string>
     <string name="cpp_vars_and_constants" comment="Name of `Constants and variables` activity and an entry in the context menu which opens a list of all constants and variables">Variables And Constants</string>
     <string name="c_plot">Plot graph</string>
     <string name="cpp_precision">Precision</string>
@@ -72,8 +72,8 @@
     <string name="cpp_continue_without_permissions">Continue without permission</string>
     <string name="cpp_widget">Widget</string>
     <string name="cpp_plotter">Function plotter</string>
-    <string name="cpp_plot_function_line_color">Unable to plot: too many variables!</string>
-    <string name="cpp_plot_function_line_width">Unable to plot empty function!</string>
+    <string name="cpp_plot_function_line_color">Line color</string>
+    <string name="cpp_plot_function_line_width">Line width</string>
     <string name="cpp_plot_empty_function_error">Unable to plot empty function!</string>
     <string name="cpp_plot_too_many_variables">Unable to plot: too many variables!</string>
     <string name="cpp_plot_range">Graph range</string>
