@@ -50,9 +50,22 @@ jobs:
 
           dependencies {
               implementation fileTree(dir: 'libs', include: ['*.jar'])
-              implementation 'com.android.support:support-annotations:23.1.1'
+              implementation 'androidx.annotation:annotation:1.8.2'
           }
           EOF
+
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path('plotter/lib/src/main/java')
+          count = 0
+          for path in root.rglob('*.java'):
+              text = path.read_text(encoding='utf-8')
+              updated = text.replace('android.support.annotation.', 'androidx.annotation.')
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  count += 1
+          print(f'Migrated AndroidX annotation imports in {count} Plotter Java files')
+          PY
 
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --stacktrace --no-daemon
