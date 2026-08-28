@@ -94,8 +94,6 @@ public class AutoClickerService extends AccessibilityService
     private int circleSizePx;
     private int screenW;
     private int screenH;
-    private int lastKnownScreenW;
-    private int lastKnownScreenH;
     private int currentIntervalMs = DEFAULT_INTERVAL_MS;
     private int currentDurationSec = DEFAULT_DURATION_SEC;
 
@@ -148,7 +146,10 @@ public class AutoClickerService extends AccessibilityService
                 return;
             }
             overlayReady = false;
-            if (!serviceConnected || !isAccessibilityEnabled(AutoClickerService.this)) {
+            // A live onServiceConnected() callback is authoritative proof that accessibility
+            // is granted. Do not block on Settings.Secure here: some OEMs update that string
+            // late, which was one cause of "enabled but no circles" after returning to the app.
+            if (!serviceConnected) {
                 markFailure(FAILURE_A11Y_OFF, null);
             } else if (lastFailure == FAILURE_NONE) {
                 markFailure(FAILURE_TIMEOUT_NO_CIRCLES, null);
@@ -487,8 +488,6 @@ public class AutoClickerService extends AccessibilityService
         width = Math.max(circleSizePx, width);
         height = Math.max(circleSizePx, height);
         boolean changed = width != screenW || height != screenH;
-        lastKnownScreenW = screenW;
-        lastKnownScreenH = screenH;
         screenW = width;
         screenH = height;
         return changed;
@@ -509,7 +508,10 @@ public class AutoClickerService extends AccessibilityService
             return;
         }
 
-        if (!serviceConnected || !isAccessibilityEnabled(this)) {
+        // Being inside this bound AccessibilityService is authoritative. Settings.Secure may
+        // briefly lag behind on some OEM ROMs, so using it as a second gate can deadlock the
+        // UI in "enabled but no circles" until a reboot/re-toggle.
+        if (!serviceConnected) {
             stopClickingInternal(false);
             removeOverlayViewsOnly();
             setEffective(false);
@@ -1165,39 +1167,50 @@ public class AutoClickerService extends AccessibilityService
     }
 
     private void showStatusNotification() {
-        NotificationManager manager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (manager == null) return;
+        try {
+            NotificationManager manager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager == null) return;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                && manager.getNotificationChannel(NOTIF_CHANNEL_ID) == null) {
-            NotificationChannel channel = new NotificationChannel(
-                    NOTIF_CHANNEL_ID, "连点服务", NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription("连点运行时状态提醒");
-            manager.createNotificationChannel(channel);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                    && manager.getNotificationChannel(NOTIF_CHANNEL_ID) == null) {
+                NotificationChannel channel = new NotificationChannel(
+                        NOTIF_CHANNEL_ID, "连点服务", NotificationManager.IMPORTANCE_LOW);
+                channel.setDescription("连点运行时状态提醒");
+                manager.createNotificationChannel(channel);
+            }
+
+            Intent contentIntent = new Intent(
+                    this, org.solovyev.android.calculator.CalculatorActivity.class);
+            contentIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent contentPi = PendingIntent.getActivity(
+                    this, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE);
+
+            Notification notification = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
+                    .setContentTitle("连点运行中")
+                    .setContentText("音量-停止 · 音量+开始")
+                    .setSmallIcon(R.drawable.ic_launcher)
+                    .setOngoing(true)
+                    .setContentIntent(contentPi)
+                    .build();
+            manager.notify(CLICK_NOTIFICATION_TAG, CLICK_NOTIFICATION_ID, notification);
+        } catch (SecurityException e) {
+            // Notification permission is optional to the click engine. Do not crash the
+            // accessibility service merely because Android 13+ notification permission is off.
+            Log.w(TAG, "Notification permission denied; autoclick continues", e);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Unable to show autoclick status notification", e);
         }
-
-        Intent contentIntent = new Intent(
-                this, org.solovyev.android.calculator.CalculatorActivity.class);
-        contentIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent contentPi = PendingIntent.getActivity(
-                this, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        Notification notification = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
-                .setContentTitle("连点运行中")
-                .setContentText("音量-停止 · 音量+开始")
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setOngoing(true)
-                .setContentIntent(contentPi)
-                .build();
-        manager.notify(CLICK_NOTIFICATION_TAG, CLICK_NOTIFICATION_ID, notification);
     }
 
     private void cancelStatusNotification() {
-        NotificationManager manager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (manager != null) {
-            manager.cancel(CLICK_NOTIFICATION_TAG, CLICK_NOTIFICATION_ID);
+        try {
+            NotificationManager manager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager != null) {
+                manager.cancel(CLICK_NOTIFICATION_TAG, CLICK_NOTIFICATION_ID);
+            }
+        } catch (RuntimeException ignored) {
         }
     }
 
