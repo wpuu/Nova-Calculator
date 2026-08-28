@@ -88,6 +88,7 @@ public class AutoClickerService extends AccessibilityService
     private static final int MIN_INTERVAL_MS = 40;
     private static final long NO_SHOW_WATCHDOG_MS = 4000L;
     private static final long OVERLAY_HEALTH_CHECK_MS = 750L;
+    private static final long OVERLAY_ATTACH_VERIFY_MS = 1000L;
     private static final long GESTURE_TIMEOUT_MS = 80L;
     private static final int MAX_CONSECUTIVE_CANCELS = 5;
     private static final int MAX_INIT_RETRIES = 3;
@@ -112,6 +113,7 @@ public class AutoClickerService extends AccessibilityService
 
     private boolean serviceConnected;
     private boolean overlayReady;
+    private boolean overlayAttachPending;
     private boolean isClicking;
     private int lastFailure = FAILURE_NONE;
 
@@ -142,6 +144,10 @@ public class AutoClickerService extends AccessibilityService
             if (preferences == null || !Preferences.AutoClicker.intent.getPreference(preferences)) {
                 return;
             }
+            if (overlayAttachPending) {
+                armNoShowWatchdog();
+                return;
+            }
             if (isOverlayActuallyReady()) {
                 overlayReady = true;
                 clearFailureIfRecovered();
@@ -160,6 +166,34 @@ public class AutoClickerService extends AccessibilityService
             // One final self-heal attempt. This is intentionally delayed: transient window
             // changes while switching into a game should not require a phone/app restart.
             reconcileState();
+        }
+    };
+
+    private final Runnable overlayAttachVerifyRunnable = new Runnable() {
+        @Override
+        public void run() {
+            overlayAttachPending = false;
+            if (preferences == null
+                    || !Preferences.AutoClicker.intent.getPreference(preferences)
+                    || !serviceConnected) {
+                return;
+            }
+            if (isOverlayActuallyReady()) {
+                overlayReady = true;
+                handler.removeCallbacks(noShowRunnable);
+                clearFailureIfRecovered();
+                setEffective(true);
+                return;
+            }
+
+            // WindowManager.addView() returning successfully means Android accepted the window,
+            // but some OEMs do not report View.isAttachedToWindow() until a later UI traversal.
+            // Only treat the overlay as genuinely lost after this delayed verification.
+            Log.w(TAG, "Overlay add was accepted but views are still detached after attach grace period");
+            overlayReady = false;
+            setEffective(false);
+            removeOverlayViewsOnly();
+            armNoShowWatchdog();
         }
     };
 
@@ -378,6 +412,7 @@ public class AutoClickerService extends AccessibilityService
     public void onDestroy() {
         serviceConnected = false;
         handler.removeCallbacks(noShowRunnable);
+        handler.removeCallbacks(overlayAttachVerifyRunnable);
         cancelInitRetry();
         stopClickingInternal(false);
         removeOverlayViewsOnly();
@@ -456,6 +491,7 @@ public class AutoClickerService extends AccessibilityService
 
     private void onScreenOff() {
         handler.removeCallbacks(noShowRunnable);
+        handler.removeCallbacks(overlayAttachVerifyRunnable);
         cancelInitRetry();
         stopClickingInternal(false);
         removeOverlayViewsOnly();
@@ -540,6 +576,7 @@ public class AutoClickerService extends AccessibilityService
         boolean intent = Preferences.AutoClicker.intent.getPreference(preferences);
         if (!intent) {
             handler.removeCallbacks(noShowRunnable);
+            handler.removeCallbacks(overlayAttachVerifyRunnable);
             cancelInitRetry();
             stopClickingInternal(false);
             removeOverlayViewsOnly();
@@ -561,6 +598,12 @@ public class AutoClickerService extends AccessibilityService
         }
 
         if (overlayReady && !isOverlayActuallyReady()) {
+            if (overlayAttachPending) {
+                // addView() succeeded and the OEM WindowManager is still completing its first
+                // attach/layout pass. The delayed verifier owns this transition; do not tear
+                // down and recreate the same windows from a health/configuration callback.
+                return;
+            }
             Log.w(TAG, "Overlay flag was stale; rebuilding detached views");
             overlayReady = false;
             removeOverlayViewsOnly();
@@ -600,6 +643,7 @@ public class AutoClickerService extends AccessibilityService
     @SuppressLint("ClickableViewAccessibility")
     private boolean addOverlayAtomically() {
         if (isOverlayActuallyReady()) {
+            overlayAttachPending = false;
             overlayReady = true;
             return true;
         }
@@ -608,11 +652,17 @@ public class AutoClickerService extends AccessibilityService
             createAndAddOverlay(0);
             createAndAddOverlay(1);
             createAndAddFloatingButton();
-            overlayReady = isOverlayActuallyReady();
-            if (!overlayReady) {
-                throw new IllegalStateException("Overlay add completed but views are detached");
-            }
+
+            // Do not require isAttachedToWindow() synchronously here. On some OEM builds,
+            // WindowManager.addView() returns before the first attach/layout traversal. Treat
+            // successful addView() calls as provisionally accepted and verify attachment after
+            // a short grace period. This prevents false FAILURE_UNKNOWN/code 4 loops.
+            overlayAttachPending = true;
+            overlayReady = true;
+            handler.removeCallbacks(overlayAttachVerifyRunnable);
+            handler.postDelayed(overlayAttachVerifyRunnable, OVERLAY_ATTACH_VERIFY_MS);
             lastFailure = FAILURE_NONE;
+            sLastErrorType = "";
             persistFailure();
             return true;
         } catch (SecurityException e) {
@@ -931,6 +981,8 @@ public class AutoClickerService extends AccessibilityService
     }
 
     private void removeOverlayViewsOnly() {
+        handler.removeCallbacks(overlayAttachVerifyRunnable);
+        overlayAttachPending = false;
         if (windowManager != null) {
             for (int i = 0; i < overlayViews.length; i++) {
                 View view = overlayViews[i];
