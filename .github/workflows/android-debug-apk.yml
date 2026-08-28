@@ -23,9 +23,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Inspect pinned plotter build script
-        run: nl -ba plotter/lib/build.gradle | sed -n '1,180p'
-
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
@@ -36,17 +33,26 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Patch legacy plotter publishing script for Gradle 8
+      - name: Adapt pinned plotter library for current Android Gradle Plugin
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path('plotter/lib/build.gradle')
-          text = path.read_text(encoding='utf-8')
-          old = 'MavenDeployment deployment'
-          if old not in text:
-              raise SystemExit('Expected legacy MavenDeployment declaration was not found')
-          path.write_text(text.replace(old, 'deployment'), encoding='utf-8')
-          PY
+          cat > plotter/lib/build.gradle <<'EOF'
+          apply plugin: 'com.android.library'
+
+          android {
+              namespace 'org.solovyev.android.plotter'
+              compileSdk 35
+
+              defaultConfig {
+                  minSdk 21
+                  targetSdk 35
+              }
+          }
+
+          dependencies {
+              implementation fileTree(dir: 'libs', include: ['*.jar'])
+              implementation 'com.android.support:support-annotations:23.1.1'
+          }
+          EOF
 
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --stacktrace --no-daemon
