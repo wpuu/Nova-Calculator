@@ -597,13 +597,19 @@ public class AutoClickerService extends AccessibilityService
             return;
         }
 
-        if (overlayReady && !isOverlayActuallyReady()) {
-            if (overlayAttachPending) {
-                // addView() succeeded and the OEM WindowManager is still completing its first
-                // attach/layout pass. The delayed verifier owns this transition; do not tear
-                // down and recreate the same windows from a health/configuration callback.
+        // addView() can be accepted before isAttachedToWindow() becomes true. This pending state
+        // must be authoritative even if an accessibility/configuration callback already reset
+        // overlayReady=false; otherwise that callback can tear down the brand-new windows before
+        // the OEM WindowManager finishes its first attach pass.
+        if (overlayAttachPending) {
+            if (!isOverlayActuallyReady()) {
                 return;
             }
+            overlayAttachPending = false;
+            handler.removeCallbacks(overlayAttachVerifyRunnable);
+        }
+
+        if (overlayReady && !isOverlayActuallyReady()) {
             Log.w(TAG, "Overlay flag was stale; rebuilding detached views");
             overlayReady = false;
             removeOverlayViewsOnly();
