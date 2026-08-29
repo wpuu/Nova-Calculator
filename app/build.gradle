@@ -22,7 +22,9 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdk versions.sdk.compile
     defaultConfig {
-        applicationId "org.solovyev.android.calculator"
+        // Development-only commercial identity. Do not upload this .dev ID to Google Play.
+        // The production applicationId will be frozen after name/package availability checks.
+        applicationId "com.wpuu.novacalculator.dev"
         minSdkVersion versions.sdk.min
         targetSdkVersion versions.sdk.target
         versionCode 1
@@ -44,6 +46,7 @@ android {
             multiDexEnabled true
         }
     }
+    // Source namespace remains inherited during refactor; applicationId is already isolated.
     namespace 'org.solovyev.android.calculator'
     lint {
         abortOnError false
