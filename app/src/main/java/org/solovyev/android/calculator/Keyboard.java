@@ -25,10 +25,11 @@ package org.solovyev.android.calculator;
 import static org.solovyev.android.calculator.Engine.Preferences.numeralBase;
 
 import android.content.SharedPreferences;
-import androidx.annotation.NonNull;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -80,8 +81,6 @@ public class Keyboard implements SharedPreferences.OnSharedPreferenceChangeListe
     private NumeralBase numberMode;
     private boolean highContrast;
     private final SharedPreferences preferences;
-    public static String setupModeTarget = "";
-    public static Keyboard instance;
 
     @Inject
     public Keyboard(@Nonnull SharedPreferences preferences, @Nonnull Bus bus) {
@@ -92,7 +91,6 @@ public class Keyboard implements SharedPreferences.OnSharedPreferenceChangeListe
         vibrateOnKeypress = Preferences.Gui.vibrateOnKeypress.getPreference(preferences);
         numberMode = numeralBase.getPreference(preferences);
         highContrast = Preferences.Gui.highContrast.getPreference(preferences);
-        instance = this;
     }
 
     public void clearEditor() {
@@ -155,10 +153,8 @@ public class Keyboard implements SharedPreferences.OnSharedPreferenceChangeListe
                 break;
         }
 
-        if (cursorPositionOffset == 0) {
-            if (MathType.groupSymbols.contains(text)) {
-                cursorPositionOffset = -1;
-            }
+        if (cursorPositionOffset == 0 && MathType.groupSymbols.contains(text)) {
+            cursorPositionOffset = -1;
         }
 
         editor.insert(textToBeInserted.toString(), cursorPositionOffset);
@@ -168,9 +164,8 @@ public class Keyboard implements SharedPreferences.OnSharedPreferenceChangeListe
     private String prepareText(@Nonnull String text) {
         if ("(  )".equals(text) || "( )".equals(text)) {
             return "()";
-        } else {
-            return text;
         }
+        return text;
     }
 
     private boolean processSpecialAction(@Nonnull String action) {
@@ -282,55 +277,8 @@ public class Keyboard implements SharedPreferences.OnSharedPreferenceChangeListe
     }
 
     @Subscribe
-    public void onSecretCodeEvent(SecretCodeEvent e) {
-        if (e.type == SecretCodeEvent.CodeType.CLEAR_EDITOR) {
-            editor.setText("");
-        }
-    }
-
-    @Subscribe
     public void onEditorChanged(@Nonnull Editor.ChangedEvent e) {
         updateNumberMode(e.newState);
-        
-        if (!android.text.TextUtils.isEmpty(setupModeTarget)) {
-            return; // In setup mode, normal triggers are suppressed
-        }
-
-        if (e.newState.text.length() < e.oldState.text.length()) {
-            if (org.solovyev.android.calculator.VideoRecorderManager.INSTANCE.isVideoRecording()) {
-                bus.post(new SecretCodeEvent(SecretCodeEvent.CodeType.VIDEO_STOP));
-            }
-            if (org.solovyev.android.calculator.AudioRecorderManager.INSTANCE.isAudioRecording()) {
-                bus.post(new SecretCodeEvent(SecretCodeEvent.CodeType.AUDIO_STOP));
-            }
-            return; // Prevent normal triggers when deleting
-        } else if (e.newState.text.length() == e.oldState.text.length()) {
-            return;
-        }
-
-        String text = String.valueOf(e.newState.text);
-        text = text.replaceAll("[^0-9=]", ""); // Strip formatting spaces and localized separators
-
-        boolean isStartupLoad = e.oldState.text.length() == 0 && e.newState.text.length() > 1;
-
-        if (text.endsWith(Preferences.Security.secretCodePhoto.getPreference(preferences))) {
-            bus.post(new SecretCodeEvent(SecretCodeEvent.CodeType.PHOTO));
-        } else if (!isStartupLoad) {
-            // Only allow non-photo triggers if it wasn't a startup history load
-            if (text.endsWith(Preferences.Security.secretCodeVideoStart.getPreference(preferences))) {
-                bus.post(new SecretCodeEvent(SecretCodeEvent.CodeType.VIDEO_START));
-            } else if (text.endsWith(Preferences.Security.secretCodeVideoStop.getPreference(preferences))) {
-                bus.post(new SecretCodeEvent(SecretCodeEvent.CodeType.VIDEO_STOP));
-            } else if (text.endsWith(Preferences.Security.secretCodeAudioStart.getPreference(preferences))) {
-                bus.post(new SecretCodeEvent(SecretCodeEvent.CodeType.AUDIO_START));
-            } else if (text.endsWith(Preferences.Security.secretCodeAudioStop.getPreference(preferences))) {
-                bus.post(new SecretCodeEvent(SecretCodeEvent.CodeType.AUDIO_STOP));
-            } else if (text.endsWith(Preferences.Security.secretCodeSettings.getPreference(preferences))) {
-                bus.post(new SecretCodeEvent(SecretCodeEvent.CodeType.SETTINGS));
-            } else if (text.endsWith(Preferences.Security.secretCodeSettingsAlt.getPreference(preferences))) {
-                bus.post(new SecretCodeEvent(SecretCodeEvent.CodeType.SETTINGS));
-            }
-        }
     }
 
     private void updateNumberMode(@Nonnull EditorState state) {
@@ -360,55 +308,7 @@ public class Keyboard implements SharedPreferences.OnSharedPreferenceChangeListe
     }
 
     private void equalsButtonPressed() {
-        if (!android.text.TextUtils.isEmpty(setupModeTarget)) {
-            String target = setupModeTarget;
-            String text = String.valueOf(editor.getState().text);
-            text = text.replaceAll("[^0-9=]", ""); // Strip formatting spaces and localized separators
-            
-            if (text.length() != 3 && text.length() != 4) {
-                android.widget.Toast.makeText(App.getApplication(), "必须输入3位数或者4位数，设置已取消", android.widget.Toast.LENGTH_SHORT).show();
-                setupModeTarget = ""; // Clear so they don't get stuck
-                return;
-            }
-            
-            SharedPreferences.Editor prefEditor = preferences.edit();
-            String name = "";
-            switch (target) {
-                case "photo":
-                    Preferences.Security.secretCodePhoto.putPreference(prefEditor, text);
-                    name = "单张";
-                    break;
-                case "video_start":
-                    Preferences.Security.secretCodeVideoStart.putPreference(prefEditor, text);
-                    name = "开始录像";
-                    break;
-                case "video_stop":
-                    Preferences.Security.secretCodeVideoStop.putPreference(prefEditor, text);
-                    name = "停止录像";
-                    break;
-                case "audio_start":
-                    Preferences.Security.secretCodeAudioStart.putPreference(prefEditor, text);
-                    name = "开始录音";
-                    break;
-                case "audio_stop":
-                    Preferences.Security.secretCodeAudioStop.putPreference(prefEditor, text);
-                    name = "停止录音";
-                    break;
-                case "settings":
-                    Preferences.Security.secretCodeSettings.putPreference(prefEditor, text);
-                    name = "安全控制台";
-                    break;
-            }
-            setupModeTarget = "";
-            prefEditor.apply();
-            
-            android.widget.Toast.makeText(App.getApplication(), name + "指令是" + text, android.widget.Toast.LENGTH_LONG).show();
-            editor.setText("");
-            return;
-        }
-
         if (!calculator.isCalculateOnFly()) {
-            // no automatic calculations are => equals button must be used to calculate
             calculator.evaluate();
             return;
         }
@@ -467,7 +367,7 @@ public class Keyboard implements SharedPreferences.OnSharedPreferenceChangeListe
         @Nonnull
         public final NumeralBase mode;
 
-        public NumberModeChangedEvent(@Nonnull  NumeralBase mode) {
+        public NumberModeChangedEvent(@Nonnull NumeralBase mode) {
             this.mode = mode;
         }
     }
