@@ -24,7 +24,7 @@
 
     <application
         android:name=".CalculatorApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/cpp_app_name"
