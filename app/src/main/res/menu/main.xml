@@ -82,6 +82,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_tools"
+        android:title="工具"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_history"
         android:title="@string/c_history"
         app:showAsAction="never" />
