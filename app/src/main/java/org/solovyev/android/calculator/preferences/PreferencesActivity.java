@@ -4,19 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.SparseArray;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
-import android.util.SparseArray;
 
 import org.solovyev.android.calculator.App;
 import org.solovyev.android.calculator.AppComponent;
 import org.solovyev.android.calculator.BaseActivity;
 import org.solovyev.android.calculator.R;
 import org.solovyev.android.calculator.language.Languages;
-import org.solovyev.android.checkout.ActivityCheckout;
-import org.solovyev.android.checkout.Billing;
-import org.solovyev.android.checkout.Checkout;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -43,10 +41,6 @@ public class PreferencesActivity extends BaseActivity implements SharedPreferenc
         preferenceDefs.append(R.xml.preferences_auto_clicker, new PrefDef("screen-auto-clicker", R.string.pref_auto_clicker_category));
     }
 
-    ActivityCheckout checkout;
-
-    @Inject
-    Billing billing;
     @Inject
     Languages languages;
 
@@ -85,26 +79,12 @@ public class PreferencesActivity extends BaseActivity implements SharedPreferenc
                     .add(R.id.main, PreferencesFragment.create(preference))
                     .commit();
         }
-
-        checkout = Checkout.forActivity(this, billing);
-        checkout.start();
     }
 
     @Override
     protected void inject(@Nonnull AppComponent component) {
         super.inject(component);
         component.inject(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        checkout.stop();
-        super.onDestroy();
-    }
-
-    @Nonnull
-    ActivityCheckout getCheckout() {
-        return checkout;
     }
 
     static class PrefDef {
