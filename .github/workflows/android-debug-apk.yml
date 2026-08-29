@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - commercial/nova-ai-v1
   pull_request:
     branches:
       - main
@@ -40,11 +41,11 @@ jobs:
 
           android {
               namespace 'org.solovyev.android.plotter'
-              compileSdk 35
+              compileSdk 36
 
               defaultConfig {
                   minSdk 21
-                  targetSdk 35
+                  targetSdk 36
               }
           }
 
@@ -74,14 +75,14 @@ jobs:
         if: success()
         run: |
           mkdir -p build-artifacts
-          cp app/build/outputs/apk/debug/app-debug.apk build-artifacts/Nova-Calculator-autoclicker-test.apk
-          sha256sum build-artifacts/Nova-Calculator-autoclicker-test.apk | tee build-artifacts/SHA256SUMS.txt
+          cp app/build/outputs/apk/debug/app-debug.apk build-artifacts/Nova-Calculator-commercial-debug.apk
+          sha256sum build-artifacts/Nova-Calculator-commercial-debug.apk | tee build-artifacts/SHA256SUMS.txt
 
       - name: Upload debug APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Nova-Calculator-autoclicker-debug-apk
+          name: Nova-Calculator-commercial-debug-apk
           path: build-artifacts/
           if-no-files-found: error
           retention-days: 14
