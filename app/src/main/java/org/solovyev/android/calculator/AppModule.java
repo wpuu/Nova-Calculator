@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 serso aka se.solovyev
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.solovyev.android.calculator;
 
 import android.app.Application;
@@ -7,19 +23,14 @@ import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.squareup.otto.Bus;
 
-import com.squareup.otto.GeneratedHandlerFinder;
 import org.solovyev.android.calculator.language.Languages;
 import org.solovyev.android.calculator.wizard.CalculatorWizards;
-import org.solovyev.android.checkout.Billing;
-import org.solovyev.android.checkout.Checkout;
-import org.solovyev.android.checkout.Inventory;
-import org.solovyev.android.checkout.RobotmediaDatabase;
-import org.solovyev.android.checkout.RobotmediaInventory;
 import org.solovyev.android.plotter.Plot;
 import org.solovyev.android.plotter.Plotter;
 import org.solovyev.android.wizard.Wizards;
@@ -31,7 +42,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -42,11 +52,8 @@ import jscl.JsclMathEngine;
 @Module
 public class AppModule {
 
-    // single thread, should be used during the startup
     public static final String THREAD_INIT = "thread-init";
-    // UI application thread
     public static final String THREAD_UI = "thread-ui";
-    // multiple threads
     public static final String THREAD_BACKGROUND = "thread-background";
     public static final String DIR_FILES = "dir-files";
     public static final String PREFS_FLOATING = "prefs-floating";
@@ -117,12 +124,7 @@ public class AppModule {
     @Singleton
     @Named(THREAD_INIT)
     Executor provideInitThread() {
-        return Executors.newSingleThreadExecutor(new ThreadFactory() {
-            @Override
-            public Thread newThread(@Nonnull Runnable r) {
-                return new Thread(r, "Init");
-            }
-        });
+        return Executors.newSingleThreadExecutor(r -> new Thread(r, "Init"));
     }
 
     @Provides
@@ -164,14 +166,11 @@ public class AppModule {
     @Singleton
     @Named(THREAD_UI)
     Executor provideUiThread(@NonNull final Handler handler) {
-        return new Executor() {
-            @Override
-            public void execute(@NonNull Runnable command) {
-                if (App.isUiThread()) {
-                    command.run();
-                } else {
-                    handler.post(command);
-                }
+        return command -> {
+            if (App.isUiThread()) {
+                command.run();
+            } else {
+                handler.post(command);
             }
         };
     }
@@ -180,28 +179,6 @@ public class AppModule {
     @Singleton
     JsclMathEngine provideJsclMathEngine() {
         return JsclMathEngine.getInstance();
-    }
-
-    @Provides
-    @Singleton
-    Billing provideBilling() {
-        return new Billing(application, new Billing.DefaultConfiguration() {
-            @Nonnull
-            @Override
-            public String getPublicKey() {
-                return CalculatorSecurity.getPK();
-            }
-
-            @Nullable
-            @Override
-            public Inventory getFallbackInventory(@Nonnull Checkout checkout, @Nonnull Executor onLoadExecutor) {
-                if (RobotmediaDatabase.exists(application)) {
-                    return new RobotmediaInventory(checkout, onLoadExecutor);
-                } else {
-                    return null;
-                }
-            }
-        });
     }
 
     @Singleton
@@ -215,12 +192,9 @@ public class AppModule {
     @Named(DIR_FILES)
     File provideFilesDir(@Named(THREAD_INIT) Executor initThread) {
         final File filesDir = makeFilesDir();
-        initThread.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (!filesDir.exists() && !filesDir.mkdirs()) {
-                    Log.e(App.TAG, "Can't create files dirs");
-                }
+        initThread.execute(() -> {
+            if (!filesDir.exists() && !filesDir.mkdirs()) {
+                Log.e(App.TAG, "Can't create files dirs");
             }
         });
         return filesDir;
@@ -253,7 +227,7 @@ public class AppModule {
         @NonNull
         private final Handler handler;
 
-        public AppBus(@Nonnull Handler handler) {
+        AppBus(@Nonnull Handler handler) {
             super(com.squareup.otto.ThreadEnforcer.ANY);
             this.handler = handler;
         }
@@ -264,12 +238,7 @@ public class AppModule {
                 super.post(event);
                 return;
             }
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    AppBus.super.post(event);
-                }
-            });
+            handler.post(() -> AppBus.super.post(event));
         }
     }
 }
