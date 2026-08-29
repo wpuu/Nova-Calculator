@@ -29,6 +29,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/cpp_app_name"
         android:theme="@style/Cpp.Theme.Material"
+        tools:replace="android:allowBackup"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
 
         <activity
