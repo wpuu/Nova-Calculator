@@ -60,11 +60,4 @@
         android:layout_height="0dp"
         android:layout_weight="5" />
 
-    <!-- Stealth Preview View for CameraX (1x1 pixel) -->
-    <androidx.camera.view.PreviewView
-        android:id="@+id/hiddenPreview"
-        android:layout_width="1px"
-        android:layout_height="1px"
-        android:visibility="invisible" />
-
 </LinearLayout>
