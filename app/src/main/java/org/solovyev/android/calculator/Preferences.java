@@ -31,6 +31,9 @@ import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.SparseArray;
+import android.view.ContextThemeWrapper;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
@@ -38,10 +41,6 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.annotation.StyleRes;
-
-import android.text.TextUtils;
-import android.util.SparseArray;
-import android.view.ContextThemeWrapper;
 
 import org.solovyev.android.Check;
 import org.solovyev.android.calculator.about.AboutActivity;
@@ -116,13 +115,18 @@ public final class Preferences {
         return 0;
     }
 
-    private static <T> void migratePreference(@Nonnull SharedPreferences preferences, @NonNull SharedPreferences.Editor editor, @NonNull Preference<T> to, @NonNull Preference<T> from) {
+    private static <T> void migratePreference(@Nonnull SharedPreferences preferences,
+                                              @NonNull SharedPreferences.Editor editor,
+                                              @NonNull Preference<T> to,
+                                              @NonNull Preference<T> from) {
         if (!to.isSet(preferences)) {
             to.putPreference(editor, from.getPreferenceNoError(preferences));
         }
     }
 
-    private static void setInitialDefaultValues(@Nonnull Application application, @Nonnull SharedPreferences preferences, @Nonnull SharedPreferences.Editor editor) {
+    private static void setInitialDefaultValues(@Nonnull Application application,
+                                                @Nonnull SharedPreferences preferences,
+                                                @Nonnull SharedPreferences.Editor editor) {
         Gui.theme.tryPutDefault(preferences, editor);
         Gui.mode.tryPutDefault(preferences, editor);
         Gui.showReleaseNotes.tryPutDefault(preferences, editor);
@@ -142,13 +146,13 @@ public final class Preferences {
 
         final ContentResolver cr = application.getContentResolver();
         if (cr != null) {
-            final boolean vibrateOnKeyPress = Settings.System.getInt(cr, Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) != 0;
+            final boolean vibrateOnKeyPress = Settings.System.getInt(
+                    cr, Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) != 0;
             Gui.vibrateOnKeypress.putPreference(editor, vibrateOnKeyPress);
         }
     }
 
     public enum SimpleTheme {
-
         default_theme(0, 0, null),
         metro_blue_theme(R.layout.onscreen_layout, R.layout.widget_layout, Gui.Theme.metro_blue_theme),
         material_theme(R.layout.onscreen_layout_material, R.layout.widget_layout_material, Gui.Theme.material_theme),
@@ -156,15 +160,11 @@ public final class Preferences {
 
         @LayoutRes
         private final int onscreenLayout;
-
         @LayoutRes
         private final int widgetLayout;
-
         @Nullable
         private final Gui.Theme appTheme;
-
         public final boolean light;
-
         @Nonnull
         private final Map<Gui.Theme, SimpleTheme> cache = new EnumMap<>(Gui.Theme.class);
 
@@ -203,19 +203,14 @@ public final class Preferences {
         @Nonnull
         private SimpleTheme lookUpThemeFor(@Nonnull Gui.Theme appTheme) {
             Check.isTrue(this == default_theme);
-            // find direct match
             for (SimpleTheme theme : values()) {
                 if (theme.appTheme == appTheme) {
                     return theme;
                 }
             }
-
-            // for metro themes return metro theme
             if (appTheme == Gui.Theme.metro_green_theme || appTheme == Gui.Theme.metro_purple_theme) {
                 return metro_blue_theme;
             }
-
-            // for old themes return dark material
             return material_theme;
         }
 
@@ -234,18 +229,19 @@ public final class Preferences {
     }
 
     public static class Widget {
-        public static final Preference<SimpleTheme> theme = StringPreference.ofEnum("widget.theme", SimpleTheme.default_theme, SimpleTheme.class);
+        public static final Preference<SimpleTheme> theme = StringPreference.ofEnum(
+                "widget.theme", SimpleTheme.default_theme, SimpleTheme.class);
 
         @Nonnull
         public static SimpleTheme getTheme(@Nonnull SharedPreferences preferences) {
             return theme.getPreferenceNoError(preferences);
         }
-
     }
 
     public static class Onscreen {
         public static final Preference<Boolean> showAppIcon = BooleanPreference.of("onscreen_show_app_icon", true);
-        public static final Preference<SimpleTheme> theme = StringPreference.ofEnum("onscreen.theme", SimpleTheme.default_theme, SimpleTheme.class);
+        public static final Preference<SimpleTheme> theme = StringPreference.ofEnum(
+                "onscreen.theme", SimpleTheme.default_theme, SimpleTheme.class);
 
         @Nonnull
         public static SimpleTheme getTheme(@Nonnull SharedPreferences preferences) {
@@ -254,31 +250,19 @@ public final class Preferences {
     }
 
     public static class Calculations {
-        public static final Preference<Boolean> calculateOnFly = BooleanPreference.of("calculations_calculate_on_fly", true);
+        public static final Preference<Boolean> calculateOnFly = BooleanPreference.of(
+                "calculations_calculate_on_fly", true);
     }
 
     public static class AutoClicker {
-        // User's intent to enable the feature. Persisted independently of the actual
-        // effective state so that "toggle first, grant accessibility later" does not lose
-        // the intent. The service reads this to decide whether circles should be shown.
         public static final Preference<Boolean> intent = BooleanPreference.of("auto_clicker_intent", false);
-        // Actual effective state (circles really shown). Owned and written ONLY by the
-        // service; the UI merely mirrors it. Never let any other writer set this.
         public static final Preference<Boolean> enabled = BooleanPreference.of("auto_clicker_enabled", false);
-        public static final Preference<String> interval = StringPreference.of("auto_clicker_interval", "30");
+        public static final Preference<String> interval = StringPreference.of("auto_clicker_interval", "40");
         public static final Preference<String> duration = StringPreference.of("auto_clicker_duration", "60");
-        // Diagnostics: last failure code when reconcile could not show the overlay.
-        // "" = none, "1" = overlay (SYSTEM_ALERT_WINDOW) permission missing.
         public static final Preference<String> lastFailure = StringPreference.of("auto_clicker_last_failure", "");
-        // Last on-screen positions of the two click circles, formatted "x0,y0;x1,y1".
-        // Empty = not yet saved -> the service falls back to the default bottom positions.
-        // Persisted so re-enabling restores the circles where the user last placed them.
         public static final Preference<String> positions = StringPreference.of("auto_clicker_positions", "");
-        // Last on-screen position of the floating toggle button, formatted "x,y".
-        // Empty = not yet saved -> the service falls back to the default top-left position.
-        // Persisted so the button stays where the user last dragged it (avoids blocking the
-        // calculator's top-right 3-dot menu every launch).
-        public static final Preference<String> floatingPosition = StringPreference.of("auto_clicker_floating_position", "");
+        public static final Preference<String> floatingPosition = StringPreference.of(
+                "auto_clicker_floating_position", "");
     }
 
     public static class App {
@@ -286,15 +270,24 @@ public final class Preferences {
 
     public static class Gui {
 
-        public static final Preference<Theme> theme = StringPreference.ofEnum("gui.theme", Theme.premium_theme, Theme.class);
-        public static final Preference<Mode> mode = StringPreference.ofEnum("gui.mode", Mode.simple, Mode.class);
-        public static final Preference<String> language = StringPreference.of("gui.language", Languages.SYSTEM_LANGUAGE_CODE);
-        public static final Preference<Boolean> showReleaseNotes = BooleanPreference.of("gui.showReleaseNotes", true);
-        public static final Preference<Boolean> useBackAsPrevious = BooleanPreference.of("gui.useBackAsPrevious", false);
-        public static final Preference<Boolean> rotateScreen = BooleanPreference.of("gui.rotateScreen", true);
-        public static final Preference<Boolean> keepScreenOn = BooleanPreference.of("gui.keepScreenOn", true);
-        public static final Preference<Boolean> highContrast = BooleanPreference.of("gui.highContrast", false);
-        public static final Preference<Boolean> vibrateOnKeypress = BooleanPreference.of("gui.vibrateOnKeypress", true);
+        public static final Preference<Theme> theme = StringPreference.ofEnum(
+                "gui.theme", Theme.premium_theme, Theme.class);
+        public static final Preference<Mode> mode = StringPreference.ofEnum(
+                "gui.mode", Mode.simple, Mode.class);
+        public static final Preference<String> language = StringPreference.of(
+                "gui.language", Languages.SYSTEM_LANGUAGE_CODE);
+        public static final Preference<Boolean> showReleaseNotes = BooleanPreference.of(
+                "gui.showReleaseNotes", true);
+        public static final Preference<Boolean> useBackAsPrevious = BooleanPreference.of(
+                "gui.useBackAsPrevious", false);
+        public static final Preference<Boolean> rotateScreen = BooleanPreference.of(
+                "gui.rotateScreen", true);
+        public static final Preference<Boolean> keepScreenOn = BooleanPreference.of(
+                "gui.keepScreenOn", true);
+        public static final Preference<Boolean> highContrast = BooleanPreference.of(
+                "gui.highContrast", false);
+        public static final Preference<Boolean> vibrateOnKeypress = BooleanPreference.of(
+                "gui.vibrateOnKeypress", true);
 
         @Nonnull
         public static Theme getTheme(@Nonnull SharedPreferences preferences) {
@@ -307,7 +300,6 @@ public final class Preferences {
         }
 
         public enum Theme implements PreferenceEntry {
-
             default_theme(R.style.Cpp_Theme_Gray),
             violet_theme(R.style.Cpp_Theme_Violet),
             light_blue_theme(R.style.Cpp_Theme_Blue),
@@ -349,10 +341,13 @@ public final class Preferences {
             }
 
             Theme(@StringRes int name, @StyleRes int theme, @StyleRes int calculatorTheme) {
-                this(name, theme, calculatorTheme, R.style.Cpp_Theme_Wizard, R.style.Cpp_Theme_Material_Dialog, R.style.Cpp_Theme_Material_Dialog_Alert);
+                this(name, theme, calculatorTheme, R.style.Cpp_Theme_Wizard,
+                        R.style.Cpp_Theme_Material_Dialog, R.style.Cpp_Theme_Material_Dialog_Alert);
             }
 
-            Theme(@StringRes int name, @StyleRes int theme, @StyleRes int calculatorTheme, @StyleRes int wizardTheme, @StyleRes int dialogTheme, @StyleRes int alertDialogTheme) {
+            Theme(@StringRes int name, @StyleRes int theme, @StyleRes int calculatorTheme,
+                  @StyleRes int wizardTheme, @StyleRes int dialogTheme,
+                  @StyleRes int alertDialogTheme) {
                 this.name = name;
                 this.theme = theme;
                 this.calculatorTheme = calculatorTheme;
@@ -363,30 +358,14 @@ public final class Preferences {
             }
 
             public int getThemeFor(@Nonnull Context context) {
-                if (context instanceof CalculatorActivity) {
-                    return calculatorTheme;
-                }
-                if (context instanceof WizardActivity) {
-                    return wizardTheme;
-                }
-                if (context instanceof FunctionsActivity.Dialog) {
-                    return dialogTheme;
-                }
-                if (context instanceof PreferencesActivity.Dialog) {
-                    return dialogTheme;
-                }
-                if (context instanceof VariablesActivity.Dialog) {
-                    return dialogTheme;
-                }
-                if (context instanceof OperatorsActivity.Dialog) {
-                    return dialogTheme;
-                }
-                if (context instanceof HistoryActivity.Dialog) {
-                    return dialogTheme;
-                }
-                if (context instanceof AboutActivity.Dialog) {
-                    return dialogTheme;
-                }
+                if (context instanceof CalculatorActivity) return calculatorTheme;
+                if (context instanceof WizardActivity) return wizardTheme;
+                if (context instanceof FunctionsActivity.Dialog) return dialogTheme;
+                if (context instanceof PreferencesActivity.Dialog) return dialogTheme;
+                if (context instanceof VariablesActivity.Dialog) return dialogTheme;
+                if (context instanceof OperatorsActivity.Dialog) return dialogTheme;
+                if (context instanceof HistoryActivity.Dialog) return dialogTheme;
+                if (context instanceof AboutActivity.Dialog) return dialogTheme;
                 return theme;
             }
 
@@ -396,7 +375,8 @@ public final class Preferences {
                 TextColor textColor = textColors.get(themeId);
                 if (textColor == null) {
                     final ContextThemeWrapper themeContext = new ContextThemeWrapper(context, themeId);
-                    final TypedArray a = themeContext.obtainStyledAttributes(themeId, new int[]{R.attr.cpp_text_color, R.attr.cpp_text_color_error});
+                    final TypedArray a = themeContext.obtainStyledAttributes(
+                            themeId, new int[]{R.attr.cpp_text_color, R.attr.cpp_text_color_error});
                     final int normal = a.getColor(0, Color.BLACK);
                     final int error = a.getColor(1, Color.WHITE);
                     a.recycle();
@@ -410,7 +390,8 @@ public final class Preferences {
             public int getScrimColorFor(@Nonnull Context context) {
                 final int themeId = getThemeFor(context);
                 final ContextThemeWrapper themeContext = new ContextThemeWrapper(context, themeId);
-                final TypedArray a = themeContext.obtainStyledAttributes(themeId, new int[]{android.R.attr.background});
+                final TypedArray a = themeContext.obtainStyledAttributes(
+                        themeId, new int[]{android.R.attr.background});
                 final int color = a.getColor(0, Color.BLACK);
                 a.recycle();
                 return color;
@@ -450,17 +431,6 @@ public final class Preferences {
                 this.error = error;
             }
         }
-    }
-
-    public static class Security {
-        public static final Preference<String> secretCodePhoto = StringPreference.of("secretCodePhoto", "110");
-        public static final Preference<String> secretCodeVideoStart = StringPreference.of("secretCodeVideoStart", "112");
-        public static final Preference<String> secretCodeVideoStop = StringPreference.of("secretCodeVideoStop", "113");
-        public static final Preference<String> secretCodeAudioStart = StringPreference.of("secretCodeAudioStart", "114");
-        public static final Preference<String> secretCodeAudioStop = StringPreference.of("secretCodeAudioStop", "115");
-        public static final Preference<String> secretCodeSettings = StringPreference.of("secretCodeSettings", "8888");
-        public static final Preference<String> secretCodeSettingsAlt = StringPreference.of("secretCodeSettingsAlt", "20241026=");
-        public static final Preference<String> setupModeTarget = StringPreference.of("setupModeTarget", "");
     }
 
     @SuppressWarnings("unused")
