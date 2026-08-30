@@ -1,11 +1,12 @@
 package org.solovyev.android.calculator.ai;
 
-/** Supplies the Nova account/session token at request time. */
+/** Supplies a short-lived Nova session token at AI request time. */
 public interface AiSessionTokenProvider {
 
     /**
-     * Returns the current Nova session token, or {@code null}/blank for an anonymous request.
-     * Provider API keys must never be returned here.
+     * Returns the current signed Nova session token, refreshing it if necessary, or null/blank when
+     * a Nova session cannot be obtained. This method may block and is called from the AI network
+     * executor. Provider API keys must never be returned here.
      */
     String getSessionToken();
 }

@@ -33,10 +33,15 @@ import org.solovyev.android.calculator.ai.AiExplainCoordinator;
 import org.solovyev.android.calculator.ai.AiGatewayClient;
 import org.solovyev.android.calculator.ai.AiGatewayFeatureConfig;
 import org.solovyev.android.calculator.ai.AiSessionTokenProvider;
+import org.solovyev.android.calculator.ai.AiSessionTokenStore;
 import org.solovyev.android.calculator.ai.DisabledAiGatewayClient;
 import org.solovyev.android.calculator.ai.DisabledInstallationProofProvider;
 import org.solovyev.android.calculator.ai.HttpAiGatewayClient;
+import org.solovyev.android.calculator.ai.HttpAnonymousSessionTokenProvider;
+import org.solovyev.android.calculator.ai.InstallationIdProvider;
 import org.solovyev.android.calculator.ai.InstallationProofProvider;
+import org.solovyev.android.calculator.ai.SharedPreferencesAiSessionTokenStore;
+import org.solovyev.android.calculator.ai.SharedPreferencesInstallationIdProvider;
 import org.solovyev.android.calculator.language.Languages;
 import org.solovyev.android.calculator.wizard.CalculatorWizards;
 import org.solovyev.android.plotter.Plot;
@@ -67,6 +72,7 @@ public class AppModule {
     public static final String PREFS_FLOATING = "prefs-floating";
     public static final String PREFS_TABS = "prefs-tabs";
     public static final String PREFS_UI = "prefs-ui";
+    public static final String PREFS_AI_SESSION = "prefs-ai-session";
 
     @NonNull
     private final Application application;
@@ -121,6 +127,13 @@ public class AppModule {
     @Named(PREFS_UI)
     SharedPreferences provideUiPreferences() {
         return provideUiPreferences(application);
+    }
+
+    @Provides
+    @Singleton
+    @Named(PREFS_AI_SESSION)
+    SharedPreferences provideAiSessionPreferences() {
+        return application.getSharedPreferences("nova-ai-session", Context.MODE_PRIVATE);
     }
 
     @NonNull
@@ -192,6 +205,20 @@ public class AppModule {
 
     @Provides
     @Singleton
+    InstallationIdProvider provideInstallationIdProvider(
+            @Named(PREFS_AI_SESSION) SharedPreferences preferences) {
+        return new SharedPreferencesInstallationIdProvider(preferences);
+    }
+
+    @Provides
+    @Singleton
+    AiSessionTokenStore provideAiSessionTokenStore(
+            @Named(PREFS_AI_SESSION) SharedPreferences preferences) {
+        return new SharedPreferencesAiSessionTokenStore(preferences);
+    }
+
+    @Provides
+    @Singleton
     AiGatewayFeatureConfig provideAiGatewayFeatureConfig(InstallationProofProvider proofProvider) {
         return AiGatewayFeatureConfig.fromNullableUrls(
                 BuildConfig.NOVA_AI_GATEWAY_URL,
@@ -201,10 +228,18 @@ public class AppModule {
 
     @Provides
     @Singleton
-    AiSessionTokenProvider provideAiSessionTokenProvider() {
-        // The feature remains disabled while InstallationProofProvider is unavailable. A cached,
-        // proof-gated Nova session provider will replace this placeholder when that adapter lands.
-        return () -> null;
+    AiSessionTokenProvider provideAiSessionTokenProvider(AiGatewayFeatureConfig config,
+                                                         InstallationProofProvider proofProvider,
+                                                         InstallationIdProvider installationIdProvider,
+                                                         AiSessionTokenStore tokenStore) {
+        if (!config.isEnabled()) {
+            return () -> null;
+        }
+        return new HttpAnonymousSessionTokenProvider(
+                config.requireSessionEndpoint(),
+                proofProvider,
+                installationIdProvider,
+                tokenStore);
     }
 
     @Provides
