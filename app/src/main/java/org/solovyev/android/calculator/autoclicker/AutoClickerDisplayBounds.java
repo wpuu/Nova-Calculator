@@ -7,7 +7,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-import android.view.WindowMetrics;
 
 import androidx.annotation.NonNull;
 
@@ -15,9 +14,9 @@ import androidx.annotation.NonNull;
  * Reads the usable full-display coordinate space for AutoTap overlays.
  *
  * API 30 deprecated WindowManager#getDefaultDisplay(). On modern Android we use WindowMetrics and
- * deliberately choose the larger of current/maximum bounds. AutoTap is a screen overlay rather
- * than an Activity layout, so this avoids inheriting a transient half-width app/task bound while a
- * full-screen target app is foregrounded. Legacy Android keeps getRealMetrics().
+ * choose maximum bounds only when they are strictly larger than the current bounds. This recovers
+ * from a transient half-screen/task bound without replacing a valid current landscape orientation
+ * merely because current and maximum have the same pixel area. Legacy Android keeps realMetrics.
  */
 final class AutoClickerDisplayBounds {
 
@@ -38,7 +37,7 @@ final class AutoClickerDisplayBounds {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 final Rect current = windowManager.getCurrentWindowMetrics().getBounds();
                 final Rect maximum = windowManager.getMaximumWindowMetrics().getBounds();
-                final Rect selected = chooseLarger(current, maximum);
+                final Rect selected = chooseBest(current, maximum);
                 width = selected.width();
                 height = selected.height();
             } else {
@@ -67,10 +66,10 @@ final class AutoClickerDisplayBounds {
     }
 
     @NonNull
-    static Rect chooseLarger(@NonNull Rect current, @NonNull Rect maximum) {
+    static Rect chooseBest(@NonNull Rect current, @NonNull Rect maximum) {
         final long currentArea = area(current);
         final long maximumArea = area(maximum);
-        return new Rect(maximumArea >= currentArea ? maximum : current);
+        return new Rect(maximumArea > currentArea ? maximum : current);
     }
 
     private static long area(@NonNull Rect bounds) {
