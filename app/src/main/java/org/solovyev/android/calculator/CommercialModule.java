@@ -4,6 +4,7 @@ import android.app.Application;
 
 import org.solovyev.android.calculator.ai.AiSessionTokenProvider;
 import org.solovyev.android.calculator.ai.AiSessionTokenStore;
+import org.solovyev.android.calculator.analytics.NovaProductAnalytics;
 import org.solovyev.android.calculator.billing.HttpNovaBillingEntitlementClient;
 import org.solovyev.android.calculator.billing.NovaBillingCoordinator;
 import org.solovyev.android.calculator.billing.NovaBillingEndpoint;
@@ -12,6 +13,9 @@ import org.solovyev.android.calculator.entitlement.DefaultEntitlementManager;
 import org.solovyev.android.calculator.entitlement.EntitlementManager;
 import org.solovyev.android.calculator.entitlement.NovaSessionEntitlementSource;
 
+import java.util.concurrent.Executor;
+
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -25,6 +29,19 @@ public final class CommercialModule {
     @Singleton
     EntitlementManager provideEntitlementManager(AiSessionTokenStore tokenStore) {
         return new DefaultEntitlementManager(new NovaSessionEntitlementSource(tokenStore));
+    }
+
+    @Provides
+    @Singleton
+    NovaProductAnalytics provideNovaProductAnalytics(
+            AiSessionTokenProvider sessionTokenProvider,
+            @Named(AppModule.THREAD_BACKGROUND) Executor background) {
+        // Product events live on the same Nova-owned origin as the anonymous-session route.
+        // A missing/invalid session endpoint makes analytics a no-op rather than weakening auth.
+        return NovaProductAnalytics.fromSessionEndpoint(
+                BuildConfig.NOVA_ANONYMOUS_SESSION_URL,
+                sessionTokenProvider,
+                background);
     }
 
     @Provides
