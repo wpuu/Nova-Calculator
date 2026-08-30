@@ -21,16 +21,26 @@ apply plugin: 'kotlin-kapt'
 
 def configuredNovaGatewayUrl = (project.findProperty('novaAiGatewayUrl') ?: System.getenv('NOVA_AI_GATEWAY_URL') ?: '').toString().trim()
 def configuredNovaSessionUrl = (project.findProperty('novaAnonymousSessionUrl') ?: System.getenv('NOVA_ANONYMOUS_SESSION_URL') ?: '').toString().trim()
+def configuredNovaPlayIntegrityProjectText = (project.findProperty('novaPlayIntegrityCloudProjectNumber') ?: System.getenv('NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER') ?: '0').toString().trim()
 def configuredNovaVersionCodeText = (project.findProperty('novaVersionCode') ?: System.getenv('NOVA_VERSION_CODE') ?: '20001').toString().trim()
 def configuredNovaVersionName = (project.findProperty('novaVersionName') ?: System.getenv('NOVA_VERSION_NAME') ?: '0.2.0-alpha01').toString().trim()
 def configuredNovaVersionCode
+def configuredNovaPlayIntegrityProject
 try {
     configuredNovaVersionCode = Integer.parseInt(configuredNovaVersionCodeText)
 } catch (NumberFormatException ignored) {
     throw new GradleException('novaVersionCode/NOVA_VERSION_CODE must be an integer')
 }
+try {
+    configuredNovaPlayIntegrityProject = Long.parseLong(configuredNovaPlayIntegrityProjectText)
+} catch (NumberFormatException ignored) {
+    throw new GradleException('novaPlayIntegrityCloudProjectNumber/NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER must be an integer')
+}
 if (configuredNovaVersionCode <= 0 || configuredNovaVersionCode > 2100000000) {
     throw new GradleException('Nova versionCode must be between 1 and 2100000000')
+}
+if (configuredNovaPlayIntegrityProject < 0L) {
+    throw new GradleException('Nova Play Integrity Cloud project number must be zero (disabled) or positive')
 }
 if (!(configuredNovaVersionName ==~ /[0-9A-Za-z][0-9A-Za-z._-]{0,49}/)) {
     throw new GradleException('Nova versionName must be 1-50 characters using letters, numbers, dot, underscore or hyphen')
@@ -56,6 +66,9 @@ android {
         // AI actions remain hidden until both URLs and a production installation proof adapter exist.
         buildConfigField 'String', 'NOVA_AI_GATEWAY_URL', '"' + buildConfigString(configuredNovaGatewayUrl) + '"'
         buildConfigField 'String', 'NOVA_ANONYMOUS_SESSION_URL', '"' + buildConfigString(configuredNovaSessionUrl) + '"'
+        // Google Cloud project numbers are public identifiers, not credentials. Zero keeps the
+        // Play Integrity proof path disabled in development builds.
+        buildConfigField 'long', 'NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER', configuredNovaPlayIntegrityProject + 'L'
     }
     buildFeatures {
         buildConfig true
@@ -101,6 +114,7 @@ dependencies {
     implementation "androidx.preference:preference-ktx:1.2.1"
     implementation "androidx.activity:activity:1.9.2"
     implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.google.android.play:integrity:1.6.0'
 
     implementation ':measure:'
     implementation ':square-otto:1.3.9-SNAPSHOT'

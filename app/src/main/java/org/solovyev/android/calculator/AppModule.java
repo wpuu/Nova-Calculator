@@ -40,6 +40,7 @@ import org.solovyev.android.calculator.ai.HttpAiGatewayClient;
 import org.solovyev.android.calculator.ai.HttpAnonymousSessionTokenProvider;
 import org.solovyev.android.calculator.ai.InstallationIdProvider;
 import org.solovyev.android.calculator.ai.InstallationProofProvider;
+import org.solovyev.android.calculator.ai.PlayIntegrityInstallationProofProvider;
 import org.solovyev.android.calculator.ai.SharedPreferencesAiSessionTokenStore;
 import org.solovyev.android.calculator.ai.SharedPreferencesInstallationIdProvider;
 import org.solovyev.android.calculator.language.Languages;
@@ -198,9 +199,18 @@ public class AppModule {
 
     @Provides
     @Singleton
-    InstallationProofProvider provideInstallationProofProvider() {
-        // Production AI remains hidden until a real app/device proof adapter is wired.
-        return new DisabledInstallationProofProvider();
+    InstallationProofProvider provideInstallationProofProvider(Application application) {
+        final long cloudProjectNumber = BuildConfig.NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER;
+        if (cloudProjectNumber <= 0L) {
+            // Development builds stay fail-closed until a Play-linked project number is injected.
+            return new DisabledInstallationProofProvider();
+        }
+        try {
+            return new PlayIntegrityInstallationProofProvider(application, cloudProjectNumber);
+        } catch (RuntimeException e) {
+            // A device without usable Google Play components must not silently bypass proof.
+            return new DisabledInstallationProofProvider();
+        }
     }
 
     @Provides
@@ -318,7 +328,7 @@ public class AppModule {
         }
 
         @Override
-        public void post(final Object event) {
+        public void post(Object event) {
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 super.post(event);
                 return;
