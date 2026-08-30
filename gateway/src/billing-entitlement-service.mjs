@@ -15,7 +15,12 @@ export const NOVA_BILLING_STATUS = Object.freeze({
  * entitlement session. Verification is server-side; client purchase state is never authoritative.
  */
 export class BillingEntitlementService {
-  constructor({ authVerifier, purchaseVerifier, issueEntitlementSession } = {}) {
+  constructor({
+    authVerifier,
+    purchaseVerifier,
+    issueEntitlementSession,
+    onVerifiedEntitlements = null,
+  } = {}) {
     if (!authVerifier || typeof authVerifier.verify !== 'function') {
       throw new Error('BillingEntitlementService requires authVerifier');
     }
@@ -25,9 +30,13 @@ export class BillingEntitlementService {
     if (typeof issueEntitlementSession !== 'function') {
       throw new Error('BillingEntitlementService requires issueEntitlementSession');
     }
+    if (onVerifiedEntitlements != null && typeof onVerifiedEntitlements !== 'function') {
+      throw new Error('onVerifiedEntitlements must be a function');
+    }
     this.authVerifier = authVerifier;
     this.purchaseVerifier = purchaseVerifier;
     this.issueEntitlementSession = issueEntitlementSession;
+    this.onVerifiedEntitlements = onVerifiedEntitlements;
   }
 
   async execute({ authorization, request } = {}) {
@@ -49,6 +58,21 @@ export class BillingEntitlementService {
       if (!issued?.token || !Number.isFinite(issued?.expiresAtEpochMs)) {
         throw new Error('entitlement session issuer returned invalid result');
       }
+
+      // Funnel measurement is server-authoritative: only a Google-verified paid entitlement can
+      // reach this callback. Analytics failure must never revoke or delay an otherwise valid
+      // purchase, so it is isolated from the billing result.
+      if (entitlements.length > 0 && this.onVerifiedEntitlements) {
+        try {
+          await this.onVerifiedEntitlements({
+            subjectId: principal.subjectId,
+            entitlements: Object.freeze([...entitlements]),
+          });
+        } catch {
+          // Billing success remains authoritative even when the analytics backend is unavailable.
+        }
+      }
+
       return Object.freeze({
         status: NOVA_BILLING_STATUS.SUCCESS,
         sessionToken: issued.token,
