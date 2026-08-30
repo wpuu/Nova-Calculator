@@ -11,6 +11,7 @@ import androidx.preference.Preference;
 
 import org.solovyev.android.calculator.CalculatorApplication;
 import org.solovyev.android.calculator.R;
+import org.solovyev.android.calculator.analytics.NovaProductAnalytics;
 import org.solovyev.android.calculator.billing.NovaBillingCoordinator;
 import org.solovyev.android.calculator.billing.NovaBillingProducts;
 import org.solovyev.android.calculator.entitlement.EntitlementSnapshot;
@@ -57,21 +58,30 @@ public final class NovaBillingPreference extends Preference {
                     return;
                 }
                 final Activity activity = activity(getContext());
-                if (activity != null) billing.buyProLifetime(activity);
+                if (activity != null) {
+                    analytics().proPurchaseStarted(NovaProductAnalytics.PaywallSource.OTHER);
+                    billing.buyProLifetime(activity);
+                }
             } else if (KEY_AI_MONTHLY.equals(key)) {
                 if (entitlement.hasAiPlus()) {
                     alreadyOwned();
                     return;
                 }
                 final Activity activity = activity(getContext());
-                if (activity != null) billing.buyAiPlusMonthly(activity);
+                if (activity != null) {
+                    analytics().proPurchaseStarted(NovaProductAnalytics.PaywallSource.OTHER);
+                    billing.buyAiPlusMonthly(activity);
+                }
             } else if (KEY_AI_ANNUAL.equals(key)) {
                 if (entitlement.hasAiPlus()) {
                     alreadyOwned();
                     return;
                 }
                 final Activity activity = activity(getContext());
-                if (activity != null) billing.buyAiPlusAnnual(activity);
+                if (activity != null) {
+                    analytics().proPurchaseStarted(NovaProductAnalytics.PaywallSource.OTHER);
+                    billing.buyAiPlusAnnual(activity);
+                }
             } else if (KEY_RESTORE.equals(key)) {
                 billing.restorePurchases();
                 Toast.makeText(getContext(), R.string.nova_billing_restore_started, Toast.LENGTH_SHORT).show();
@@ -145,6 +155,17 @@ public final class NovaBillingPreference extends Preference {
 
     private void alreadyOwned() {
         Toast.makeText(getContext(), R.string.nova_billing_already_owned, Toast.LENGTH_SHORT).show();
+    }
+
+    private NovaProductAnalytics analytics() {
+        final Context app = getContext().getApplicationContext();
+        if (app instanceof CalculatorApplication) {
+            try {
+                return ((CalculatorApplication) app).getComponent().productAnalytics();
+            } catch (RuntimeException ignored) {
+            }
+        }
+        return NovaProductAnalytics.fromSessionEndpoint(null, null, null);
     }
 
     @Nullable
