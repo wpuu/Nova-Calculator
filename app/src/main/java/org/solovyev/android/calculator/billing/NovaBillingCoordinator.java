@@ -100,6 +100,30 @@ public final class NovaBillingCoordinator implements NovaBillingObserver {
         }
     }
 
+    @Nullable
+    public String getProLifetimePriceLabel() {
+        final ProductDetails details = getProductDetails(NovaBillingProducts.PRO_LIFETIME);
+        if (details == null) return null;
+        final List<ProductDetails.OneTimePurchaseOfferDetails> offers =
+                details.getOneTimePurchaseOfferDetailsList();
+        if (offers == null || offers.isEmpty()) return null;
+        return offers.get(0).getFormattedPrice();
+    }
+
+    @Nullable
+    public String getAiPlusPriceLabel(String basePlanId) {
+        final ProductDetails details = getProductDetails(NovaBillingProducts.AI_PLUS);
+        if (details == null) return null;
+        final ProductDetails.SubscriptionOfferDetails offer =
+                findSubscriptionOffer(details, basePlanId);
+        if (offer == null || offer.getPricingPhases() == null) return null;
+        final List<ProductDetails.PricingPhase> phases =
+                offer.getPricingPhases().getPricingPhaseList();
+        if (phases == null || phases.isEmpty()) return null;
+        // The last phase is the ongoing recurring price after any intro/trial phase.
+        return phases.get(phases.size() - 1).getFormattedPrice();
+    }
+
     public void restorePurchases() {
         if (!enabled || playBillingClient == null) return;
         playBillingClient.refreshPurchases();
@@ -172,6 +196,20 @@ public final class NovaBillingCoordinator implements NovaBillingObserver {
                 }
             }
         });
+    }
+
+    @Nullable
+    private static ProductDetails.SubscriptionOfferDetails findSubscriptionOffer(
+            ProductDetails details, String basePlanId) {
+        final List<ProductDetails.SubscriptionOfferDetails> offers = details.getSubscriptionOfferDetails();
+        if (offers == null) return null;
+        ProductDetails.SubscriptionOfferDetails fallback = null;
+        for (ProductDetails.SubscriptionOfferDetails offer : offers) {
+            if (!basePlanId.equals(offer.getBasePlanId())) continue;
+            if (offer.getOfferId() == null) return offer;
+            if (fallback == null) fallback = offer;
+        }
+        return fallback;
     }
 
     private void requireEnabled() {
