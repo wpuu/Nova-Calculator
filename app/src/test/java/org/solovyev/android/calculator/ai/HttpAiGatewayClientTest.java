@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -26,20 +27,12 @@ public class HttpAiGatewayClientTest {
 
     @Test
     public void postsOnlyNovaContractFieldsAndSessionTokenWithoutFollowingRedirects() throws Exception {
-        FakeConnection connection = new FakeConnection(new URL("https://nova.example/ai"));
-        connection.responseCode = 200;
-        connection.responseBody = "{\"requestId\":\"req-1\",\"status\":\"SUCCESS\",\"answer\":\"ok\"}";
+        FakeConnection connection = successConnection();
         AtomicInteger opens = new AtomicInteger();
         HttpAiGatewayClient client = client(connection, opens, () -> " session-token ", 32 * 1024);
-        AiGatewayRequest request = new AiGatewayRequest(
-                "req-1",
-                AiOperation.EXPLAIN_CALCULATION,
-                "2+2",
-                "4",
-                "zh-CN");
         AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
 
-        client.execute(request, result::set);
+        client.execute(request("req-1"), result::set);
 
         assertEquals(1, opens.get());
         assertEquals("POST", connection.methodSeen);
@@ -53,7 +46,7 @@ public class HttpAiGatewayClientTest {
         assertEquals("EXPLAIN_CALCULATION", json.getString("operation"));
         assertEquals("2+2", json.getString("expression"));
         assertEquals("4", json.getString("deterministicResult"));
-        assertEquals("zh-CN", json.getString("localeTag"));
+        assertEquals("en-US", json.getString("localeTag"));
         assertFalse(json.has("provider"));
         assertFalse(json.has("model"));
         assertFalse(json.has("apiKey"));
@@ -65,28 +58,40 @@ public class HttpAiGatewayClientTest {
     @Test
     public void anonymousRequestDoesNotSendAuthorizationHeader() throws Exception {
         FakeConnection connection = successConnection();
-        HttpAiGatewayClient client = client(connection, new AtomicInteger(), () -> "   ", 32 * 1024);
         AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
 
-        client.execute(request("req-anon"), result::set);
+        client(connection, new AtomicInteger(), () -> "   ", 32 * 1024)
+                .execute(request("req-anon"), result::set);
 
         assertNull(connection.getRequestProperty("Authorization"));
         assertEquals(AiGatewayStatus.SUCCESS, result.get().getStatus());
     }
 
     @Test
-    public void redirectIsNeverFollowedAndReturnsUnavailable() throws Exception {
-        FakeConnection connection = new FakeConnection(new URL("https://nova.example/ai"));
-        connection.responseCode = 302;
-        connection.responseBody = "";
+    public void malformedSessionTokenFailsBeforeOpeningNetwork() throws Exception {
+        FakeConnection connection = successConnection();
         AtomicInteger opens = new AtomicInteger();
-        HttpAiGatewayClient client = client(connection, opens, () -> "token", 32 * 1024);
         AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
 
-        client.execute(request("req-redirect"), result::set);
+        client(connection, opens, () -> "good\r\nX-Evil: yes", 1024)
+                .execute(request("req-token"), result::set);
 
-        assertEquals(1, opens.get());
+        assertEquals(0, opens.get());
+        assertEquals(AiGatewayStatus.TEMPORARILY_UNAVAILABLE, result.get().getStatus());
+    }
+
+    @Test
+    public void redirectIsNeverFollowedAndReturnsUnavailable() throws Exception {
+        FakeConnection connection = new FakeConnection(new URL("https://nova.example/ai"));
+        connection.responseCode = 307;
+        connection.responseBody = "{\"status\":\"SUCCESS\",\"answer\":\"wrong\"}";
+        AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
+
+        client(connection, new AtomicInteger(), () -> "token", 32 * 1024)
+                .execute(request("req-redirect"), result::set);
+
         assertFalse(connection.getInstanceFollowRedirects());
+        assertFalse(connection.inputStreamOpened);
         assertEquals(AiGatewayStatus.TEMPORARILY_UNAVAILABLE, result.get().getStatus());
     }
 
@@ -94,10 +99,10 @@ public class HttpAiGatewayClientTest {
     public void oversizedDeclaredResponseIsRejectedBeforeOpeningBodyStream() throws Exception {
         FakeConnection connection = successConnection();
         connection.contentLength = 1025;
-        HttpAiGatewayClient client = client(connection, new AtomicInteger(), () -> null, 1024);
         AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
 
-        client.execute(request("req-large"), result::set);
+        client(connection, new AtomicInteger(), () -> null, 1024)
+                .execute(request("req-large"), result::set);
 
         assertFalse(connection.inputStreamOpened);
         assertEquals(AiGatewayStatus.TEMPORARILY_UNAVAILABLE, result.get().getStatus());
@@ -108,33 +113,60 @@ public class HttpAiGatewayClientTest {
         FakeConnection connection = successConnection();
         connection.responseBody = repeat('x', 1025);
         connection.contentLength = -1;
-        HttpAiGatewayClient client = client(connection, new AtomicInteger(), () -> null, 1024);
         AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
 
-        client.execute(request("req-stream-large"), result::set);
+        client(connection, new AtomicInteger(), () -> null, 1024)
+                .execute(request("req-stream-large"), result::set);
 
         assertTrue(connection.inputStreamOpened);
         assertEquals(AiGatewayStatus.TEMPORARILY_UNAVAILABLE, result.get().getStatus());
     }
 
     @Test
-    public void structuredErrorBodyWinsOverGenericHttpFallbackButCannotReturnSuccess() throws Exception {
+    public void rateLimitBodyCanPreserveQuotaOrRpmDetails() throws Exception {
         FakeConnection connection = new FakeConnection(new URL("https://nova.example/ai"));
         connection.responseCode = 429;
-        connection.responseBody = "{\"requestId\":\"req-rate\",\"status\":\"RATE_LIMITED\",\"retryAfterSeconds\":12}";
-        HttpAiGatewayClient client = client(connection, new AtomicInteger(), () -> null, 32 * 1024);
+        connection.responseBody = "{\"requestId\":\"req-rate\",\"status\":\"QUOTA_EXHAUSTED\",\"retryAfterSeconds\":12}";
         AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
 
-        client.execute(request("req-rate"), result::set);
+        client(connection, new AtomicInteger(), () -> null, 32 * 1024)
+                .execute(request("req-rate"), result::set);
 
-        assertEquals(AiGatewayStatus.RATE_LIMITED, result.get().getStatus());
+        assertEquals(AiGatewayStatus.QUOTA_EXHAUSTED, result.get().getStatus());
         assertEquals(12L, result.get().getRetryAfterSeconds());
     }
 
     @Test
-    public void transportFailureBecomesUnavailableAndCallbackRunsOnce() throws Exception {
+    public void authHttpStatusCannotBeOverriddenByResponseBody() throws Exception {
+        FakeConnection connection = new FakeConnection(new URL("https://nova.example/ai"));
+        connection.responseCode = 401;
+        connection.responseBody = "{\"requestId\":\"req-auth\",\"status\":\"QUOTA_EXHAUSTED\",\"retryAfterSeconds\":999}";
+        AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
+
+        client(connection, new AtomicInteger(), () -> "token", 32 * 1024)
+                .execute(request("req-auth"), result::set);
+
+        assertEquals(AiGatewayStatus.AUTH_REQUIRED, result.get().getStatus());
+        assertEquals(0L, result.get().getRetryAfterSeconds());
+    }
+
+    @Test
+    public void genericClientErrorCannotInventAnotherBusinessState() throws Exception {
+        FakeConnection connection = new FakeConnection(new URL("https://nova.example/ai"));
+        connection.responseCode = 400;
+        connection.responseBody = "{\"requestId\":\"req-bad\",\"status\":\"RATE_LIMITED\"}";
+        AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
+
+        client(connection, new AtomicInteger(), () -> null, 32 * 1024)
+                .execute(request("req-bad"), result::set);
+
+        assertEquals(AiGatewayStatus.INVALID_REQUEST, result.get().getStatus());
+    }
+
+    @Test
+    public void transportOrExecutorFailureBecomesUnavailableAndCallbackRunsOnce() throws Exception {
         AtomicInteger callbacks = new AtomicInteger();
-        HttpAiGatewayClient client = new HttpAiGatewayClient(
+        HttpAiGatewayClient transportFailure = new HttpAiGatewayClient(
                 new AiGatewayEndpoint("https://nova.example/ai"),
                 () -> null,
                 DIRECT,
@@ -143,25 +175,33 @@ public class HttpAiGatewayClientTest {
                 1000,
                 1000,
                 1024);
-        AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
-
-        client.execute(request("req-fail"), response -> {
+        AtomicReference<AiGatewayResponse> first = new AtomicReference<>();
+        transportFailure.execute(request("req-fail"), response -> {
             callbacks.incrementAndGet();
-            result.set(response);
+            first.set(response);
         });
-
         assertEquals(1, callbacks.get());
-        assertEquals(AiGatewayStatus.TEMPORARILY_UNAVAILABLE, result.get().getStatus());
+        assertEquals(AiGatewayStatus.TEMPORARILY_UNAVAILABLE, first.get().getStatus());
+
+        Executor rejecting = command -> { throw new RejectedExecutionException("shutdown"); };
+        HttpAiGatewayClient executorFailure = new HttpAiGatewayClient(
+                new AiGatewayEndpoint("https://nova.example/ai"),
+                () -> null,
+                rejecting,
+                DIRECT);
+        AtomicReference<AiGatewayResponse> second = new AtomicReference<>();
+        executorFailure.execute(request("req-rejected"), second::set);
+        assertEquals(AiGatewayStatus.TEMPORARILY_UNAVAILABLE, second.get().getStatus());
     }
 
     @Test
     public void tokenProviderFailureDoesNotOpenNetwork() throws Exception {
         AtomicInteger opens = new AtomicInteger();
         FakeConnection connection = successConnection();
-        HttpAiGatewayClient client = client(connection, opens, () -> { throw new IllegalStateException("session unavailable"); }, 1024);
         AtomicReference<AiGatewayResponse> result = new AtomicReference<>();
 
-        client.execute(request("req-token"), result::set);
+        client(connection, opens, () -> { throw new IllegalStateException("session unavailable"); }, 1024)
+                .execute(request("req-token-provider"), result::set);
 
         assertEquals(0, opens.get());
         assertEquals(AiGatewayStatus.TEMPORARILY_UNAVAILABLE, result.get().getStatus());
@@ -206,7 +246,7 @@ public class HttpAiGatewayClientTest {
         final ByteArrayOutputStream requestBody = new ByteArrayOutputStream();
         int responseCode = 200;
         String responseBody = "";
-        long contentLength = -1;
+        int contentLength = -1;
         boolean inputStreamOpened;
         String methodSeen;
 
@@ -245,7 +285,7 @@ public class HttpAiGatewayClientTest {
         }
 
         @Override
-        public long getContentLengthLong() {
+        public int getContentLength() {
             return contentLength;
         }
 

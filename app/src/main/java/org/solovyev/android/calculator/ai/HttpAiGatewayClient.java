@@ -21,6 +21,7 @@ public final class HttpAiGatewayClient implements AiGatewayClient {
     static final int DEFAULT_CONNECT_TIMEOUT_MS = 10_000;
     static final int DEFAULT_READ_TIMEOUT_MS = 20_000;
     static final int DEFAULT_MAX_RESPONSE_BYTES = 32 * 1024;
+    private static final int MAX_SESSION_TOKEN_CHARS = 4096;
 
     interface ConnectionFactory {
         HttpURLConnection open(URL url) throws IOException;
@@ -79,10 +80,11 @@ public final class HttpAiGatewayClient implements AiGatewayClient {
     public void execute(AiGatewayRequest request, Callback callback) {
         if (request == null) throw new IllegalArgumentException("request must not be null");
         if (callback == null) throw new IllegalArgumentException("callback must not be null");
-        networkExecutor.execute(() -> {
-            final AiGatewayResponse response = executeBlocking(request);
-            callbackExecutor.execute(() -> callback.onComplete(response));
-        });
+        try {
+            networkExecutor.execute(() -> deliver(callback, executeBlocking(request)));
+        } catch (RuntimeException e) {
+            deliver(callback, unavailable(request.getRequestId()));
+        }
     }
 
     private AiGatewayResponse executeBlocking(AiGatewayRequest request) {
@@ -103,7 +105,8 @@ public final class HttpAiGatewayClient implements AiGatewayClient {
                 return unavailable(request.getRequestId());
             }
 
-            final long declaredLength = connection.getContentLengthLong();
+            // getContentLength() is available across the app's full Android API range.
+            final int declaredLength = connection.getContentLength();
             if (declaredLength > maxResponseBytes) {
                 return unavailable(request.getRequestId());
             }
@@ -112,20 +115,7 @@ public final class HttpAiGatewayClient implements AiGatewayClient {
                     ? connection.getInputStream()
                     : connection.getErrorStream();
             final String responseBody = readBody(stream, maxResponseBytes);
-
-            if (status >= 200 && status < 300) {
-                return AiGatewayJsonCodec.decodeResponse(responseBody, request.getRequestId());
-            }
-
-            if (responseBody != null && !responseBody.trim().isEmpty()) {
-                final AiGatewayResponse decoded = AiGatewayJsonCodec.decodeResponse(
-                        responseBody,
-                        request.getRequestId());
-                if (!decoded.isSuccess() && decoded.getStatus() != AiGatewayStatus.TEMPORARILY_UNAVAILABLE) {
-                    return decoded;
-                }
-            }
-            return AiGatewayJsonCodec.fallbackForHttpStatus(status, request.getRequestId());
+            return normalizeHttpResponse(status, responseBody, request.getRequestId());
         } catch (IOException | RuntimeException e) {
             return unavailable(request.getRequestId());
         } finally {
@@ -155,7 +145,42 @@ public final class HttpAiGatewayClient implements AiGatewayClient {
     private static String normalizeToken(String token) {
         if (token == null) return null;
         final String trimmed = token.trim();
-        return trimmed.isEmpty() ? null : trimmed;
+        if (trimmed.isEmpty()) return null;
+        if (trimmed.length() > MAX_SESSION_TOKEN_CHARS
+                || trimmed.indexOf('\r') >= 0
+                || trimmed.indexOf('\n') >= 0) {
+            throw new IllegalArgumentException("invalid Nova session token");
+        }
+        return trimmed;
+    }
+
+    private static AiGatewayResponse normalizeHttpResponse(int status,
+                                                           String responseBody,
+                                                           String requestId) {
+        final AiGatewayResponse decoded = AiGatewayJsonCodec.decodeResponse(responseBody, requestId);
+        if (status >= 200 && status < 300) {
+            return decoded;
+        }
+        if (status == 401 || status == 403) {
+            return new AiGatewayResponse(
+                    requestId,
+                    AiGatewayStatus.AUTH_REQUIRED,
+                    "",
+                    0L,
+                    -1,
+                    0L);
+        }
+        if (status == 429) {
+            if (decoded.getStatus() == AiGatewayStatus.QUOTA_EXHAUSTED
+                    || decoded.getStatus() == AiGatewayStatus.RATE_LIMITED) {
+                return decoded;
+            }
+            return AiGatewayJsonCodec.fallbackForHttpStatus(status, requestId);
+        }
+        if (status >= 400 && status < 500) {
+            return AiGatewayJsonCodec.fallbackForHttpStatus(status, requestId);
+        }
+        return unavailable(requestId);
     }
 
     private static String readBody(InputStream stream, int maxBytes) throws IOException {
@@ -174,6 +199,14 @@ public final class HttpAiGatewayClient implements AiGatewayClient {
                 output.write(buffer, 0, read);
             }
             return new String(output.toByteArray(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private void deliver(Callback callback, AiGatewayResponse response) {
+        try {
+            callbackExecutor.execute(() -> callback.onComplete(response));
+        } catch (RuntimeException ignored) {
+            // The app may be shutting down; do not move a UI callback onto an arbitrary thread.
         }
     }
 
