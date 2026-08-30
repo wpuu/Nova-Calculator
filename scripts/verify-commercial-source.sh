@@ -35,6 +35,10 @@ forbidden=(
   'com.google.android.gms.ads.'
   'com.google.firebase:firebase-analytics'
   'com.google.firebase.analytics.'
+  'https://example.com/nova-calculator'
+  'facebook.com/calculatorpp'
+  'play.google.com/store/apps/details?id=org.solovyev.android.calculator'
+  'market://details?id=org.solovyev.android.calculator'
 )
 
 failed=0
