@@ -134,6 +134,7 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
         super.onResume();
         launcher.setActivity(this);
         restartIfModeChanged();
+        startupHelper.maybeShowAutoTapChoice(this);
     }
 
     @Override
