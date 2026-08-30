@@ -31,7 +31,7 @@ import org.solovyev.android.calculator.wizard.WizardFragment;
 import javax.inject.Singleton;
 
 @Singleton
-@Component(modules = AppModule.class)
+@Component(modules = {AppModule.class, CommercialModule.class})
 public interface AppComponent {
     void inject(CalculatorApplication application);
     void inject(EditorFragment fragment);
