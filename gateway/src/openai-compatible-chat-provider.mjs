@@ -41,7 +41,7 @@ export class OpenAiCompatibleChatProvider {
           },
           body: JSON.stringify({
             model: this.model,
-            messages: buildMessages(normalized),
+            messages: buildNormalizedMessages(normalized),
             temperature: 0.2,
             max_tokens: this.maxTokens,
             stream: false,
@@ -96,7 +96,10 @@ export class OpenAiCompatibleChatProvider {
 }
 
 export function buildMessages(request) {
-  const normalized = normalizeExplainRequest(request);
+  return buildNormalizedMessages(normalizeExplainRequest(request));
+}
+
+function buildNormalizedMessages(normalized) {
   return [
     {
       role: 'system',
