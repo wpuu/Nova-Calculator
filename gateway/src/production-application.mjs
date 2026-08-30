@@ -50,6 +50,7 @@ export function createProductionNovaGatewayApplication(options = {}) {
       evalClient: redisEvalClient,
       keyPrefix: env.NOVA_PRODUCT_EVENT_REDIS_KEY_PREFIX || 'nova:product:v1',
       retentionDays: env.NOVA_PRODUCT_EVENT_RETENTION_DAYS || 120,
+      dailySubjectLimit: env.NOVA_PRODUCT_EVENT_DAILY_SUBJECT_LIMIT || 500,
     }) : null);
 
   let integrityDecoder = options.integrityDecoder;
@@ -106,6 +107,7 @@ export function createProductionNovaGatewayApplication(options = {}) {
       playIntegrityServerDecode: !options.installationProofVerifier,
       googlePlayPurchaseVerification: Boolean(purchaseVerifier),
       redisProductFunnelAggregation: Boolean(productEventStore),
+      pseudonymousProductEventRateLimit: Boolean(productEventStore),
     }),
   });
 }
