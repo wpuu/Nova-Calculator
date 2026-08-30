@@ -71,6 +71,14 @@ test('prompt treats expression as data and states the verified result is authori
   assert.equal(messages[1].content.includes('<verified_result>'), true);
 });
 
+test('prompt forbids fabricated advanced derivations and requires explicit uncertainty', () => {
+  const system = buildMessages(novaRequest({ expression: 'integral(exp(-x^2), x, 0, infinity)' }))[0].content;
+  assert.equal(system.includes('Do not fabricate a rigorous derivation'), true);
+  assert.equal(system.includes('cannot be justified with high confidence'), true);
+  assert.equal(system.includes('Never present an uncertain symbolic step as certain'), true);
+  assert.equal(system.includes('verified calculator result supplied by Nova is authoritative'), true);
+});
+
 test('429 is normalized with Retry-After for dispatcher cooldown', async () => {
   const provider = new OpenAiCompatibleChatProvider({
     baseUrl: 'https://gateway-provider.invalid/v1',
