@@ -32,6 +32,7 @@ import android.util.TimingLogger;
 
 import com.squareup.otto.Bus;
 
+import org.solovyev.android.calculator.billing.NovaBillingCoordinator;
 import org.solovyev.android.calculator.floating.FloatingCalculatorActivity;
 import org.solovyev.android.calculator.ga.Ga;
 import org.solovyev.android.calculator.history.History;
@@ -117,6 +118,9 @@ public class CalculatorApplication extends android.app.Application implements Sh
     @Inject
     Lazy<Ga> ga;
 
+    @Inject
+    NovaBillingCoordinator billingCoordinator;
+
     @Nonnull
     private final TimingLogger timer = new TimingLogger("App", "onCreate");
 
@@ -162,6 +166,7 @@ public class CalculatorApplication extends android.app.Application implements Sh
         languages.updateContextLocale(this, true);
 
         calculator.init(initThread);
+        billingCoordinator.start();
 
         initThread.execute(new Runnable() {
             @Override
