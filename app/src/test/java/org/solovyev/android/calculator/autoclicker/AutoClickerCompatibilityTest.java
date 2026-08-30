@@ -35,11 +35,22 @@ public class AutoClickerCompatibilityTest {
     }
 
     @Test
-    public void displayBoundsChooseLargerAreaToAvoidTransientHalfScreenBounds() {
+    public void displayBoundsChooseStrictlyLargerAreaToEscapeTransientHalfScreen() {
         Rect transientHalf = new Rect(0, 0, 1080, 1200);
         Rect fullLandscape = new Rect(0, 0, 2400, 1080);
 
-        Rect selected = AutoClickerDisplayBounds.chooseLarger(transientHalf, fullLandscape);
+        Rect selected = AutoClickerDisplayBounds.chooseBest(transientHalf, fullLandscape);
+
+        assertEquals(2400, selected.width());
+        assertEquals(1080, selected.height());
+    }
+
+    @Test
+    public void equalAreaPrefersCurrentOrientation() {
+        Rect currentLandscape = new Rect(0, 0, 2400, 1080);
+        Rect maximumPortrait = new Rect(0, 0, 1080, 2400);
+
+        Rect selected = AutoClickerDisplayBounds.chooseBest(currentLandscape, maximumPortrait);
 
         assertEquals(2400, selected.width());
         assertEquals(1080, selected.height());
