@@ -56,6 +56,7 @@ test('safe runtime summary never exposes provider identity or raw credentials', 
     paidReserveFraction: 0.2,
     providerTimeoutMs: 15_000,
     maxTokens: 800,
+    sharedProviderCapacity: false,
   });
 
   const serialized = JSON.stringify(runtime.safeSummary);
@@ -63,6 +64,50 @@ test('safe runtime summary never exposes provider identity or raw credentials', 
   assert.equal(serialized.includes('runtime-model'), false);
   assert.equal(serialized.includes('secret-a'), false);
   assert.equal(serialized.includes('secret-b'), false);
+});
+
+test('runtime can inject an asynchronous shared provider pool without exposing secrets', async () => {
+  const factoryCalls = [];
+  const leases = [];
+  const sharedPool = {
+    async lease(priority, options) {
+      leases.push({ priority, options });
+      return { id: 'key-1', secret: 'secret-a' };
+    },
+    async reportSuccess() {},
+    async reportRateLimit() {},
+    async reportFailure() {},
+    async setEnabled() {},
+  };
+  const runtime = createGatewayRuntime(env(), {
+    keyPoolFactory(options) {
+      factoryCalls.push(options);
+      return sharedPool;
+    },
+    fetchImpl: async () => ({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      async json() {
+        return { choices: [{ message: { content: '共享容量正常' } }] };
+      },
+    }),
+  });
+
+  const result = await runtime.dispatcher.dispatch({
+    operation: 'EXPLAIN_CALCULATION',
+    expression: '1+2',
+    deterministicResult: '3',
+    localeTag: 'zh-CN',
+  }, REQUEST_PRIORITY.AI_PLUS);
+
+  assert.equal(result.answer, '共享容量正常');
+  assert.equal(factoryCalls.length, 1);
+  assert.equal(factoryCalls[0].keys.length, 2);
+  assert.equal(factoryCalls[0].keys[0].secret, 'secret-a');
+  assert.equal(runtime.safeSummary.sharedProviderCapacity, true);
+  assert.equal(leases[0].priority, REQUEST_PRIORITY.AI_PLUS);
+  assert.equal(JSON.stringify(runtime.safeSummary).includes('secret-a'), false);
 });
 
 test('runtime rejects missing provider secrets and invalid capacity settings', () => {
