@@ -8,25 +8,58 @@ import org.junit.Test;
 public class AiGatewayFeatureConfigTest {
 
     @Test
-    public void blankGatewayUrlKeepsAiHidden() {
-        assertFalse(AiGatewayFeatureConfig.fromNullableUrl(null).isEnabled());
-        assertFalse(AiGatewayFeatureConfig.fromNullableUrl("   ").isEnabled());
+    public void missingGatewayOrSessionUrlKeepsAiHidden() {
+        assertFalse(AiGatewayFeatureConfig.fromNullableUrls(null, null, true).isEnabled());
+        assertFalse(AiGatewayFeatureConfig.fromNullableUrls("https://nova.example/ai", "", true).isEnabled());
+        assertFalse(AiGatewayFeatureConfig.fromNullableUrls("", "https://nova.example/session", true).isEnabled());
     }
 
     @Test
-    public void validHttpsGatewayEnablesAi() {
-        AiGatewayFeatureConfig config = AiGatewayFeatureConfig.fromNullableUrl("https://nova.example/ai");
-        assertTrue(config.isEnabled());
-        assertTrue(config.requireEndpoint().toString().startsWith("https://nova.example/"));
+    public void validNovaEndpointsStillRequireInstallationProofCapability() {
+        AiGatewayFeatureConfig disabled = AiGatewayFeatureConfig.fromNullableUrls(
+                "https://nova.example/ai",
+                "https://nova.example/session/anonymous",
+                false);
+        assertFalse(disabled.isEnabled());
+
+        AiGatewayFeatureConfig enabled = AiGatewayFeatureConfig.fromNullableUrls(
+                "https://nova.example/ai",
+                "https://nova.example/session/anonymous",
+                true);
+        assertTrue(enabled.isEnabled());
+        assertTrue(enabled.requireEndpoint().toString().startsWith("https://nova.example/"));
+        assertTrue(enabled.requireSessionEndpoint().toString().startsWith("https://nova.example/"));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void insecureGatewayUrlIsRejectedInsteadOfSilentlyEnablingAi() {
-        AiGatewayFeatureConfig.fromNullableUrl("http://nova.example/ai");
+    public void insecureGatewayUrlIsRejected() {
+        AiGatewayFeatureConfig.fromNullableUrls(
+                "http://nova.example/ai",
+                "https://nova.example/session/anonymous",
+                true);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void insecureSessionUrlIsRejected() {
+        AiGatewayFeatureConfig.fromNullableUrls(
+                "https://nova.example/ai",
+                "http://nova.example/session/anonymous",
+                true);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void disabledConfigHasNoEndpoint() {
-        AiGatewayFeatureConfig.fromNullableUrl("").requireEndpoint();
+    public void disabledConfigHasNoUsableGatewayEndpoint() {
+        AiGatewayFeatureConfig.fromNullableUrls(
+                "https://nova.example/ai",
+                "https://nova.example/session/anonymous",
+                false).requireEndpoint();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void disabledConfigHasNoUsableSessionEndpoint() {
+        AiGatewayFeatureConfig.fromNullableUrls(
+                "https://nova.example/ai",
+                "https://nova.example/session/anonymous",
+                false).requireSessionEndpoint();
     }
 }

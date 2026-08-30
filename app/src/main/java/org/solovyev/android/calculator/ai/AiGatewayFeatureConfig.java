@@ -6,27 +6,50 @@ import javax.annotation.Nullable;
 public final class AiGatewayFeatureConfig {
 
     @Nullable
-    private final AiGatewayEndpoint endpoint;
+    private final AiGatewayEndpoint gatewayEndpoint;
+    @Nullable
+    private final AiSessionEndpoint sessionEndpoint;
+    private final boolean installationProofAvailable;
 
-    private AiGatewayFeatureConfig(@Nullable AiGatewayEndpoint endpoint) {
-        this.endpoint = endpoint;
+    private AiGatewayFeatureConfig(@Nullable AiGatewayEndpoint gatewayEndpoint,
+                                   @Nullable AiSessionEndpoint sessionEndpoint,
+                                   boolean installationProofAvailable) {
+        this.gatewayEndpoint = gatewayEndpoint;
+        this.sessionEndpoint = sessionEndpoint;
+        this.installationProofAvailable = installationProofAvailable;
     }
 
-    public static AiGatewayFeatureConfig fromNullableUrl(@Nullable String value) {
-        if (value == null || value.trim().isEmpty()) {
-            return new AiGatewayFeatureConfig(null);
-        }
-        return new AiGatewayFeatureConfig(new AiGatewayEndpoint(value));
+    public static AiGatewayFeatureConfig fromNullableUrls(@Nullable String gatewayUrl,
+                                                          @Nullable String sessionUrl,
+                                                          boolean installationProofAvailable) {
+        final AiGatewayEndpoint gateway = blank(gatewayUrl)
+                ? null
+                : new AiGatewayEndpoint(gatewayUrl);
+        final AiSessionEndpoint session = blank(sessionUrl)
+                ? null
+                : new AiSessionEndpoint(sessionUrl);
+        return new AiGatewayFeatureConfig(gateway, session, installationProofAvailable);
     }
 
     public boolean isEnabled() {
-        return endpoint != null;
+        return gatewayEndpoint != null && sessionEndpoint != null && installationProofAvailable;
     }
 
     public AiGatewayEndpoint requireEndpoint() {
-        if (endpoint == null) {
-            throw new IllegalStateException("Nova AI gateway is not configured");
+        if (!isEnabled()) {
+            throw new IllegalStateException("Nova AI gateway is not fully configured");
         }
-        return endpoint;
+        return gatewayEndpoint;
+    }
+
+    public AiSessionEndpoint requireSessionEndpoint() {
+        if (!isEnabled()) {
+            throw new IllegalStateException("Nova AI session flow is not fully configured");
+        }
+        return sessionEndpoint;
+    }
+
+    private static boolean blank(@Nullable String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

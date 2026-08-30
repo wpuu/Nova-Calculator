@@ -34,7 +34,9 @@ import org.solovyev.android.calculator.ai.AiGatewayClient;
 import org.solovyev.android.calculator.ai.AiGatewayFeatureConfig;
 import org.solovyev.android.calculator.ai.AiSessionTokenProvider;
 import org.solovyev.android.calculator.ai.DisabledAiGatewayClient;
+import org.solovyev.android.calculator.ai.DisabledInstallationProofProvider;
 import org.solovyev.android.calculator.ai.HttpAiGatewayClient;
+import org.solovyev.android.calculator.ai.InstallationProofProvider;
 import org.solovyev.android.calculator.language.Languages;
 import org.solovyev.android.calculator.wizard.CalculatorWizards;
 import org.solovyev.android.plotter.Plot;
@@ -183,15 +185,25 @@ public class AppModule {
 
     @Provides
     @Singleton
-    AiGatewayFeatureConfig provideAiGatewayFeatureConfig() {
-        return AiGatewayFeatureConfig.fromNullableUrl(BuildConfig.NOVA_AI_GATEWAY_URL);
+    InstallationProofProvider provideInstallationProofProvider() {
+        // Production AI remains hidden until a real app/device proof adapter is wired.
+        return new DisabledInstallationProofProvider();
+    }
+
+    @Provides
+    @Singleton
+    AiGatewayFeatureConfig provideAiGatewayFeatureConfig(InstallationProofProvider proofProvider) {
+        return AiGatewayFeatureConfig.fromNullableUrls(
+                BuildConfig.NOVA_AI_GATEWAY_URL,
+                BuildConfig.NOVA_ANONYMOUS_SESSION_URL,
+                proofProvider.isAvailable());
     }
 
     @Provides
     @Singleton
     AiSessionTokenProvider provideAiSessionTokenProvider() {
-        // Anonymous/free requests are supported first. Paid-account session tokens will replace
-        // this provider once the server-verified account/purchase flow is wired.
+        // The feature remains disabled while InstallationProofProvider is unavailable. A cached,
+        // proof-gated Nova session provider will replace this placeholder when that adapter lands.
         return () -> null;
     }
 

@@ -20,6 +20,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 def configuredNovaGatewayUrl = (project.findProperty('novaAiGatewayUrl') ?: System.getenv('NOVA_AI_GATEWAY_URL') ?: '').toString().trim()
+def configuredNovaSessionUrl = (project.findProperty('novaAnonymousSessionUrl') ?: System.getenv('NOVA_ANONYMOUS_SESSION_URL') ?: '').toString().trim()
 def configuredNovaVersionCodeText = (project.findProperty('novaVersionCode') ?: System.getenv('NOVA_VERSION_CODE') ?: '20001').toString().trim()
 def configuredNovaVersionName = (project.findProperty('novaVersionName') ?: System.getenv('NOVA_VERSION_NAME') ?: '0.2.0-alpha01').toString().trim()
 def configuredNovaVersionCode
@@ -51,9 +52,10 @@ android {
         versionCode configuredNovaVersionCode
         versionName configuredNovaVersionName
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        // This is Nova's own public gateway URL, not an upstream provider URL.
-        // Leave blank to keep AI UI/actions disabled.
+        // These are Nova-owned public endpoints. Upstream provider URLs never belong in the APK.
+        // AI actions remain hidden until both URLs and a production installation proof adapter exist.
         buildConfigField 'String', 'NOVA_AI_GATEWAY_URL', '"' + buildConfigString(configuredNovaGatewayUrl) + '"'
+        buildConfigField 'String', 'NOVA_ANONYMOUS_SESSION_URL', '"' + buildConfigString(configuredNovaSessionUrl) + '"'
     }
     buildFeatures {
         buildConfig true
