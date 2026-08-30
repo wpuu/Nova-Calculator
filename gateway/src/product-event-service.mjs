@@ -4,6 +4,7 @@ export const NOVA_PRODUCT_EVENT_STATUS = Object.freeze({
   ACCEPTED: 'ACCEPTED',
   AUTH_REQUIRED: 'AUTH_REQUIRED',
   INVALID_REQUEST: 'INVALID_REQUEST',
+  RATE_LIMITED: 'RATE_LIMITED',
   TEMPORARILY_UNAVAILABLE: 'TEMPORARILY_UNAVAILABLE',
 });
 
@@ -63,7 +64,10 @@ export class ProductEventService {
         receivedAtEpochMs: finiteNow(this.now()),
       }));
       return result(NOVA_PRODUCT_EVENT_STATUS.ACCEPTED);
-    } catch {
+    } catch (error) {
+      if (error?.code === 'PRODUCT_EVENT_RATE_LIMITED') {
+        return result(NOVA_PRODUCT_EVENT_STATUS.RATE_LIMITED);
+      }
       return result(NOVA_PRODUCT_EVENT_STATUS.TEMPORARILY_UNAVAILABLE);
     }
   }
@@ -210,6 +214,7 @@ function statusCode(status) {
     case NOVA_PRODUCT_EVENT_STATUS.ACCEPTED: return 202;
     case NOVA_PRODUCT_EVENT_STATUS.AUTH_REQUIRED: return 401;
     case NOVA_PRODUCT_EVENT_STATUS.INVALID_REQUEST: return 400;
+    case NOVA_PRODUCT_EVENT_STATUS.RATE_LIMITED: return 429;
     default: return 503;
   }
 }
