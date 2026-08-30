@@ -6,7 +6,7 @@ buildscript {
 
     ext {
         versions = [supportLib: "28.0.0",
-                    kotlin    : "1.9.22",
+                    kotlin    : "2.3.21",
                     sdk       : [compile: 36, min: 21, target: 36]]
     }
 
