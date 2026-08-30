@@ -11,9 +11,8 @@ import { upstashRedisEvalClientFromEnv } from './upstash-redis-eval-client.mjs';
  * Production deployment composition for Nova Gateway.
  *
  * This is the only layer that binds the provider-neutral core to concrete server adapters:
- * shared Redis capacity/accounting, Google Play Integrity server decoding, and Google Play
- * purchase verification. All credentials are read from deployment environment variables and
- * remain server-side.
+ * shared Redis capacity/accounting, Google Play Integrity server decoding, and (when credentials
+ * are configured) Google Play purchase verification. All credentials remain server-side.
  */
 export function createProductionNovaGatewayApplication(options = {}) {
   const env = options.env ?? process.env;
@@ -61,8 +60,8 @@ export function createProductionNovaGatewayApplication(options = {}) {
     });
   }
 
-  let purchaseVerifier = options.purchaseVerifier;
-  if (!purchaseVerifier) {
+  let purchaseVerifier = options.purchaseVerifier ?? null;
+  if (!purchaseVerifier && hasBillingCredentials(env)) {
     const billingAccessTokenProvider = googleAndroidPublisherAccessTokenProviderFromEnv(env, {
       fetchImpl: options.fetchImpl,
       now,
@@ -96,7 +95,7 @@ export function createProductionNovaGatewayApplication(options = {}) {
       sharedQuotaStore: true,
       sharedProviderCapacity: true,
       playIntegrityServerDecode: !options.installationProofVerifier,
-      googlePlayPurchaseVerification: true,
+      googlePlayPurchaseVerification: Boolean(purchaseVerifier),
     }),
   });
 }
@@ -115,4 +114,14 @@ function guardProductionIdentity(env, packageName) {
       && packageName.toLowerCase().endsWith('.dev')) {
     throw new Error('production deployment refuses a .dev Android package');
   }
+}
+
+function hasBillingCredentials(env) {
+  const billingEmail = String(env.NOVA_PLAY_BILLING_SERVICE_ACCOUNT_EMAIL ?? '').trim();
+  const billingKey = String(env.NOVA_PLAY_BILLING_SERVICE_ACCOUNT_PRIVATE_KEY_B64 ?? '').trim();
+  if (billingEmail || billingKey) return Boolean(billingEmail && billingKey);
+  return Boolean(
+    String(env.NOVA_PLAY_INTEGRITY_SERVICE_ACCOUNT_EMAIL ?? '').trim()
+    && String(env.NOVA_PLAY_INTEGRITY_SERVICE_ACCOUNT_PRIVATE_KEY_B64 ?? '').trim(),
+  );
 }
