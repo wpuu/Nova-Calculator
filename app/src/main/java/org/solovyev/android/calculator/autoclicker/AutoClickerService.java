@@ -123,6 +123,7 @@ public class AutoClickerService extends AccessibilityService
     private BroadcastReceiver reconcileReceiver;
     private boolean screenOffReceiverRegistered;
     private boolean reconcileReceiverRegistered;
+    private AutoClickerDisplayMonitor displayMonitor;
 
     private long clickStartTime;
     private int targetIndex;
@@ -312,6 +313,7 @@ public class AutoClickerService extends AccessibilityService
             refreshDisplayBounds();
             registerScreenOffReceiver();
             registerReconcileReceiver();
+            startDisplayMonitor();
 
             serviceConnected = true;
             cancelInitRetry();
@@ -334,6 +336,48 @@ public class AutoClickerService extends AccessibilityService
     private void cancelInitRetry() {
         handler.removeCallbacks(initRetryRunnable);
         initRetryCount = 0;
+    }
+
+    private void startDisplayMonitor() {
+        if (displayMonitor == null) {
+            displayMonitor = new AutoClickerDisplayMonitor(this, handler,
+                    new AutoClickerDisplayMonitor.Callback() {
+                        @Override
+                        public void onDisplayGeometryMayHaveChanged() {
+                            handleDisplayGeometryChange();
+                        }
+                    });
+        }
+        displayMonitor.start();
+    }
+
+    private void stopDisplayMonitor() {
+        if (displayMonitor != null) {
+            displayMonitor.stop();
+            displayMonitor = null;
+        }
+    }
+
+    private void handleDisplayGeometryChange() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (!refreshDisplayBounds()) return;
+
+                // Never continue firing at stale coordinates after a display-mode transition.
+                // Reposition the deterministic saved targets and require a fresh Volume+ start.
+                if (isClicking) {
+                    stopClickingInternal(false);
+                }
+                if (isOverlayActuallyReady()) {
+                    repositionVisibleOverlays();
+                } else if (preferences != null
+                        && Preferences.AutoClicker.intent.getPreference(preferences)) {
+                    overlayReady = false;
+                    reconcileState();
+                }
+            }
+        });
     }
 
     @Override
@@ -387,6 +431,7 @@ public class AutoClickerService extends AccessibilityService
     @Override
     public boolean onUnbind(Intent intent) {
         serviceConnected = false;
+        stopDisplayMonitor();
         cancelInitRetry();
         stopClickingInternal(false);
         removeOverlayViewsOnly();
@@ -411,6 +456,7 @@ public class AutoClickerService extends AccessibilityService
     @Override
     public void onDestroy() {
         serviceConnected = false;
+        stopDisplayMonitor();
         handler.removeCallbacks(noShowRunnable);
         handler.removeCallbacks(overlayAttachVerifyRunnable);
         cancelInitRetry();
@@ -528,44 +574,22 @@ public class AutoClickerService extends AccessibilityService
     }
 
     /**
-     * Refresh the REAL default-display bounds. getResources().getDisplayMetrics() can remain
-     * tied to the old app configuration while a landscape full-screen game is foregrounded;
-     * getRealMetrics() is refreshed from WindowManager each time and avoids the "left half of
-     * the screen only" drag limit.
+     * Refresh the overlay coordinate space. API 30+ uses WindowMetrics rather than the deprecated
+     * default-display API; older Android retains getRealMetrics through the compatibility helper.
      *
      * @return true when width/height changed.
      */
-    @SuppressWarnings("deprecation")
     private boolean refreshDisplayBounds() {
-        int width = 0;
-        int height = 0;
-        try {
-            if (windowManager == null) {
-                windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-            }
-            if (windowManager != null) {
-                Display display = windowManager.getDefaultDisplay();
-                if (display != null) {
-                    DisplayMetrics dm = new DisplayMetrics();
-                    display.getRealMetrics(dm);
-                    width = dm.widthPixels;
-                    height = dm.heightPixels;
-                }
-            }
-        } catch (Throwable t) {
-            Log.w(TAG, "Unable to read real display metrics", t);
+        if (windowManager == null) {
+            windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         }
-        if (width <= 0 || height <= 0) {
-            DisplayMetrics dm = getResources().getDisplayMetrics();
-            width = dm.widthPixels;
-            height = dm.heightPixels;
-        }
+        if (windowManager == null) return false;
 
-        width = Math.max(circleSizePx, width);
-        height = Math.max(circleSizePx, height);
-        boolean changed = width != screenW || height != screenH;
-        screenW = width;
-        screenH = height;
+        AutoClickerDisplayBounds.Bounds bounds = AutoClickerDisplayBounds.read(
+                this, windowManager, circleSizePx, circleSizePx);
+        boolean changed = bounds.width != screenW || bounds.height != screenH;
+        screenW = bounds.width;
+        screenH = bounds.height;
         return changed;
     }
 
@@ -1081,12 +1105,16 @@ public class AutoClickerService extends AccessibilityService
         targetIndex = 0;
         clickStartTime = System.currentTimeMillis();
 
-        // Reticles are placement handles while idle and passively mark the click locations
-        // while running. The status indicator remains draggable at all times.
+        // All overlays are placement handles while idle and passive visual indicators while
+        // running. None of them may steal touches from the target app during an active run.
         for (int i = 0; i < paramsArr.length; i++) {
             if (paramsArr[i] == null || overlayViews[i] == null) continue;
             paramsArr[i].flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
             safeUpdateViewLayout(overlayViews[i], paramsArr[i]);
+        }
+        if (floatingParams != null && floatingButton != null) {
+            floatingParams.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+            safeUpdateViewLayout(floatingButton, floatingParams);
         }
 
         handler.removeCallbacks(clickRunnable);
@@ -1115,6 +1143,12 @@ public class AutoClickerService extends AccessibilityService
             paramsArr[i].flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
             if (overlayViews[i] != null) {
                 safeUpdateViewLayout(overlayViews[i], paramsArr[i]);
+            }
+        }
+        if (floatingParams != null) {
+            floatingParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+            if (floatingButton != null) {
+                safeUpdateViewLayout(floatingButton, floatingParams);
             }
         }
         updateFloatingButtonState();
@@ -1203,11 +1237,7 @@ public class AutoClickerService extends AccessibilityService
         pendingGestureSerial = serial;
         isGesturePending = true;
 
-        Path path = new Path();
-        path.moveTo(x, y);
-        path.lineTo(x + 1, y + 1);
-        GestureDescription.Builder builder = new GestureDescription.Builder();
-        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 10));
+        final GestureDescription gesture = AutoClickerGestureFactory.stationaryTap(x, y, 10L);
 
         pendingGestureTimeout = new Runnable() {
             @Override
@@ -1225,7 +1255,7 @@ public class AutoClickerService extends AccessibilityService
         };
         handler.postDelayed(pendingGestureTimeout, GESTURE_TIMEOUT_MS);
 
-        boolean accepted = dispatchGesture(builder.build(), new GestureResultCallback() {
+        boolean accepted = dispatchGesture(gesture, new GestureResultCallback() {
             @Override
             public void onCompleted(GestureDescription gestureDescription) {
                 super.onCompleted(gestureDescription);
