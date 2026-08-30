@@ -44,6 +44,7 @@ import org.solovyev.android.calculator.converter.ConverterFragment;
 import org.solovyev.android.calculator.databinding.ActivityMainBinding;
 import org.solovyev.android.calculator.history.History;
 import org.solovyev.android.calculator.keyboard.PartialKeyboardUi;
+import org.solovyev.android.calculator.preferences.PreferencesActivity;
 import org.solovyev.android.widget.menu.CustomPopupMenu;
 
 import javax.annotation.Nonnull;
@@ -234,7 +235,13 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             int itemId = item.getItemId();
-            if (itemId == R.id.menu_settings) {
+            if (itemId == R.id.menu_autotap) {
+                startActivity(PreferencesActivity.makeIntent(
+                        CalculatorActivity.this,
+                        R.xml.preferences_auto_clicker,
+                        R.string.pref_auto_clicker_category));
+                return true;
+            } else if (itemId == R.id.menu_settings) {
                 launcher.showSettings();
                 return true;
             } else if (itemId == R.id.menu_tools) {
