@@ -5,7 +5,8 @@ import {
 import { createNovaFetchHandler } from './http-handler.mjs';
 import { NovaAiService } from './nova-ai-service.mjs';
 import { DailyQuotaLedger } from './quota-ledger.mjs';
-import { quotaPolicyFromEnv } from './quota-policy.mjs';
+import { quotaLimitsForPriority, quotaPolicyFromEnv } from './quota-policy.mjs';
+import { REQUEST_PRIORITY } from './provider-key-pool.mjs';
 import { createGatewayRuntime } from './runtime.mjs';
 import { sessionTokenServiceFromEnv } from './session-token.mjs';
 
@@ -26,6 +27,9 @@ export function createNovaGatewayApplication(options = {}) {
   });
   const sessionTokens = sessionTokenServiceFromEnv(env, { now });
   const quotaPolicy = quotaPolicyFromEnv(env);
+  const freeLimits = quotaLimitsForPriority(quotaPolicy, REQUEST_PRIORITY.FREE);
+  const proLimits = quotaLimitsForPriority(quotaPolicy, REQUEST_PRIORITY.PRO);
+  const aiPlusLimits = quotaLimitsForPriority(quotaPolicy, REQUEST_PRIORITY.AI_PLUS);
   const quotaLedger = new DailyQuotaLedger({
     store: options.quotaStore,
     policy: quotaPolicy,
@@ -51,12 +55,12 @@ export function createNovaGatewayApplication(options = {}) {
     anonymousSessionHandler: createAnonymousSessionFetchHandler({ service: anonymousSessionService }),
     safeSummary: Object.freeze({
       ...providerRuntime.safeSummary,
-      freeDailyLimit: quotaPolicy.FREE.dailyLimit,
-      freeRpmLimit: quotaPolicy.FREE.rpmLimit,
-      proDailyLimit: quotaPolicy.PRO.dailyLimit,
-      proRpmLimit: quotaPolicy.PRO.rpmLimit,
-      aiPlusDailyLimit: quotaPolicy.AI_PLUS.dailyLimit,
-      aiPlusRpmLimit: quotaPolicy.AI_PLUS.rpmLimit,
+      freeDailyLimit: freeLimits.dailyLimit,
+      freeRpmLimit: freeLimits.rpmLimit,
+      proDailyLimit: proLimits.dailyLimit,
+      proRpmLimit: proLimits.rpmLimit,
+      aiPlusDailyLimit: aiPlusLimits.dailyLimit,
+      aiPlusRpmLimit: aiPlusLimits.rpmLimit,
       signedNovaSessions: true,
       proofGatedAnonymousSessions: true,
     }),
