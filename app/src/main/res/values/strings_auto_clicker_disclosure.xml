@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auto_clicker_disclosure_title">Enable Nova AutoTap</string>
+    <string name="auto_clicker_disclosure_message">Nova AutoTap uses Android AccessibilityService only when you enable AutoTap. It listens for the volume keys so Volume Up can start and Volume Down can stop, shows the tap targets/status overlay, and sends only the tap gestures and timing you configure.\n\nNova configures this service not to retrieve window content. This accessibility permission is not used to read or collect text/content from the app underneath the overlay, and Nova product analytics must not upload your tap coordinates or target-app content.\n\nAutoTap runs only from your user-defined setup. You can stop it immediately with Volume Down or disable it at any time.\n\nTap Continue to acknowledge this use, then review and enable Nova in Android Accessibility settings.</string>
+    <string name="auto_clicker_disclosure_continue">Continue</string>
+</resources>
