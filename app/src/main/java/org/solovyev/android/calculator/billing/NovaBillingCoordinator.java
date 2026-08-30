@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 
+import org.solovyev.android.calculator.analytics.NovaProductAnalytics;
 import org.solovyev.android.calculator.entitlement.EntitlementManager;
 import org.solovyev.android.calculator.entitlement.EntitlementSnapshot;
 
@@ -35,8 +36,10 @@ public final class NovaBillingCoordinator implements NovaBillingObserver {
     @Nullable
     private final NovaBillingEntitlementClient entitlementClient;
     private final EntitlementManager entitlementManager;
+    private final NovaProductAnalytics productAnalytics;
     private final ExecutorService billingWorker;
     private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean explicitRestorePending = new AtomicBoolean();
     private final Object catalogLock = new Object();
     private final Map<String, ProductDetails> catalog = new HashMap<>();
 
@@ -47,12 +50,24 @@ public final class NovaBillingCoordinator implements NovaBillingObserver {
     public NovaBillingCoordinator(Context context,
                                   @Nullable NovaBillingEntitlementClient entitlementClient,
                                   EntitlementManager entitlementManager) {
+        this(context, entitlementClient, entitlementManager,
+                NovaProductAnalytics.fromSessionEndpoint(null, null, null));
+    }
+
+    public NovaBillingCoordinator(Context context,
+                                  @Nullable NovaBillingEntitlementClient entitlementClient,
+                                  EntitlementManager entitlementManager,
+                                  NovaProductAnalytics productAnalytics) {
         if (context == null) throw new IllegalArgumentException("context must not be null");
         if (entitlementManager == null) {
             throw new IllegalArgumentException("entitlementManager must not be null");
         }
+        if (productAnalytics == null) {
+            throw new IllegalArgumentException("productAnalytics must not be null");
+        }
         this.entitlementClient = entitlementClient;
         this.entitlementManager = entitlementManager;
+        this.productAnalytics = productAnalytics;
         this.enabled = entitlementClient != null;
         this.playBillingClient = enabled
                 ? new NovaPlayBillingClient(context.getApplicationContext(), this)
@@ -67,7 +82,7 @@ public final class NovaBillingCoordinator implements NovaBillingObserver {
         });
     }
 
-    /** Connects once and restores existing Google Play purchases. */
+    /** Connects once and restores existing Google Play purchases without counting a user restore. */
     public void start() {
         entitlementManager.refresh();
         if (!enabled || !started.compareAndSet(false, true)) return;
@@ -126,7 +141,15 @@ public final class NovaBillingCoordinator implements NovaBillingObserver {
 
     public void restorePurchases() {
         if (!enabled || playBillingClient == null) return;
-        playBillingClient.refreshPurchases();
+        explicitRestorePending.set(true);
+        try {
+            playBillingClient.refreshPurchases();
+        } catch (RuntimeException error) {
+            if (explicitRestorePending.getAndSet(false)) {
+                productAnalytics.purchaseRestoreFailed();
+            }
+            throw error;
+        }
     }
 
     public void buyProLifetime(Activity activity) {
@@ -164,6 +187,9 @@ public final class NovaBillingCoordinator implements NovaBillingObserver {
     public void onBillingUnavailable(int responseCode, String debugMessage) {
         lastBillingResponseCode = responseCode;
         lastBillingDebugMessage = debugMessage == null ? "" : debugMessage;
+        if (explicitRestorePending.getAndSet(false)) {
+            productAnalytics.purchaseRestoreFailed();
+        }
     }
 
     @Override
@@ -184,6 +210,8 @@ public final class NovaBillingCoordinator implements NovaBillingObserver {
     @Override
     public void onPurchasesObserved(final List<Purchase> purchases, String source) {
         if (!enabled || entitlementClient == null || purchases == null) return;
+        final boolean explicitRestore = NovaPlayBillingClient.SOURCE_RESTORE_COMPLETE.equals(source)
+                && explicitRestorePending.getAndSet(false);
         billingWorker.execute(new Runnable() {
             @Override
             public void run() {
@@ -193,6 +221,9 @@ public final class NovaBillingCoordinator implements NovaBillingObserver {
                     // HttpNovaBillingEntitlementClient persisted the fresh server-issued session.
                     // Reload the app-facing cache only after that server-authoritative success.
                     entitlementManager.refresh();
+                    if (explicitRestore) productAnalytics.purchaseRestoreSuccess();
+                } else if (explicitRestore) {
+                    productAnalytics.purchaseRestoreFailed();
                 }
             }
         });
