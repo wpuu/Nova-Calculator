@@ -2,6 +2,7 @@ package org.solovyev.android.calculator.autoclicker;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,7 +18,9 @@ import androidx.preference.PreferenceManager;
 
 import org.solovyev.android.calculator.CalculatorApplication;
 import org.solovyev.android.calculator.R;
+import org.solovyev.android.calculator.analytics.NovaProductAnalytics;
 import org.solovyev.android.calculator.entitlement.EntitlementSnapshot;
+import org.solovyev.android.calculator.preferences.PreferencesActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,16 +99,28 @@ public final class AutoClickerProfilesPreference extends Preference {
                 : requestedName;
         try {
             store.saveCurrent(name, profileLimit());
+            analytics().autoTapProfileSaved();
             Toast.makeText(getContext(), R.string.auto_clicker_profile_saved, Toast.LENGTH_SHORT).show();
             notifyChanged();
         } catch (AutoClickerProfileStore.ProfileLimitReachedException e) {
-            new AlertDialog.Builder(getContext())
-                    .setTitle(R.string.auto_clicker_profile_limit_title)
-                    .setMessage(isPro()
-                            ? R.string.auto_clicker_profile_limit_pro
-                            : R.string.auto_clicker_profile_limit_free)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show();
+            if (isPro()) {
+                new AlertDialog.Builder(getContext())
+                        .setTitle(R.string.auto_clicker_profile_limit_title)
+                        .setMessage(R.string.auto_clicker_profile_limit_pro)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
+            } else {
+                new AlertDialog.Builder(getContext())
+                        .setTitle(R.string.auto_clicker_profile_limit_title)
+                        .setMessage(R.string.auto_clicker_profile_limit_free)
+                        .setPositiveButton(R.string.nova_billing_title, (dialog, which) -> {
+                            analytics().proPaywallViewed(
+                                    NovaProductAnalytics.PaywallSource.PROFILE_LIMIT);
+                            openBilling();
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
+            }
         }
     }
 
@@ -121,6 +136,7 @@ public final class AutoClickerProfilesPreference extends Preference {
                 .setItems(actions, (dialog, which) -> {
                     if (which == 0) {
                         if (store.apply(profile.name)) {
+                            analytics().autoTapProfileLoaded();
                             restartOverlayIfEnabled();
                             Toast.makeText(getContext(), R.string.auto_clicker_profile_loaded,
                                     Toast.LENGTH_SHORT).show();
@@ -128,6 +144,7 @@ public final class AutoClickerProfilesPreference extends Preference {
                     } else if (which == 1) {
                         try {
                             store.saveCurrent(profile.name, profileLimit());
+                            analytics().autoTapProfileSaved();
                             Toast.makeText(getContext(), R.string.auto_clicker_profile_saved,
                                     Toast.LENGTH_SHORT).show();
                         } catch (AutoClickerProfileStore.ProfileLimitReachedException ignored) {
@@ -164,6 +181,25 @@ public final class AutoClickerProfilesPreference extends Preference {
         preferences.edit().putBoolean("auto_clicker_intent", false).apply();
         mainHandler.postDelayed(() ->
                 preferences.edit().putBoolean("auto_clicker_intent", true).apply(), 120L);
+    }
+
+    private void openBilling() {
+        final Intent intent = PreferencesActivity.makeIntent(
+                getContext(), R.xml.preferences_billing, R.string.nova_billing_title);
+        getContext().startActivity(intent);
+    }
+
+    @NonNull
+    private NovaProductAnalytics analytics() {
+        try {
+            final Context applicationContext = getContext().getApplicationContext();
+            if (applicationContext instanceof CalculatorApplication) {
+                return ((CalculatorApplication) applicationContext)
+                        .getComponent().productAnalytics();
+            }
+        } catch (RuntimeException ignored) {
+        }
+        return NovaProductAnalytics.fromSessionEndpoint(null, null, null);
     }
 
     private int profileLimit() {
