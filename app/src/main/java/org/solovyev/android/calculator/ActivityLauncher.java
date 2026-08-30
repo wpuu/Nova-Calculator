@@ -27,12 +27,10 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
-import dagger.Lazy;
-import jscl.math.Generic;
-import jscl.math.function.Constant;
-import jscl.math.function.CustomFunction;
+
+import androidx.annotation.NonNull;
+
 import org.solovyev.android.Check;
 import org.solovyev.android.calculator.about.AboutActivity;
 import org.solovyev.android.calculator.functions.CppFunction;
@@ -50,12 +48,18 @@ import org.solovyev.android.plotter.PlotFunction;
 import org.solovyev.android.plotter.Plotter;
 import org.solovyev.common.msg.MessageType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
+
+import dagger.Lazy;
+import jscl.math.Generic;
+import jscl.math.function.Constant;
+import jscl.math.function.CustomFunction;
 
 @Singleton
 public final class ActivityLauncher {
@@ -123,12 +127,26 @@ public final class ActivityLauncher {
         show(getContext(), PlotActivity.class);
     }
 
+    /**
+     * Legacy call site retained during refactor. It now opens only a developer-configured Nova
+     * HTTPS destination. Blank, placeholder or malformed links fail closed.
+     */
     public void openFacebook() {
-        // 二开：分享/点赞链接改为占位（app_share_link），由开发者填自己的商店页或官网
-        final Uri uri = Uri.parse(application.getString(R.string.app_share_link));
-        final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        application.startActivity(intent);
+        final String configured = application.getString(R.string.app_share_link).trim();
+        if (TextUtils.isEmpty(configured) || configured.contains("example.com")) {
+            return;
+        }
+        final Uri uri = Uri.parse(configured);
+        if (!"https".equalsIgnoreCase(uri.getScheme()) || TextUtils.isEmpty(uri.getHost())) {
+            return;
+        }
+        try {
+            final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            application.startActivity(intent);
+        } catch (RuntimeException e) {
+            errorReporter.get().onException(e);
+        }
     }
 
     public void setActivity(@Nullable CalculatorActivity activity) {
