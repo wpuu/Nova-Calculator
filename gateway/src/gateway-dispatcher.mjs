@@ -52,15 +52,18 @@ export class GatewayDispatchError extends Error {
 /**
  * Dispatches one logical Nova AI request across independently limited provider credentials.
  *
- * Provider contract:
- *   provider.invoke({ request, apiKey, keyId }) -> Promise<any>
- *
- * apiKey exists only inside the server process. Android clients never receive provider details.
+ * keyPool methods may be synchronous (single-process tests/local use) or asynchronous (shared
+ * Redis production capacity). Raw provider keys remain inside the server process.
  */
 export class GatewayDispatcher {
   constructor({ keyPool, provider }) {
     if (!keyPool || typeof keyPool.lease !== 'function') {
       throw new Error('GatewayDispatcher requires a keyPool');
+    }
+    for (const method of ['reportSuccess', 'reportRateLimit', 'reportFailure', 'setEnabled']) {
+      if (typeof keyPool[method] !== 'function') {
+        throw new Error(`GatewayDispatcher keyPool requires ${method}`);
+      }
     }
     if (!provider || typeof provider.invoke !== 'function') {
       throw new Error('GatewayDispatcher requires provider.invoke');
@@ -73,7 +76,7 @@ export class GatewayDispatcher {
     const attempted = new Set();
 
     while (true) {
-      const lease = this.keyPool.lease(priority, { excludeIds: attempted });
+      const lease = await this.keyPool.lease(priority, { excludeIds: attempted });
       if (!lease) {
         throw new GatewayDispatchError(
           'NO_PROVIDER_CAPACITY',
@@ -92,23 +95,23 @@ export class GatewayDispatcher {
           apiKey: lease.secret,
           keyId: lease.id,
         });
-        this.keyPool.reportSuccess(lease.id);
+        await reportSuccessQuietly(this.keyPool, lease.id);
         return response;
       } catch (error) {
         if (!(error instanceof ProviderInvocationError)) {
-          this.keyPool.reportFailure(lease.id);
+          await this.keyPool.reportFailure(lease.id);
           continue;
         }
 
         switch (error.kind) {
           case PROVIDER_FAILURE_KIND.RATE_LIMIT:
-            this.keyPool.reportRateLimit(lease.id, error.retryAfterMs ?? undefined);
+            await this.keyPool.reportRateLimit(lease.id, error.retryAfterMs ?? undefined);
             continue;
           case PROVIDER_FAILURE_KIND.CREDENTIAL:
-            this.keyPool.setEnabled(lease.id, false);
+            await this.keyPool.setEnabled(lease.id, false);
             continue;
           case PROVIDER_FAILURE_KIND.TRANSIENT:
-            this.keyPool.reportFailure(lease.id);
+            await this.keyPool.reportFailure(lease.id);
             continue;
           case PROVIDER_FAILURE_KIND.REQUEST:
             throw new GatewayDispatchError(
@@ -121,5 +124,14 @@ export class GatewayDispatcher {
         }
       }
     }
+  }
+}
+
+async function reportSuccessQuietly(keyPool, id) {
+  try {
+    await keyPool.reportSuccess(id);
+  } catch {
+    // The provider request already succeeded. A failure-counter reset must never turn a valid
+    // answer into a client-visible 503 and trigger duplicate upstream work.
   }
 }

@@ -6,16 +6,26 @@ import { ProviderKeyPool } from './provider-key-pool.mjs';
 /**
  * Builds the server-only Nova AI runtime from deployment environment variables.
  * Concrete provider identity remains outside Android and outside committed configuration.
+ *
+ * Production deployments may inject keyPoolFactory to replace the single-process pool with a
+ * shared atomic implementation while keeping provider configuration parsing in one place.
  */
 export function createGatewayRuntime(env = process.env, options = {}) {
   const config = readConfig(env);
   const keys = parseProviderKeys(config.providerKeys, config.rpmPerKey);
-  const keyPool = new ProviderKeyPool(keys, {
+  const poolOptions = Object.freeze({
     paidReserveFraction: config.paidReserveFraction,
     cooldownOnFailureMs: config.cooldownOnFailureMs,
     maxFailuresBeforeCooldown: config.maxFailuresBeforeCooldown,
     now: options.now,
   });
+  const keyPool = typeof options.keyPoolFactory === 'function'
+    ? options.keyPoolFactory(Object.freeze({ keys, ...poolOptions }))
+    : new ProviderKeyPool(keys, poolOptions);
+  if (!keyPool || typeof keyPool.lease !== 'function') {
+    throw new Error('keyPoolFactory returned an invalid provider key pool');
+  }
+
   const provider = new OpenAiCompatibleChatProvider({
     baseUrl: config.providerBaseUrl,
     model: config.providerModel,
@@ -34,6 +44,7 @@ export function createGatewayRuntime(env = process.env, options = {}) {
       paidReserveFraction: config.paidReserveFraction,
       providerTimeoutMs: config.providerTimeoutMs,
       maxTokens: config.maxTokens,
+      sharedProviderCapacity: typeof options.keyPoolFactory === 'function',
     }),
   });
 }

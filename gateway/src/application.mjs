@@ -16,6 +16,9 @@ import { sessionTokenServiceFromEnv } from './session-token.mjs';
  * Required deployment adapters:
  * - quotaStore: shared atomic persistent store implementing reserve/commit/release.
  * - installationProofVerifier: validates app/device proof before a free anonymous session is issued.
+ *
+ * Production may additionally inject keyPoolFactory so provider-key RPM/cooldown state is shared
+ * across horizontally scaled gateway instances instead of remaining process-local.
  */
 export function createNovaGatewayApplication(options = {}) {
   const env = options.env ?? process.env;
@@ -24,6 +27,7 @@ export function createNovaGatewayApplication(options = {}) {
   const providerRuntime = createGatewayRuntime(env, {
     fetchImpl: options.fetchImpl,
     now,
+    keyPoolFactory: options.keyPoolFactory,
   });
   const sessionTokens = sessionTokenServiceFromEnv(env, { now });
   const quotaPolicy = quotaPolicyFromEnv(env);
