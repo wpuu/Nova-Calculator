@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import {
   AnonymousSessionService,
   createAnonymousSessionFetchHandler,
@@ -79,6 +81,15 @@ export function createNovaGatewayApplication(options = {}) {
           ttlMs: sessionTokens.accountTtlMs,
         });
       },
+      onVerifiedEntitlements: options.productEventStore ? async ({ subjectId, entitlements }) => {
+        await options.productEventStore.record(Object.freeze({
+          eventId: `srv_${randomUUID().replaceAll('-', '')}`,
+          event: 'pro_purchase_verified',
+          subjectId,
+          entitlement: entitlementLabel(entitlements),
+          receivedAtEpochMs: Number(now()),
+        }));
+      } : null,
     });
     billingHandler = createBillingEntitlementFetchHandler({ service: billingService });
   }
@@ -110,6 +121,14 @@ export function createNovaGatewayApplication(options = {}) {
       proofGatedAnonymousSessions: true,
       serverVerifiedPlayBilling: Boolean(options.purchaseVerifier),
       privacySafeProductEvents: Boolean(options.productEventStore),
+      serverAuthoritativePurchaseAnalytics: Boolean(options.purchaseVerifier && options.productEventStore),
     }),
   });
+}
+
+function entitlementLabel(entitlements) {
+  const values = Array.isArray(entitlements) ? entitlements : [];
+  if (values.includes('AI_PLUS')) return 'AI_PLUS';
+  if (values.includes('PRO_LIFETIME')) return 'PRO_LIFETIME';
+  return 'FREE';
 }
