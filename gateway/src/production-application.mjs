@@ -3,6 +3,7 @@ import { googleAndroidPublisherAccessTokenProviderFromEnv } from './google-andro
 import { googlePlayIntegrityDecoderFromEnv } from './google-play-integrity-decoder.mjs';
 import { GooglePlayPurchaseVerifier } from './google-play-purchase-verifier.mjs';
 import { PlayIntegrityInstallationProofVerifier } from './play-integrity-proof-verifier.mjs';
+import { createProductFunnelFetchHandler } from './product-funnel-service.mjs';
 import { RedisProductEventStore } from './redis-product-event-store.mjs';
 import { redisQuotaStoreFromEnv } from './quota-store-runtime.mjs';
 import { RedisProviderKeyPool } from './redis-provider-key-pool.mjs';
@@ -96,8 +97,27 @@ export function createProductionNovaGatewayApplication(options = {}) {
     productEventStore,
   });
 
+  let productFunnelHandler = null;
+  const productAnalyticsAdminToken = String(
+    env.NOVA_PRODUCT_ANALYTICS_ADMIN_TOKEN ?? '',
+  ).trim();
+  if (productEventStore && productAnalyticsAdminToken) {
+    try {
+      productFunnelHandler = createProductFunnelFetchHandler({
+        store: productEventStore,
+        adminToken: productAnalyticsAdminToken,
+        now,
+      });
+    } catch {
+      // An invalid/missing admin token disables the read endpoint only. It must never disable
+      // customer AI, billing, sessions, or write-side product analytics.
+      productFunnelHandler = null;
+    }
+  }
+
   return Object.freeze({
     ...core,
+    productFunnelHandler,
     safeSummary: Object.freeze({
       ...core.safeSummary,
       deploymentComposition: 'production-v3-growth',
@@ -108,6 +128,7 @@ export function createProductionNovaGatewayApplication(options = {}) {
       googlePlayPurchaseVerification: Boolean(purchaseVerifier),
       redisProductFunnelAggregation: Boolean(productEventStore),
       pseudonymousProductEventRateLimit: Boolean(productEventStore),
+      adminProductFunnel: Boolean(productFunnelHandler),
     }),
   });
 }
