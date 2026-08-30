@@ -84,6 +84,7 @@ jobs:
           ./gradlew :app:testDebugUnitTest \
             --tests 'org.solovyev.android.calculator.entitlement.DefaultEntitlementManagerTest' \
             --tests 'org.solovyev.android.calculator.ai.AiGatewayContractTest' \
+            --tests 'org.solovyev.android.calculator.ai.AiExplainCoordinatorTest' \
             --stacktrace --no-daemon
 
       - name: Build debug APK
