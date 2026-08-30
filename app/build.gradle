@@ -22,9 +22,14 @@ apply plugin: 'kotlin-kapt'
 def configuredNovaGatewayUrl = (project.findProperty('novaAiGatewayUrl') ?: System.getenv('NOVA_AI_GATEWAY_URL') ?: '').toString().trim()
 def configuredNovaSessionUrl = (project.findProperty('novaAnonymousSessionUrl') ?: System.getenv('NOVA_ANONYMOUS_SESSION_URL') ?: '').toString().trim()
 def configuredNovaBillingUrl = (project.findProperty('novaBillingUrl') ?: System.getenv('NOVA_BILLING_URL') ?: '').toString().trim()
+def configuredNovaApplicationId = (project.findProperty('novaApplicationId') ?: System.getenv('NOVA_ANDROID_PACKAGE_NAME') ?: 'com.wpuu.novacalculator.dev').toString().trim()
 def configuredNovaPlayIntegrityProjectText = (project.findProperty('novaPlayIntegrityCloudProjectNumber') ?: System.getenv('NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER') ?: '0').toString().trim()
 def configuredNovaVersionCodeText = (project.findProperty('novaVersionCode') ?: System.getenv('NOVA_VERSION_CODE') ?: '20001').toString().trim()
 def configuredNovaVersionName = (project.findProperty('novaVersionName') ?: System.getenv('NOVA_VERSION_NAME') ?: '0.2.0-alpha01').toString().trim()
+def configuredNovaUploadKeystorePath = (project.findProperty('novaUploadKeystorePath') ?: System.getenv('NOVA_UPLOAD_KEYSTORE_PATH') ?: '').toString().trim()
+def configuredNovaUploadStorePassword = (project.findProperty('novaUploadStorePassword') ?: System.getenv('NOVA_UPLOAD_STORE_PASSWORD') ?: '').toString()
+def configuredNovaUploadKeyAlias = (project.findProperty('novaUploadKeyAlias') ?: System.getenv('NOVA_UPLOAD_KEY_ALIAS') ?: '').toString().trim()
+def configuredNovaUploadKeyPassword = (project.findProperty('novaUploadKeyPassword') ?: System.getenv('NOVA_UPLOAD_KEY_PASSWORD') ?: '').toString()
 def configuredNovaVersionCode
 def configuredNovaPlayIntegrityProject
 try {
@@ -37,6 +42,10 @@ try {
 } catch (NumberFormatException ignored) {
     throw new GradleException('novaPlayIntegrityCloudProjectNumber/NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER must be an integer')
 }
+if (!(configuredNovaApplicationId ==~ /[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+/)
+        || configuredNovaApplicationId.length() > 255) {
+    throw new GradleException('novaApplicationId/NOVA_ANDROID_PACKAGE_NAME is invalid')
+}
 if (configuredNovaVersionCode <= 0 || configuredNovaVersionCode > 2100000000) {
     throw new GradleException('Nova versionCode must be between 1 and 2100000000')
 }
@@ -46,16 +55,44 @@ if (configuredNovaPlayIntegrityProject < 0L) {
 if (!(configuredNovaVersionName ==~ /[0-9A-Za-z][0-9A-Za-z._-]{0,49}/)) {
     throw new GradleException('Nova versionName must be 1-50 characters using letters, numbers, dot, underscore or hyphen')
 }
+
+def uploadSigningValues = [
+        configuredNovaUploadKeystorePath,
+        configuredNovaUploadStorePassword,
+        configuredNovaUploadKeyAlias,
+        configuredNovaUploadKeyPassword,
+]
+def uploadSigningConfigured = uploadSigningValues.every { value -> value != null && !value.toString().isEmpty() }
+def uploadSigningPartiallyConfigured = uploadSigningValues.any { value -> value != null && !value.toString().isEmpty() }
+if (uploadSigningPartiallyConfigured && !uploadSigningConfigured) {
+    throw new GradleException('Nova upload signing requires keystore path, store password, key alias and key password together')
+}
+if (uploadSigningConfigured && !file(configuredNovaUploadKeystorePath).isFile()) {
+    throw new GradleException('NOVA_UPLOAD_KEYSTORE_PATH does not point to a file')
+}
+
 def buildConfigString = { String value ->
     value.replace('\\', '\\\\').replace('"', '\\"').replace('\r', '').replace('\n', '')
+}
+
+def isSafeHttpsEndpoint = { String value ->
+    try {
+        def uri = new java.net.URI(value == null ? '' : value.trim())
+        return 'https'.equalsIgnoreCase(uri.scheme)
+                && uri.host != null && !uri.host.trim().isEmpty()
+                && uri.userInfo == null
+                && uri.fragment == null
+    } catch (Exception ignored) {
+        return false
+    }
 }
 
 android {
     compileSdk versions.sdk.compile
     defaultConfig {
-        // Development-only commercial identity. Do not upload this .dev ID to Google Play.
-        // The production applicationId will be frozen after name/package availability checks.
-        applicationId "com.wpuu.novacalculator.dev"
+        // Development defaults to a .dev identity. The final Play identity is injected through
+        // novaApplicationId/NOVA_ANDROID_PACKAGE_NAME after Play Console availability is confirmed.
+        applicationId configuredNovaApplicationId
         minSdkVersion versions.sdk.min
         targetSdkVersion versions.sdk.target
         // Default scheme: major*1,000,000 + minor*10,000 + patch*100 + build.
@@ -72,6 +109,16 @@ android {
         // Play Integrity proof path disabled in development builds.
         buildConfigField 'long', 'NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER', configuredNovaPlayIntegrityProject + 'L'
     }
+    signingConfigs {
+        if (uploadSigningConfigured) {
+            releaseUpload {
+                storeFile file(configuredNovaUploadKeystorePath)
+                storePassword configuredNovaUploadStorePassword
+                keyAlias configuredNovaUploadKeyAlias
+                keyPassword configuredNovaUploadKeyPassword
+            }
+        }
+    }
     buildFeatures {
         buildConfig true
         dataBinding true
@@ -81,6 +128,9 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg'
+            if (uploadSigningConfigured) {
+                signingConfig signingConfigs.releaseUpload
+            }
         }
         debug {
             minifyEnabled false
@@ -109,6 +159,31 @@ android {
     }
 }
 
+tasks.register('verifyNovaPlayReleaseConfig') {
+    group = 'verification'
+    description = 'Fails unless Nova is configured for a signed Google Play release build.'
+    doLast {
+        if (configuredNovaApplicationId.toLowerCase(Locale.ROOT).endsWith('.dev')) {
+            throw new GradleException('Google Play release refuses the development .dev applicationId')
+        }
+        if (!isSafeHttpsEndpoint(configuredNovaGatewayUrl)
+                || !isSafeHttpsEndpoint(configuredNovaSessionUrl)
+                || !isSafeHttpsEndpoint(configuredNovaBillingUrl)) {
+            throw new GradleException('Google Play release requires HTTPS Nova AI, session and billing endpoints')
+        }
+        if (configuredNovaPlayIntegrityProject <= 0L) {
+            throw new GradleException('Google Play release requires NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER')
+        }
+        if (!uploadSigningConfigured) {
+            throw new GradleException('Google Play release requires the Nova upload keystore configuration')
+        }
+    }
+}
+
+tasks.matching { task -> task.name == 'bundleRelease' || task.name == 'assembleRelease' }.configureEach {
+    dependsOn tasks.named('verifyNovaPlayReleaseConfig')
+}
+
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}"
 
@@ -134,7 +209,8 @@ dependencies {
     implementation 'com.google.guava:guava:32.1.2-android'
     implementation('org.simpleframework:simple-xml:2.7.1') {
         exclude(module: 'stax')
-        exclude(module: 'stax-api')
+        exclude(module: 'stax-api'
+        )
         exclude(module: 'xpp3')
     }
 
