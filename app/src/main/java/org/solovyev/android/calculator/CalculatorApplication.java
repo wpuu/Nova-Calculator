@@ -32,6 +32,7 @@ import android.util.TimingLogger;
 
 import com.squareup.otto.Bus;
 
+import org.solovyev.android.calculator.analytics.AutoTapProductEventTracker;
 import org.solovyev.android.calculator.billing.NovaBillingCoordinator;
 import org.solovyev.android.calculator.floating.FloatingCalculatorActivity;
 import org.solovyev.android.calculator.ga.Ga;
@@ -121,6 +122,9 @@ public class CalculatorApplication extends android.app.Application implements Sh
     @Inject
     NovaBillingCoordinator billingCoordinator;
 
+    @Inject
+    AutoTapProductEventTracker autoTapProductEventTracker;
+
     @Nonnull
     private final TimingLogger timer = new TimingLogger("App", "onCreate");
 
@@ -167,6 +171,7 @@ public class CalculatorApplication extends android.app.Application implements Sh
 
         calculator.init(initThread);
         billingCoordinator.start();
+        autoTapProductEventTracker.start();
 
         initThread.execute(new Runnable() {
             @Override
