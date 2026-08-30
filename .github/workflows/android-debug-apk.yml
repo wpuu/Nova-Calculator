@@ -94,6 +94,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/nova-ci-signing"
           keytool -genkeypair \
+            -storetype JKS \
             -keystore "$RUNNER_TEMP/nova-ci-signing/nova-upload.jks" \
             -storepass nova-ci-store-pass \
             -alias nova-ci-upload \
