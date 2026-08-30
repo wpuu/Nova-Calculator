@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nova_ai_explain_action">解释此计算</string>
+    <string name="nova_ai_explain_title">Nova AI 解释</string>
+    <string name="nova_ai_explain_loading">正在解释这个已由计算器验证的结果…</string>
+    <string name="nova_ai_auth_required">请登录 Nova 后使用此 AI 功能。</string>
+    <string name="nova_ai_quota_exhausted">当前 AI 可用次数已用完。</string>
+    <string name="nova_ai_rate_limited">当前 AI 请求较多，请稍后再试。</string>
+    <string name="nova_ai_invalid_request">该计算暂时无法由 AI 解释。</string>
+    <string name="nova_ai_unavailable">Nova AI 暂时不可用，计算器结果不会受到影响。</string>
+</resources>

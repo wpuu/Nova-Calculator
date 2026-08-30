@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nova_ai_explain_action">Explain this calculation</string>
+    <string name="nova_ai_explain_title">Nova AI explanation</string>
+    <string name="nova_ai_explain_loading">Explaining this verified calculator result…</string>
+    <string name="nova_ai_auth_required">Sign in to Nova to use this AI feature.</string>
+    <string name="nova_ai_quota_exhausted">Your AI allowance is used up for now.</string>
+    <string name="nova_ai_rate_limited">AI is busy right now. Please try again shortly.</string>
+    <string name="nova_ai_invalid_request">This calculation cannot be explained by AI yet.</string>
+    <string name="nova_ai_unavailable">Nova AI is temporarily unavailable. Your calculator result is unchanged.</string>
+</resources>

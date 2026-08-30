@@ -29,6 +29,12 @@ import androidx.annotation.NonNull;
 
 import com.squareup.otto.Bus;
 
+import org.solovyev.android.calculator.ai.AiExplainCoordinator;
+import org.solovyev.android.calculator.ai.AiGatewayClient;
+import org.solovyev.android.calculator.ai.AiGatewayFeatureConfig;
+import org.solovyev.android.calculator.ai.AiSessionTokenProvider;
+import org.solovyev.android.calculator.ai.DisabledAiGatewayClient;
+import org.solovyev.android.calculator.ai.HttpAiGatewayClient;
 import org.solovyev.android.calculator.language.Languages;
 import org.solovyev.android.calculator.wizard.CalculatorWizards;
 import org.solovyev.android.plotter.Plot;
@@ -173,6 +179,38 @@ public class AppModule {
                 handler.post(command);
             }
         };
+    }
+
+    @Provides
+    @Singleton
+    AiGatewayFeatureConfig provideAiGatewayFeatureConfig() {
+        return AiGatewayFeatureConfig.fromNullableUrl(BuildConfig.NOVA_AI_GATEWAY_URL);
+    }
+
+    @Provides
+    @Singleton
+    AiSessionTokenProvider provideAiSessionTokenProvider() {
+        // Anonymous/free requests are supported first. Paid-account session tokens will replace
+        // this provider once the server-verified account/purchase flow is wired.
+        return () -> null;
+    }
+
+    @Provides
+    @Singleton
+    AiGatewayClient provideAiGatewayClient(AiGatewayFeatureConfig config,
+                                           AiSessionTokenProvider tokenProvider,
+                                           @Named(THREAD_BACKGROUND) Executor background,
+                                           @Named(THREAD_UI) Executor ui) {
+        if (!config.isEnabled()) {
+            return new DisabledAiGatewayClient();
+        }
+        return new HttpAiGatewayClient(config.requireEndpoint(), tokenProvider, background, ui);
+    }
+
+    @Provides
+    @Singleton
+    AiExplainCoordinator provideAiExplainCoordinator(AiGatewayClient client) {
+        return new AiExplainCoordinator(client);
     }
 
     @Provides

@@ -25,21 +25,33 @@ package org.solovyev.android.calculator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import android.view.*;
-
 import androidx.appcompat.app.AlertDialog;
+
 import com.squareup.otto.Bus;
-import jscl.NumeralBase;
-import jscl.math.Generic;
-import jscl.math.NotDoubleException;
+
+import org.solovyev.android.calculator.ai.AiExplainCoordinator;
+import org.solovyev.android.calculator.ai.AiGatewayFeatureConfig;
+import org.solovyev.android.calculator.ai.AiGatewayResponse;
 import org.solovyev.android.calculator.converter.ConverterFragment;
 import org.solovyev.android.calculator.jscl.JsclOperation;
 
+import java.util.Locale;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+
+import jscl.NumeralBase;
+import jscl.math.Generic;
+import jscl.math.NotDoubleException;
 
 public class DisplayFragment extends BaseFragment implements View.OnClickListener,
         MenuItem.OnMenuItemClickListener {
@@ -87,6 +99,14 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
     Calculator calculator;
     @Inject
     Engine engine;
+    @Inject
+    Editor editor;
+    @Inject
+    AiGatewayFeatureConfig aiGatewayFeatureConfig;
+    @Inject
+    AiExplainCoordinator aiExplainCoordinator;
+    @Nullable
+    private AlertDialog aiExplanationDialog;
 
     public DisplayFragment() {
         super(R.layout.cpp_app_display);
@@ -110,6 +130,8 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
 
     @Override
     public void onDestroyView() {
+        aiExplainCoordinator.cancelCurrent();
+        dismissAiDialog();
         display.clearView(displayView);
         super.onDestroyView();
     }
@@ -122,6 +144,9 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
             return;
         }
         addMenu(menu, R.string.cpp_copy, this);
+        if (canExplain(state)) {
+            addMenu(menu, R.string.nova_ai_explain_action, this);
+        }
 
         final Generic result = state.getResult();
         final JsclOperation operation = state.getOperation();
@@ -142,6 +167,17 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
                 addMenu(menu, R.string.c_plot, this);
             }
         }
+    }
+
+    private boolean canExplain(@Nonnull DisplayState state) {
+        if (!aiGatewayFeatureConfig.isEnabled() || !state.valid) {
+            return false;
+        }
+        final String expression = editor.getState().getTextString();
+        return expression != null
+                && !expression.trim().isEmpty()
+                && state.text != null
+                && !state.text.trim().isEmpty();
     }
 
     protected boolean isMenuItemVisible(@NonNull ConversionMenuItem menuItem,
@@ -181,6 +217,9 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
         if (itemId == R.string.cpp_copy) {
             display.copy();
             return true;
+        } else if (itemId == R.string.nova_ai_explain_action) {
+            explainCurrentCalculation(state);
+            return true;
         } else if (itemId == R.string.convert_to_bin || itemId == R.string.convert_to_dec || itemId == R.string.convert_to_hex) {
             final ConversionMenuItem menuItem = ConversionMenuItem.getByTitle(item.getItemId());
             if (menuItem == null) {
@@ -198,6 +237,88 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
             return true;
         }
         return false;
+    }
+
+    private void explainCurrentCalculation(@Nonnull DisplayState state) {
+        if (!canExplain(state) || getActivity() == null) {
+            return;
+        }
+        final String expression = editor.getState().getTextString().trim();
+        final String deterministicResult = state.text.trim();
+        final String localeTag = Locale.getDefault().toLanguageTag();
+
+        aiExplainCoordinator.cancelCurrent();
+        dismissAiDialog();
+
+        final AlertDialog dialog = new AlertDialog.Builder(
+                getActivity(),
+                App.getTheme().alertDialogTheme)
+                .setTitle(R.string.nova_ai_explain_title)
+                .setMessage(R.string.nova_ai_explain_loading)
+                .setNegativeButton(R.string.cpp_cancel, (d, which) -> aiExplainCoordinator.cancelCurrent())
+                .create();
+        aiExplanationDialog = dialog;
+        dialog.setOnDismissListener(d -> {
+            if (aiExplanationDialog == dialog) {
+                aiExplanationDialog = null;
+                aiExplainCoordinator.cancelCurrent();
+            }
+        });
+        dialog.show();
+
+        aiExplainCoordinator.explain(
+                expression,
+                deterministicResult,
+                localeTag,
+                new AiExplainCoordinator.Listener() {
+                    @Override
+                    public void onStarted(org.solovyev.android.calculator.ai.AiGatewayRequest request) {
+                    }
+
+                    @Override
+                    public void onFinished(AiGatewayResponse response) {
+                        if (!isAdded() || aiExplanationDialog != dialog || !dialog.isShowing()) {
+                            return;
+                        }
+                        dialog.setMessage(messageFor(response));
+                    }
+                });
+    }
+
+    @Nonnull
+    private CharSequence messageFor(@Nullable AiGatewayResponse response) {
+        if (response == null) {
+            return getString(R.string.nova_ai_unavailable);
+        }
+        switch (response.getStatus()) {
+            case SUCCESS:
+                final String answer = response.getAnswer();
+                return answer == null || answer.trim().isEmpty()
+                        ? getString(R.string.nova_ai_unavailable)
+                        : answer.trim();
+            case AUTH_REQUIRED:
+                return getString(R.string.nova_ai_auth_required);
+            case QUOTA_EXHAUSTED:
+                return getString(R.string.nova_ai_quota_exhausted);
+            case RATE_LIMITED:
+                return getString(R.string.nova_ai_rate_limited);
+            case INVALID_REQUEST:
+                return getString(R.string.nova_ai_invalid_request);
+            case TEMPORARILY_UNAVAILABLE:
+            default:
+                return getString(R.string.nova_ai_unavailable);
+        }
+    }
+
+    private void dismissAiDialog() {
+        final AlertDialog dialog = aiExplanationDialog;
+        aiExplanationDialog = null;
+        if (dialog != null) {
+            dialog.setOnDismissListener(null);
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
     }
 
     private static double getValue(@Nullable Generic result) {
