@@ -1,6 +1,7 @@
 package org.solovyev.android.calculator;
 
 import dagger.Component;
+import org.solovyev.android.calculator.billing.NovaBillingCoordinator;
 import org.solovyev.android.calculator.converter.ConverterFragment;
 import org.solovyev.android.calculator.errors.FixableErrorFragment;
 import org.solovyev.android.calculator.errors.FixableErrorsActivity;
@@ -68,4 +69,6 @@ public interface AppComponent {
     void inject(PreferencesFragment fragment);
     void inject(WizardFragment fragment);
     void inject(FloatingCalculatorBroadcastReceiver receiver);
+
+    NovaBillingCoordinator billingCoordinator();
 }
