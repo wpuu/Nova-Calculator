@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auto_clicker_disclosure_title">启用 Nova AutoTap</string>
+    <string name="auto_clicker_disclosure_message">Nova AutoTap 仅在你主动启用 AutoTap 时使用 Android 无障碍服务。它会监听音量键，让“音量+”开始、“音量−”停止；显示点击目标和状态浮层；并发送你自己设置的位置与时间参数所对应的点击手势。\n\nNova 已将该无障碍服务配置为不读取窗口内容。此权限不会用于读取或收集浮层下方应用的文字/界面内容，Nova 的产品统计也不得上传你的点击坐标或目标应用内容。\n\nAutoTap 只执行你明确设置的固定操作。你可随时按“音量−”立即停止，也可随时关闭 AutoTap。\n\n点击“继续”表示你已了解上述用途，随后请在 Android 无障碍设置中自行查看并启用 Nova。</string>
+    <string name="auto_clicker_disclosure_continue">继续</string>
+</resources>
