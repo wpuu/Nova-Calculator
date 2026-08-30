@@ -16,6 +16,12 @@
         android:selectable="false"
         android:summary="@string/pref_auto_clicker_hint" />
 
+    <org.solovyev.android.calculator.autoclicker.AutoClickerProfilesPreference
+        android:key="auto_clicker_profiles"
+        android:title="@string/auto_clicker_profiles_title"
+        android:summary="@string/auto_clicker_profiles_summary"
+        android:selectable="true" />
+
     <!-- Diagnostics panel: hidden unless a concrete failure occurs. Shows the full fix
          for the current error code and offers a one-tap repair for self-serviceable
          errors (overlay permission / accessibility not truly on). -->
