@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreferenceCompat;
 
+import org.solovyev.android.calculator.CalculatorApplication;
 import org.solovyev.android.calculator.R;
 
 /**
@@ -51,6 +52,7 @@ public final class AutoClickerConsentSwitchPreference extends SwitchPreferenceCo
                 .setMessage(R.string.auto_clicker_disclosure_message)
                 .setPositiveButton(R.string.auto_clicker_disclosure_continue, (dialog, which) -> {
                     preferences().edit().putBoolean(CONSENT_KEY, true).apply();
+                    trackDisclosureAccepted();
                     // Continue through SwitchPreferenceCompat so the existing listener still owns
                     // user intent, reconciliation, and navigation to Android accessibility settings.
                     AutoClickerConsentSwitchPreference.super.onClick();
@@ -61,6 +63,17 @@ public final class AutoClickerConsentSwitchPreference extends SwitchPreferenceCo
 
     boolean hasDisclosureConsent() {
         return preferences().getBoolean(CONSENT_KEY, false);
+    }
+
+    private void trackDisclosureAccepted() {
+        try {
+            Context app = getContext().getApplicationContext();
+            if (app instanceof CalculatorApplication) {
+                ((CalculatorApplication) app).getComponent().productAnalytics()
+                        .autoTapDisclosureAccepted();
+            }
+        } catch (RuntimeException ignored) {
+        }
     }
 
     @NonNull
