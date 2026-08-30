@@ -29,8 +29,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import org.solovyev.android.calculator.App;
 import org.solovyev.android.calculator.BaseFragment;
+import org.solovyev.android.calculator.BuildConfig;
 import org.solovyev.android.calculator.R;
 import org.solovyev.android.calculator.databinding.FragmentAboutBinding;
 
@@ -59,6 +61,7 @@ public class AboutFragment extends BaseFragment {
         if (App.getTheme().light) {
             imageView.setImageResource(R.drawable.logo_wizard_light);
         }
+        textView.setText(getString(R.string.c_about_content, BuildConfig.VERSION_NAME));
         textView.setMovementMethod(LinkMovementMethod.getInstance());
 
         if (isEmpty(translatorsView.getText())) {
