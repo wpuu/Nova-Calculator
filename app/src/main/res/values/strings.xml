@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="cpp_app_name">Nova Calculator AI</string>
-    <string name="app_share_link" translatable="false">https://example.com/nova-calculator</string>
+    <string name="app_share_link" translatable="false"></string>
     <string name="cpp_app_name_on_screen">Nova Calculator (悬浮)</string>
     <string name="cpp_vars_and_constants">Variables And Constants</string>
     <string name="c_plot">Plot graph</string>
