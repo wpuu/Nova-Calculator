@@ -87,6 +87,7 @@ jobs:
             --tests 'org.solovyev.android.calculator.ai.*Test' \
             --tests 'org.solovyev.android.calculator.billing.*Test' \
             --tests 'org.solovyev.android.calculator.autoclicker.*Test' \
+            --tests 'org.solovyev.android.calculator.analytics.*Test' \
             --stacktrace --no-daemon
 
       - name: Build debug APK
