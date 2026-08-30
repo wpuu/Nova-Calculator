@@ -21,6 +21,7 @@ apply plugin: 'kotlin-kapt'
 
 def configuredNovaGatewayUrl = (project.findProperty('novaAiGatewayUrl') ?: System.getenv('NOVA_AI_GATEWAY_URL') ?: '').toString().trim()
 def configuredNovaSessionUrl = (project.findProperty('novaAnonymousSessionUrl') ?: System.getenv('NOVA_ANONYMOUS_SESSION_URL') ?: '').toString().trim()
+def configuredNovaBillingUrl = (project.findProperty('novaBillingUrl') ?: System.getenv('NOVA_BILLING_URL') ?: '').toString().trim()
 def configuredNovaPlayIntegrityProjectText = (project.findProperty('novaPlayIntegrityCloudProjectNumber') ?: System.getenv('NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER') ?: '0').toString().trim()
 def configuredNovaVersionCodeText = (project.findProperty('novaVersionCode') ?: System.getenv('NOVA_VERSION_CODE') ?: '20001').toString().trim()
 def configuredNovaVersionName = (project.findProperty('novaVersionName') ?: System.getenv('NOVA_VERSION_NAME') ?: '0.2.0-alpha01').toString().trim()
@@ -66,6 +67,7 @@ android {
         // AI actions remain hidden until both URLs and a production installation proof adapter exist.
         buildConfigField 'String', 'NOVA_AI_GATEWAY_URL', '"' + buildConfigString(configuredNovaGatewayUrl) + '"'
         buildConfigField 'String', 'NOVA_ANONYMOUS_SESSION_URL', '"' + buildConfigString(configuredNovaSessionUrl) + '"'
+        buildConfigField 'String', 'NOVA_BILLING_URL', '"' + buildConfigString(configuredNovaBillingUrl) + '"'
         // Google Cloud project numbers are public identifiers, not credentials. Zero keeps the
         // Play Integrity proof path disabled in development builds.
         buildConfigField 'long', 'NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER', configuredNovaPlayIntegrityProject + 'L'
