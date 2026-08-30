@@ -1,5 +1,7 @@
 import { createNovaGatewayApplication } from './application.mjs';
+import { googleAndroidPublisherAccessTokenProviderFromEnv } from './google-android-publisher-token.mjs';
 import { googlePlayIntegrityDecoderFromEnv } from './google-play-integrity-decoder.mjs';
+import { GooglePlayPurchaseVerifier } from './google-play-purchase-verifier.mjs';
 import { PlayIntegrityInstallationProofVerifier } from './play-integrity-proof-verifier.mjs';
 import { redisQuotaStoreFromEnv } from './quota-store-runtime.mjs';
 import { RedisProviderKeyPool } from './redis-provider-key-pool.mjs';
@@ -9,8 +11,9 @@ import { upstashRedisEvalClientFromEnv } from './upstash-redis-eval-client.mjs';
  * Production deployment composition for Nova Gateway.
  *
  * This is the only layer that binds the provider-neutral core to concrete server adapters:
- * shared Redis capacity/accounting and Google Play Integrity server decoding. All credentials are
- * read from deployment environment variables and remain server-side.
+ * shared Redis capacity/accounting, Google Play Integrity server decoding, and Google Play
+ * purchase verification. All credentials are read from deployment environment variables and
+ * remain server-side.
  */
 export function createProductionNovaGatewayApplication(options = {}) {
   const env = options.env ?? process.env;
@@ -58,6 +61,21 @@ export function createProductionNovaGatewayApplication(options = {}) {
     });
   }
 
+  let purchaseVerifier = options.purchaseVerifier;
+  if (!purchaseVerifier) {
+    const billingAccessTokenProvider = googleAndroidPublisherAccessTokenProviderFromEnv(env, {
+      fetchImpl: options.fetchImpl,
+      now,
+    });
+    purchaseVerifier = new GooglePlayPurchaseVerifier({
+      packageName,
+      accessTokenProvider: billingAccessTokenProvider,
+      fetchImpl: options.fetchImpl,
+      now,
+      timeoutMs: env.NOVA_PLAY_BILLING_API_TIMEOUT_MS ?? options.billingTimeoutMs,
+    });
+  }
+
   const core = createNovaGatewayApplication({
     env,
     now,
@@ -66,17 +84,19 @@ export function createProductionNovaGatewayApplication(options = {}) {
     quotaStore,
     keyPoolFactory,
     installationProofVerifier,
+    purchaseVerifier,
   });
 
   return Object.freeze({
     ...core,
     safeSummary: Object.freeze({
       ...core.safeSummary,
-      deploymentComposition: 'production-v1',
+      deploymentComposition: 'production-v2-billing',
       androidPackageName: packageName,
       sharedQuotaStore: true,
       sharedProviderCapacity: true,
       playIntegrityServerDecode: !options.installationProofVerifier,
+      googlePlayPurchaseVerification: true,
     }),
   });
 }
