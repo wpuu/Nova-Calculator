@@ -1,6 +1,6 @@
 package org.solovyev.android.calculator.ai;
 
-import android.util.Base64;
+import com.google.common.io.BaseEncoding;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -21,9 +21,7 @@ public final class PlayIntegrityRequestHash {
         try {
             final MessageDigest digest = MessageDigest.getInstance("SHA-256");
             final byte[] value = (DOMAIN + "\n" + installationId.trim()).getBytes(StandardCharsets.UTF_8);
-            return Base64.encodeToString(
-                    digest.digest(value),
-                    Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+            return BaseEncoding.base64Url().omitPadding().encode(digest.digest(value));
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 is unavailable", e);
         }
