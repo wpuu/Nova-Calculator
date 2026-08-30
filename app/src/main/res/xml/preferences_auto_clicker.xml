@@ -22,6 +22,12 @@
         android:summary="@string/auto_clicker_profiles_summary"
         android:selectable="true" />
 
+    <org.solovyev.android.calculator.autoclicker.NovaAutoTapUpgradePreference
+        android:key="auto_clicker_upgrade"
+        android:title="@string/nova_billing_title"
+        android:summary="@string/nova_billing_entry_summary"
+        android:selectable="true" />
+
     <!-- Diagnostics panel: hidden unless a concrete failure occurs. Shows the full fix
          for the current error code and offers a one-tap repair for self-serviceable
          errors (overlay permission / accessibility not truly on). -->
