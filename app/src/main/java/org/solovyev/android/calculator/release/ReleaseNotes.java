@@ -12,14 +12,18 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+/** Nova-owned release history for the commercial application. */
 public final class ReleaseNotes {
 
     private static final SparseArray<ReleaseNote> map = new SparseArray<>();
+
     static {
-        map.put(143, ReleaseNote.make("2.1.4", R.string.cpp_release_notes_143));
-        map.put(148, ReleaseNote.make("2.2.1", R.string.cpp_release_notes_148));
-        map.put(150, ReleaseNote.make("2.2.2", R.string.cpp_release_notes_150));
-        map.put(152, ReleaseNote.make("2.2.3", R.string.cpp_release_notes_152));
+        // Calculator++ 2.x release history intentionally does not belong to the Nova product.
+        map.put(20001, ReleaseNote.make("0.2.0-alpha01", R.string.nova_release_notes_20001));
+    }
+
+    private ReleaseNotes() {
+        throw new AssertionError();
     }
 
     @Nonnull
@@ -42,14 +46,18 @@ public final class ReleaseNotes {
     @Nonnull
     public static String getReleaseNotesString(@Nonnull Context context, int minVersion) {
         final StringBuilder result = new StringBuilder();
-
         final String releaseNotesForTitle = context.getString(R.string.c_release_notes_for_title);
         final int currentVersionCode = App.getAppVersionCode(context);
-
         boolean first = true;
-        for (int versionCode = currentVersionCode; versionCode >= minVersion; versionCode--) {
-            final ReleaseNote releaseNote = map.get(versionCode);
-            if (releaseNote == null) {
+
+        for (int index = map.size() - 1; index >= 0; index--) {
+            final int versionCode = map.keyAt(index);
+            if (versionCode > currentVersionCode || versionCode < minVersion) {
+                continue;
+            }
+            final ReleaseNote releaseNote = map.valueAt(index);
+            final String descriptionHtml = getDescription(context, releaseNote.description);
+            if (Strings.isEmpty(descriptionHtml)) {
                 continue;
             }
             if (!first) {
@@ -57,11 +65,12 @@ public final class ReleaseNotes {
             } else {
                 first = false;
             }
-            final String descriptionHtml = getDescription(context, releaseNote.description);
-            result.append("<b>").append(releaseNotesForTitle).append(releaseNote.versionName).append("</b><br/><br/>");
+            result.append("<b>")
+                    .append(releaseNotesForTitle)
+                    .append(releaseNote.versionName)
+                    .append("</b><br/><br/>");
             result.append(descriptionHtml);
         }
-
         return result.toString();
     }
 
@@ -73,42 +82,21 @@ public final class ReleaseNotes {
     @Nonnull
     public static List<Integer> getReleaseNotesVersions(@Nonnull Context context, int minVersion) {
         final List<Integer> releaseNotes = new ArrayList<>();
-
         final int currentVersionCode = App.getAppVersionCode(context);
-
-        for (int versionCode = currentVersionCode; versionCode >= minVersion; versionCode--) {
-            if (versionCode == ChooseThemeReleaseNoteStep.VERSION_CODE) {
-                releaseNotes.add(ChooseThemeReleaseNoteStep.VERSION_CODE);
-            }
-            final ReleaseNote releaseNote = map.get(versionCode);
-            if (releaseNote == null) {
+        for (int index = map.size() - 1; index >= 0; index--) {
+            final int versionCode = map.keyAt(index);
+            if (versionCode > currentVersionCode || versionCode < minVersion) {
                 continue;
             }
-            final String description = context.getString(releaseNote.description);
-            if (!Strings.isEmpty(description)) {
+            final ReleaseNote releaseNote = map.valueAt(index);
+            if (!Strings.isEmpty(context.getString(releaseNote.description))) {
                 releaseNotes.add(versionCode);
             }
         }
-
         return releaseNotes;
     }
 
     public static boolean hasReleaseNotes(@Nonnull Context context, int minVersion) {
-        final int currentVersionCode = App.getAppVersionCode(context);
-
-        for (int versionCode = currentVersionCode; versionCode >= minVersion; versionCode--) {
-            if (versionCode == ChooseThemeReleaseNoteStep.VERSION_CODE) {
-                return true;
-            }
-            final ReleaseNote releaseNote = map.get(versionCode);
-            if (releaseNote == null) {
-                continue;
-            }
-            if (!Strings.isEmpty(context.getString(releaseNote.description))) {
-                return true;
-            }
-        }
-
-        return false;
+        return !getReleaseNotesVersions(context, minVersion).isEmpty();
     }
 }

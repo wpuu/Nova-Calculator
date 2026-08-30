@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nova_release_notes_20001">Nova 商业预览版：\n• 使用 Nova 自有应用身份和隐私安全的商业基线\n• 保留明确可见的水下相机；移除隐藏录音录像路径\n• 提升连点辅助可靠性并固定音量键控制\n• 加入供应商中立的 Nova AI 网关、已验证结果解释，以及服务端额度与多 Key 调度基础</string>
+</resources>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nova_release_notes_20001">Nova commercial preview:\n• Nova-owned application identity and privacy-safe commercial baseline\n• Explicit Underwater Camera retained; hidden recording paths removed\n• AutoTap reliability and volume-key controls improved\n• Provider-neutral Nova AI gateway, verified-result explanations and server-side quota/key routing foundations added</string>
+</resources>

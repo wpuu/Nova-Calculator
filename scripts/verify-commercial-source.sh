@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="app/src/main"
+SCAN_PATHS=(
+  "app/src/main"
+  "app/build.gradle"
+)
 
-if [[ ! -d "$ROOT" ]]; then
-  echo "Commercial source root not found: $ROOT" >&2
-  exit 1
-fi
+for path in "${SCAN_PATHS[@]}"; do
+  if [[ ! -e "$path" ]]; then
+    echo "Commercial source path not found: $path" >&2
+    exit 1
+  fi
+done
 
 forbidden=(
   'SecretCodeEvent'
@@ -25,18 +30,23 @@ forbidden=(
   'agnes-2.5-flash'
   'AGNES_API_KEY'
   'AGNES_API_KEYS'
+  'ca-app-pub-'
+  'com.google.android.gms:play-services-ads'
+  'com.google.android.gms.ads.'
+  'com.google.firebase:firebase-analytics'
+  'com.google.firebase.analytics.'
 )
 
 failed=0
 for pattern in "${forbidden[@]}"; do
-  if grep -RInF --exclude='*.map' -- "$pattern" "$ROOT"; then
+  if grep -RInF --exclude='*.map' -- "$pattern" "${SCAN_PATHS[@]}"; then
     echo "Forbidden commercial-source marker found: $pattern" >&2
     failed=1
   fi
 done
 
 # Catch common bearer-style secrets without blocking generic API client code.
-if grep -RInE -- 'sk-[A-Za-z0-9_-]{16,}' "$ROOT"; then
+if grep -RInE -- 'sk-[A-Za-z0-9_-]{16,}' "${SCAN_PATHS[@]}"; then
   echo "Possible embedded API secret found in commercial Android source" >&2
   failed=1
 fi
