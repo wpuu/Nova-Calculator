@@ -246,7 +246,7 @@ public class HttpAiGatewayClientTest {
 
         @Override
         public long getContentLengthLong() {
-            return contentLength >= 0 ? contentLength : responseBody.getBytes(StandardCharsets.UTF_8).length;
+            return contentLength;
         }
 
         @Override
