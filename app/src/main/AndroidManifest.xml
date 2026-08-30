@@ -163,9 +163,10 @@
                 android:resource="@xml/calculator_widget" />
         </receiver>
 
-        <!-- Auto Clicker Accessibility Service -->
+        <!-- AutoTap requires dispatchGesture(), which is available only from API 24. -->
         <service
             android:name=".autoclicker.AutoClickerService"
+            android:enabled="@bool/auto_clicker_supported"
             android:exported="true"
             android:label="@string/pref_auto_clicker_category"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">

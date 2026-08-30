@@ -1,6 +1,7 @@
 package org.solovyev.android.calculator
 
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.widget.Button
@@ -9,6 +10,7 @@ import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import org.solovyev.android.calculator.autoclicker.AutoClickerPlatform
 import org.solovyev.android.calculator.autoclicker.AutoClickerService
 
 /**
@@ -28,6 +30,14 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun refreshAutoClickerSwitch() {
         val switchEnabled = findViewById<Switch>(R.id.switchAutoClickerEnabled) ?: return
+        if (!AutoClickerPlatform.isSupportedSdk(Build.VERSION.SDK_INT)) {
+            if (switchEnabled.isChecked) {
+                updatingAutoClickerSwitch = true
+                switchEnabled.isChecked = false
+                updatingAutoClickerSwitch = false
+            }
+            return
+        }
         val intent = Preferences.AutoClicker.intent.getPreference(prefs)
         if (switchEnabled.isChecked == intent) return
         updatingAutoClickerSwitch = true
@@ -95,10 +105,22 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(android.content.Intent(this, UnderwaterCameraActivity::class.java))
         }
 
+        val autoClickerSupported = AutoClickerPlatform.isSupportedSdk(Build.VERSION.SDK_INT)
         val switchEnabled = findViewById<Switch>(R.id.switchAutoClickerEnabled)
-        switchEnabled.isChecked = Preferences.AutoClicker.intent.getPreference(prefs)
+        if (!autoClickerSupported) {
+            prefs.edit()
+                .putBoolean(Preferences.AutoClicker.intent.getKey(), false)
+                .putBoolean(Preferences.AutoClicker.enabled.getKey(), false)
+                .apply()
+        }
+        switchEnabled.isChecked = autoClickerSupported &&
+            Preferences.AutoClicker.intent.getPreference(prefs)
+        switchEnabled.isEnabled = autoClickerSupported
+        if (!autoClickerSupported) {
+            switchEnabled.text = "Android 7.0+"
+        }
         switchEnabled.setOnCheckedChangeListener { _, isChecked ->
-            if (updatingAutoClickerSwitch) {
+            if (updatingAutoClickerSwitch || !autoClickerSupported) {
                 return@setOnCheckedChangeListener
             }
             prefs.edit()
@@ -114,6 +136,10 @@ class SettingsActivity : AppCompatActivity() {
 
         val etInterval = findViewById<EditText>(R.id.etClickInterval)
         val etDuration = findViewById<EditText>(R.id.etClickDuration)
+        val saveAutoClicker = findViewById<Button>(R.id.btnSaveAutoClickerParams)
+        etInterval.isEnabled = autoClickerSupported
+        etDuration.isEnabled = autoClickerSupported
+        saveAutoClicker.isEnabled = autoClickerSupported
 
         val savedInterval = Preferences.AutoClicker.interval.getPreference(prefs)
         val savedDuration = Preferences.AutoClicker.duration.getPreference(prefs)
@@ -132,7 +158,10 @@ class SettingsActivity : AppCompatActivity() {
             }
         )
 
-        findViewById<Button>(R.id.btnSaveAutoClickerParams).setOnClickListener {
+        saveAutoClicker.setOnClickListener {
+            if (!autoClickerSupported) {
+                return@setOnClickListener
+            }
             val rawInterval = etInterval.text.toString().trim()
             val rawDuration = etDuration.text.toString().trim()
 
