@@ -2,13 +2,17 @@ import {
   AnonymousSessionService,
   createAnonymousSessionFetchHandler,
 } from './anonymous-session.mjs';
+import {
+  BillingEntitlementService,
+  createBillingEntitlementFetchHandler,
+} from './billing-entitlement-service.mjs';
 import { createNovaFetchHandler } from './http-handler.mjs';
 import { NovaAiService } from './nova-ai-service.mjs';
 import { DailyQuotaLedger } from './quota-ledger.mjs';
 import { quotaLimitsForPriority, quotaPolicyFromEnv } from './quota-policy.mjs';
 import { REQUEST_PRIORITY } from './provider-key-pool.mjs';
 import { createGatewayRuntime } from './runtime.mjs';
-import { sessionTokenServiceFromEnv } from './session-token.mjs';
+import { NOVA_SESSION_KIND, sessionTokenServiceFromEnv } from './session-token.mjs';
 
 /**
  * Composes Nova's deployable server core without binding it to Vercel, Express or a database.
@@ -54,9 +58,34 @@ export function createNovaGatewayApplication(options = {}) {
     installationProofVerifier: options.installationProofVerifier,
   });
 
+  let billingHandler = null;
+  if (options.purchaseVerifier) {
+    const billingService = new BillingEntitlementService({
+      authVerifier: Object.freeze({
+        verify(authorization) {
+          return sessionTokens.verify(authorization);
+        },
+      }),
+      purchaseVerifier: options.purchaseVerifier,
+      issueEntitlementSession({ subjectId, entitlements }) {
+        // Keep the same pseudonymous subject that was established by the Play-Integrity-gated
+        // anonymous session. ACCOUNT here means "server-authenticated entitlement session"; no
+        // email/password registration is required for V1 Play purchases.
+        return sessionTokens.issue({
+          kind: NOVA_SESSION_KIND.ACCOUNT,
+          subjectId,
+          entitlements,
+          ttlMs: sessionTokens.accountTtlMs,
+        });
+      },
+    });
+    billingHandler = createBillingEntitlementFetchHandler({ service: billingService });
+  }
+
   return Object.freeze({
     aiHandler: createNovaFetchHandler({ service: aiService }),
     anonymousSessionHandler: createAnonymousSessionFetchHandler({ service: anonymousSessionService }),
+    billingHandler,
     safeSummary: Object.freeze({
       ...providerRuntime.safeSummary,
       freeDailyLimit: freeLimits.dailyLimit,
@@ -67,6 +96,7 @@ export function createNovaGatewayApplication(options = {}) {
       aiPlusRpmLimit: aiPlusLimits.rpmLimit,
       signedNovaSessions: true,
       proofGatedAnonymousSessions: true,
+      serverVerifiedPlayBilling: Boolean(options.purchaseVerifier),
     }),
   });
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <org.solovyev.android.calculator.preferences.NovaBillingPreference
+        android:key="nova.billing.status"
+        android:title="@string/nova_billing_status_title" />
+
+    <PreferenceCategory android:title="@string/nova_billing_title">
+        <org.solovyev.android.calculator.preferences.NovaBillingPreference
+            android:key="nova.billing.pro"
+            android:title="@string/nova_billing_buy_pro" />
+
+        <org.solovyev.android.calculator.preferences.NovaBillingPreference
+            android:key="nova.billing.ai.monthly"
+            android:title="@string/nova_billing_buy_ai_monthly" />
+
+        <org.solovyev.android.calculator.preferences.NovaBillingPreference
+            android:key="nova.billing.ai.annual"
+            android:title="@string/nova_billing_buy_ai_annual" />
+
+        <org.solovyev.android.calculator.preferences.NovaBillingPreference
+            android:key="nova.billing.restore"
+            android:title="@string/nova_billing_restore"
+            android:summary="@string/nova_billing_restore_summary" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

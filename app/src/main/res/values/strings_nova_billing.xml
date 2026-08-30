@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nova_billing_title">Nova Pro &amp; AI</string>
+    <string name="nova_billing_entry_summary">Upgrade, manage AI Plus, or restore Google Play purchases</string>
+    <string name="nova_billing_status_title">Current plan</string>
+    <string name="nova_billing_plan_free">Free</string>
+    <string name="nova_billing_plan_pro">Nova Pro · Lifetime</string>
+    <string name="nova_billing_plan_ai_plus">Nova AI Plus</string>
+    <string name="nova_billing_buy_pro">Nova Pro · Lifetime</string>
+    <string name="nova_billing_buy_pro_summary">One-time purchase · local Pro features</string>
+    <string name="nova_billing_buy_ai_monthly">AI Plus · Monthly</string>
+    <string name="nova_billing_buy_ai_monthly_summary">Higher AI limits · includes Pro</string>
+    <string name="nova_billing_buy_ai_annual">AI Plus · Annual</string>
+    <string name="nova_billing_buy_ai_annual_summary">Best value · higher AI limits · includes Pro</string>
+    <string name="nova_billing_restore">Restore purchases</string>
+    <string name="nova_billing_restore_summary">Re-check purchases on the current Google Play account</string>
+    <string name="nova_billing_owned">Owned</string>
+    <string name="nova_billing_active">Active</string>
+    <string name="nova_billing_loading_price">Price from Google Play will appear when available</string>
+    <string name="nova_billing_unavailable">Purchases are unavailable in this build</string>
+    <string name="nova_billing_restore_started">Checking Google Play purchases…</string>
+    <string name="nova_billing_already_owned">This entitlement is already active</string>
+</resources>
