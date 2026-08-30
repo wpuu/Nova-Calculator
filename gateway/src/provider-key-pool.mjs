@@ -47,12 +47,15 @@ export class ProviderKeyPool {
     });
   }
 
-  lease(priority = REQUEST_PRIORITY.FREE) {
+  lease(priority = REQUEST_PRIORITY.FREE, options = {}) {
     assertPriority(priority);
+    const excludedIds = normalizeExcludedIds(options.excludeIds);
     const now = this.now();
     for (const key of this.keys) this.#refreshWindow(key, now);
 
-    const eligible = this.keys.filter((key) => this.#isEligible(key, priority, now));
+    const eligible = this.keys.filter((key) => (
+      !excludedIds.has(key.id) && this.#isEligible(key, priority, now)
+    ));
     if (eligible.length === 0) return null;
 
     eligible.sort((a, b) => {
@@ -139,6 +142,13 @@ export class ProviderKeyPool {
     if (!key) throw new Error(`unknown key id: ${id}`);
     return key;
   }
+}
+
+function normalizeExcludedIds(value) {
+  if (value == null) return new Set();
+  if (value instanceof Set) return value;
+  if (Array.isArray(value)) return new Set(value.map(String));
+  throw new Error('excludeIds must be an array or Set');
 }
 
 function assertPriority(priority) {
