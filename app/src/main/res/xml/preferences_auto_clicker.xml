@@ -3,7 +3,7 @@
     android:key="screen-auto-clicker"
     android:title="@string/pref_auto_clicker_category">
 
-    <SwitchPreferenceCompat
+    <org.solovyev.android.calculator.autoclicker.AutoClickerConsentSwitchPreference
         android:defaultValue="false"
         android:key="auto_clicker_intent"
         android:summary="@string/pref_auto_clicker_enable_summary"
