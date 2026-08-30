@@ -31,6 +31,11 @@ jobs:
           java-version: '17'
           cache: gradle
 
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
@@ -70,6 +75,9 @@ jobs:
 
       - name: Verify commercial source guard
         run: bash scripts/verify-commercial-source.sh
+
+      - name: Test gateway capacity core
+        run: cd gateway && npm test
 
       - name: Test commercial core contracts
         run: |
