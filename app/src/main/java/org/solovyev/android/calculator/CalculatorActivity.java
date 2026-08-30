@@ -40,6 +40,7 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import org.solovyev.android.calculator.analytics.NovaProductAnalytics;
 import org.solovyev.android.calculator.converter.ConverterFragment;
 import org.solovyev.android.calculator.databinding.ActivityMainBinding;
 import org.solovyev.android.calculator.history.History;
@@ -68,6 +69,8 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
     ActivityLauncher launcher;
     @Inject
     StartupHelper startupHelper;
+    @Inject
+    NovaProductAnalytics productAnalytics;
     @Nullable
     View partialKeyboard;
     FrameLayout editor;
@@ -236,6 +239,7 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
         public boolean onMenuItemClick(MenuItem item) {
             int itemId = item.getItemId();
             if (itemId == R.id.menu_autotap) {
+                productAnalytics.autoTapSettingsOpened(NovaProductAnalytics.EntrySource.MAIN_MENU);
                 startActivity(PreferencesActivity.makeIntent(
                         CalculatorActivity.this,
                         R.xml.preferences_auto_clicker,
