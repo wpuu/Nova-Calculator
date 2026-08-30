@@ -46,7 +46,7 @@ test('free traffic cannot consume paid reserve capacity', () => {
   assert.equal(pool.lease(REQUEST_PRIORITY.AI_PLUS), null);
 });
 
-test('rate-limited key is removed until its capacity window recovers', () => {
+test('rate-limited key is skipped while limited and becomes eligible after recovery', () => {
   let now = 0;
   const pool = new ProviderKeyPool([
     { id: 'a', secret: 'secret-a', rpmLimit: 10 },
@@ -58,7 +58,11 @@ test('rate-limited key is removed until its capacity window recovers', () => {
   pool.reportRateLimit(first.id, 5_000);
 
   assert.equal(pool.lease(REQUEST_PRIORITY.AI_PLUS).id, 'b');
+
+  // At the next RPM window both keys have capacity again. The healthier key should still be
+  // preferred, so disable it only to prove the previously limited key is eligible again.
   now = 60_000;
+  pool.setEnabled('b', false);
   assert.equal(pool.lease(REQUEST_PRIORITY.AI_PLUS).id, 'a');
 });
 
