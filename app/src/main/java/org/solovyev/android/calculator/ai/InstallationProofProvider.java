@@ -12,6 +12,13 @@ public interface InstallationProofProvider {
     boolean isAvailable();
 
     /**
+     * Optional asynchronous preparation hook. Callers must invoke this off the UI thread.
+     * Implementations should treat preparation failure as non-fatal and fail closed on getProof().
+     */
+    default void warmUp() {
+    }
+
+    /**
      * Returns a fresh proof bound to the supplied installation id, or {@code null} on failure.
      * This may perform blocking work and must only be called from Nova's background executor.
      */

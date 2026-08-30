@@ -15,9 +15,8 @@ import java.util.concurrent.TimeoutException;
 /**
  * Production installation-proof adapter backed by the Play Integrity Standard API.
  *
- * Standard integrity requests support Nova's existing Android 5.0+ baseline. The Cloud project
- * number is public configuration, not a credential. Google service-account credentials and token
- * decoding remain server-side only.
+ * The Cloud project number is public configuration, not a credential. Google service-account
+ * credentials and token decoding remain server-side only.
  *
  * This provider is called only from Nova's background executor. The prepared token provider is
  * cached and refreshed once if Google reports INTEGRITY_TOKEN_PROVIDER_INVALID.
@@ -46,8 +45,18 @@ public final class PlayIntegrityInstallationProofProvider implements Installatio
     }
 
     @Override
+    public synchronized void warmUp() {
+        try {
+            ensureTokenProvider();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception ignored) {
+            // The on-demand path will retry and fail closed if Play Integrity is still unavailable.
+        }
+    }
+
+    @Override
     public synchronized String getProof(String installationId) {
-        if (!isAvailable()) return null;
         final String requestHash;
         try {
             requestHash = PlayIntegrityRequestHash.forAnonymousSession(installationId);

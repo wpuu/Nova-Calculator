@@ -199,14 +199,23 @@ public class AppModule {
 
     @Provides
     @Singleton
-    InstallationProofProvider provideInstallationProofProvider(Application application) {
+    InstallationProofProvider provideInstallationProofProvider(
+            Application application,
+            @Named(THREAD_BACKGROUND) Executor background) {
         final long cloudProjectNumber = BuildConfig.NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER;
         if (cloudProjectNumber <= 0L) {
             // Development builds stay fail-closed until a Play-linked project number is injected.
             return new DisabledInstallationProofProvider();
         }
         try {
-            return new PlayIntegrityInstallationProofProvider(application, cloudProjectNumber);
+            final InstallationProofProvider proofProvider =
+                    new PlayIntegrityInstallationProofProvider(application, cloudProjectNumber);
+            try {
+                background.execute(proofProvider::warmUp);
+            } catch (RuntimeException ignored) {
+                // On-demand proof acquisition remains authoritative and will retry later.
+            }
+            return proofProvider;
         } catch (RuntimeException e) {
             // A device without usable Google Play components must not silently bypass proof.
             return new DisabledInstallationProofProvider();
