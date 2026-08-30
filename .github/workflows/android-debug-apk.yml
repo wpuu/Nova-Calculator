@@ -68,6 +68,12 @@ jobs:
           print(f'Migrated AndroidX annotation imports in {count} Plotter Java files')
           PY
 
+      - name: Verify commercial source guard
+        run: bash scripts/verify-commercial-source.sh
+
+      - name: Test commercial entitlement model
+        run: ./gradlew :app:testDebugUnitTest --tests 'org.solovyev.android.calculator.entitlement.DefaultEntitlementManagerTest' --stacktrace --no-daemon
+
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --stacktrace --no-daemon
 
