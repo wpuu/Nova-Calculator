@@ -34,6 +34,15 @@ redis.call('EXPIRE', unique_key, aggregate_ttl)
 return 1
 `;
 
+const READ_DAILY_SCRIPT = `
+local counts = redis.call('HGETALL', KEYS[1])
+local uniques = {}
+for i = 2, #KEYS do
+  uniques[i - 1] = redis.call('PFCOUNT', KEYS[i])
+end
+return {counts, uniques}
+`;
+
 export class ProductEventRateLimitError extends Error {
   constructor() {
     super('product event daily subject limit exceeded');
@@ -88,6 +97,45 @@ export class RedisProductEventStore {
     if (result === -1) throw new ProductEventRateLimitError();
     return result === 1;
   }
+
+  /**
+   * Returns aggregate count + unique-user data only. `dimensions` must be a server-owned fixed
+   * list of event/entitlement pairs; callers cannot use this method to enumerate raw Redis keys.
+   */
+  async readDaily(date, dimensions) {
+    const normalizedDate = safeDate(date);
+    if (!Array.isArray(dimensions) || dimensions.length === 0 || dimensions.length > 100) {
+      throw new Error('product funnel dimensions are invalid');
+    }
+    const safeDimensions = dimensions.map((dimension) => {
+      if (!dimension || typeof dimension !== 'object') {
+        throw new Error('product funnel dimension is invalid');
+      }
+      return Object.freeze({
+        event: safeSegment(dimension.event, 80),
+        entitlement: safeSegment(dimension.entitlement, 30),
+      });
+    });
+    const keys = [`${this.keyPrefix}:count:${normalizedDate}`];
+    for (const dimension of safeDimensions) {
+      keys.push(`${this.keyPrefix}:unique:${normalizedDate}:${dimension.event}:${dimension.entitlement}`);
+    }
+
+    const raw = await this.evalClient.eval(READ_DAILY_SCRIPT, keys, []);
+    const rawCounts = Array.isArray(raw?.[0]) ? raw[0] : [];
+    const rawUniques = Array.isArray(raw?.[1]) ? raw[1] : [];
+    const countMap = new Map();
+    for (let index = 0; index + 1 < rawCounts.length; index += 2) {
+      countMap.set(String(rawCounts[index]), nonNegativeInteger(rawCounts[index + 1]));
+    }
+
+    return Object.freeze(safeDimensions.map((dimension, index) => Object.freeze({
+      event: dimension.event,
+      entitlement: dimension.entitlement,
+      count: countMap.get(`${dimension.event}|${dimension.entitlement}`) ?? 0,
+      unique: nonNegativeInteger(rawUniques[index]),
+    })));
+  }
 }
 
 function validateEvent(event) {
@@ -105,6 +153,16 @@ function utcDate(epochMs) {
   const date = new Date(epochMs);
   if (!Number.isFinite(date.getTime())) throw new Error('product event date is invalid');
   return date.toISOString().slice(0, 10);
+}
+
+function safeDate(value) {
+  const text = String(value ?? '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) throw new Error('product funnel date is invalid');
+  const parsed = new Date(`${text}T00:00:00.000Z`);
+  if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== text) {
+    throw new Error('product funnel date is invalid');
+  }
+  return text;
 }
 
 function normalizePrefix(value) {
@@ -127,4 +185,9 @@ function positiveInteger(value, name) {
   const number = Number(value);
   if (!Number.isSafeInteger(number) || number <= 0) throw new Error(`${name} must be positive`);
   return number;
+}
+
+function nonNegativeInteger(value) {
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number >= 0 ? number : 0;
 }
