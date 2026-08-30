@@ -50,14 +50,16 @@ public final class CommercialModule {
             Application application,
             AiSessionTokenProvider sessionTokenProvider,
             AiSessionTokenStore tokenStore,
-            EntitlementManager entitlementManager) {
+            EntitlementManager entitlementManager,
+            NovaProductAnalytics productAnalytics) {
         final String url = BuildConfig.NOVA_BILLING_URL == null
                 ? ""
                 : BuildConfig.NOVA_BILLING_URL.trim();
         if (url.isEmpty()) {
             // Development and source builds stay safely Free until the Nova-owned billing route
             // is explicitly injected. Google Play purchase UI is not started in this state.
-            return new NovaBillingCoordinator(application, null, entitlementManager);
+            return new NovaBillingCoordinator(
+                    application, null, entitlementManager, productAnalytics);
         }
         try {
             final NovaBillingEntitlementClient entitlementClient =
@@ -65,11 +67,13 @@ public final class CommercialModule {
                             new NovaBillingEndpoint(url),
                             sessionTokenProvider,
                             tokenStore);
-            return new NovaBillingCoordinator(application, entitlementClient, entitlementManager);
+            return new NovaBillingCoordinator(
+                    application, entitlementClient, entitlementManager, productAnalytics);
         } catch (RuntimeException e) {
             // Invalid commercial endpoint configuration must fail closed rather than exposing a
             // purchase UI that cannot verify or restore the resulting entitlement.
-            return new NovaBillingCoordinator(application, null, entitlementManager);
+            return new NovaBillingCoordinator(
+                    application, null, entitlementManager, productAnalytics);
         }
     }
 }
