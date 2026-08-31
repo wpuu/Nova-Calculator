@@ -59,6 +59,22 @@
                 android:text="进入后才会使用相机；录像需要声音时再请求麦克风权限。"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnPrivacyPolicy"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="18dp"
+                android:text="隐私政策"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/btnOpenSourceLicenses"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:text="开源许可"
+                android:textSize="15sp" />
         </LinearLayout>
 
         <TextView

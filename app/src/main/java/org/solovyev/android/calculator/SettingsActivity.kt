@@ -1,12 +1,16 @@
 package org.solovyev.android.calculator
 
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ScrollView
 import android.widget.Switch
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -65,13 +69,74 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun openAccessibilitySettings() {
         try {
-            startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
         } catch (_: Exception) {
             Toast.makeText(
                 this,
                 "无法打开系统无障碍设置，请在系统设置中手动打开。",
                 Toast.LENGTH_LONG
             ).show()
+        }
+    }
+
+    private fun openPrivacyPolicy() {
+        val gatewayUrl = BuildConfig.NOVA_AI_GATEWAY_URL.trim()
+        val privacyUri = try {
+            val gateway = Uri.parse(gatewayUrl)
+            if (gateway.scheme != "https" || gateway.host.isNullOrBlank()) {
+                null
+            } else {
+                gateway.buildUpon()
+                    .encodedPath("/api/privacy")
+                    .clearQuery()
+                    .fragment(null)
+                    .build()
+            }
+        } catch (_: Exception) {
+            null
+        }
+
+        if (privacyUri == null) {
+            Toast.makeText(this, "隐私政策将在正式服务配置后提供", Toast.LENGTH_LONG).show()
+            return
+        }
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, privacyUri))
+        } catch (_: Exception) {
+            Toast.makeText(this, "无法打开隐私政策页面", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun showOpenSourceLicenses() {
+        val notice = readLegalAsset("legal/NOTICE.txt")
+        val license = readLegalAsset("legal/LICENSE.txt")
+        if (notice == null || license == null) {
+            Toast.makeText(this, "开源许可文件不可用", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val content = TextView(this).apply {
+            text = "$notice\n\n$license"
+            textSize = 12f
+            setTextIsSelectable(true)
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+        }
+        val scroll = ScrollView(this).apply {
+            addView(content)
+        }
+        AlertDialog.Builder(this)
+            .setTitle("开源许可")
+            .setView(scroll)
+            .setPositiveButton("关闭", null)
+            .show()
+    }
+
+    private fun readLegalAsset(path: String): String? {
+        return try {
+            assets.open(path).bufferedReader(Charsets.UTF_8).use { it.readText() }
+        } catch (_: Exception) {
+            null
         }
     }
 
@@ -188,7 +253,13 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnUnderwaterCamera).setOnClickListener {
-            startActivity(android.content.Intent(this, UnderwaterCameraActivity::class.java))
+            startActivity(Intent(this, UnderwaterCameraActivity::class.java))
+        }
+        findViewById<Button>(R.id.btnPrivacyPolicy).setOnClickListener {
+            openPrivacyPolicy()
+        }
+        findViewById<Button>(R.id.btnOpenSourceLicenses).setOnClickListener {
+            showOpenSourceLicenses()
         }
 
         val autoClickerSupported = AutoClickerPlatform.isSupportedSdk(Build.VERSION.SDK_INT)

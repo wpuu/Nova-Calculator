@@ -123,6 +123,34 @@ jobs:
             *) echo "NOVA_UPLOAD_KEYSTORE_TYPE must be JKS or PKCS12" >&2; exit 1 ;;
           esac
 
+      - name: Verify live Gateway health and privacy policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORIGIN="${NOVA_AI_GATEWAY_URL%/api/ai}"
+          if [ "$ORIGIN" = "$NOVA_AI_GATEWAY_URL" ]; then
+            echo 'NOVA_AI_GATEWAY_URL must end in /api/ai before live checks' >&2
+            exit 1
+          fi
+
+          HEALTH_BODY="$(curl --fail --silent --show-error --location --max-time 15 \
+            --retry 2 --retry-delay 1 "$ORIGIN/api/health")"
+          printf '%s' "$HEALTH_BODY" | grep -q '"status":"OK"' || {
+            echo 'Nova Gateway health endpoint did not return status OK' >&2
+            exit 1
+          }
+
+          PRIVACY_BODY="$(curl --fail --silent --show-error --location --max-time 15 \
+            --retry 2 --retry-delay 1 "$ORIGIN/api/privacy")"
+          printf '%s' "$PRIVACY_BODY" | grep -q 'Nova Calculator AI Privacy Policy' || {
+            echo 'Nova public privacy policy is missing or invalid' >&2
+            exit 1
+          }
+          printf '%s' "$PRIVACY_BODY" | grep -q 'Privacy contact:' || {
+            echo 'Nova public privacy policy does not expose the configured privacy contact' >&2
+            exit 1
+          }
+
       - name: Test gateway and commercial contracts
         run: |
           (cd gateway && npm test)

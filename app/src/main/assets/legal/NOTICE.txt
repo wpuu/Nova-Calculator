@@ -1,0 +1,11 @@
+Nova Calculator AI
+
+This distribution includes substantial code derived from Calculator++ / android-calculatorpp,
+originally developed by Sergey Solovyev (serso / se.solovyev).
+
+Original Calculator++ source files and resources retain their original copyright and
+Apache License 2.0 notices where present.
+
+Nova-specific modifications and additions are maintained by the Nova Calculator contributors.
+
+The Apache License, Version 2.0, is included in the root LICENSE file.

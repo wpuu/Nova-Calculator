@@ -10,6 +10,8 @@ required = [
     Path('NOTICE'),
     Path('docs/PLAY_DATA_SAFETY_BASELINE.md'),
     Path('docs/PRIVACY_POLICY_DRAFT.md'),
+    Path('app/src/main/assets/legal/LICENSE.txt'),
+    Path('app/src/main/assets/legal/NOTICE.txt'),
 ]
 for path in required:
     if not path.is_file() or path.stat().st_size == 0:
@@ -40,18 +42,37 @@ for marker in required_readme_markers:
     if marker not in readme:
         raise SystemExit(f'Nova commercial docs guard: README missing required marker: {marker}')
 
-license_text = Path('LICENSE').read_text(encoding='utf-8')
+license_path = Path('LICENSE')
+notice_path = Path('NOTICE')
+license_text = license_path.read_text(encoding='utf-8')
 if 'Apache License' not in license_text or 'Version 2.0, January 2004' not in license_text:
     raise SystemExit('Nova commercial docs guard: root LICENSE is not the Apache License 2.0 text')
 
-notice = Path('NOTICE').read_text(encoding='utf-8')
+notice = notice_path.read_text(encoding='utf-8')
 for marker in ['Calculator++', 'Sergey Solovyev', 'Apache License 2.0']:
     if marker not in notice:
         raise SystemExit(f'Nova commercial docs guard: NOTICE missing attribution marker: {marker}')
+
+if Path('app/src/main/assets/legal/LICENSE.txt').read_bytes() != license_path.read_bytes():
+    raise SystemExit('Nova commercial docs guard: APK LICENSE asset must exactly match root LICENSE')
+if Path('app/src/main/assets/legal/NOTICE.txt').read_bytes() != notice_path.read_bytes():
+    raise SystemExit('Nova commercial docs guard: APK NOTICE asset must exactly match root NOTICE')
 
 privacy = Path('docs/PRIVACY_POLICY_DRAFT.md').read_text(encoding='utf-8')
 if 'DRAFT' not in privacy or 'Required before publication' not in privacy:
     raise SystemExit('Nova commercial docs guard: privacy draft must remain explicitly non-production until finalized')
 
-print('Nova commercial README, licensing and policy-document baseline OK')
+privacy_route = Path('gateway/api/privacy.mjs')
+privacy_module = Path('gateway/src/privacy-policy-page.mjs')
+if not privacy_route.is_file() or not privacy_module.is_file():
+    raise SystemExit('Nova commercial docs guard: public privacy-policy route is missing')
+
+settings = Path('app/src/main/java/org/solovyev/android/calculator/SettingsActivity.kt').read_text(encoding='utf-8')
+layout = Path('app/src/main/res/layout/activity_settings.xml').read_text(encoding='utf-8')
+if '/api/privacy' not in settings or 'btnPrivacyPolicy' not in layout:
+    raise SystemExit('Nova commercial docs guard: in-app privacy-policy entry is missing')
+if 'btnOpenSourceLicenses' not in layout or 'legal/LICENSE.txt' not in settings:
+    raise SystemExit('Nova commercial docs guard: in-app open-source-license entry is missing')
+
+print('Nova commercial README, licensing, packaged notices and privacy-policy baseline OK')
 PY
