@@ -9,6 +9,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Reads the usable full-display coordinate space for AutoTap overlays.
@@ -21,6 +22,8 @@ import androidx.annotation.NonNull;
 final class AutoClickerDisplayBounds {
 
     private static final String TAG = "AutoClickerBounds";
+    @Nullable
+    private static volatile Bounds lastRead;
 
     private AutoClickerDisplayBounds() {
     }
@@ -60,9 +63,18 @@ final class AutoClickerDisplayBounds {
             height = fallback.heightPixels;
         }
 
-        return new Bounds(
+        final Bounds result = new Bounds(
                 Math.max(Math.max(1, minimumWidth), width),
                 Math.max(Math.max(1, minimumHeight), height));
+        // This remains process-local diagnostic state only. Nothing is uploaded or persisted.
+        lastRead = result;
+        return result;
+    }
+
+    @Nullable
+    static Bounds getLastRead() {
+        final Bounds current = lastRead;
+        return current == null ? null : new Bounds(current.width, current.height);
     }
 
     @NonNull
