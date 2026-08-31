@@ -53,9 +53,9 @@ def buildConfigString = { String value ->
 android {
     compileSdk versions.sdk.compile
     defaultConfig {
-        // Development-only commercial identity. Do not upload this .dev ID to Google Play.
-        // The production applicationId will be frozen after name/package availability checks.
-        applicationId "com.wpuu.novacalculator.dev"
+        // Candidate production identity. Google Play Console remains the final authority until the
+        // app record is created; this id can still be changed before the first Play upload.
+        applicationId "com.wpuu.novacalculator"
         minSdkVersion versions.sdk.min
         targetSdkVersion versions.sdk.target
         // Default scheme: major*1,000,000 + minor*10,000 + patch*100 + build.
@@ -83,6 +83,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg'
         }
         debug {
+            // Keep all development/test APKs isolated from the candidate production Play identity.
+            applicationIdSuffix ".dev"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-debug.cfg'
             multiDexEnabled true
