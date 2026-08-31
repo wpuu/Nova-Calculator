@@ -27,7 +27,8 @@ The commercial branch now has these foundations in source and CI:
 - public `/api/privacy`, in-app privacy entry and bundled Apache-2.0 LICENSE/NOTICE access;
 - signed production AAB workflow with production identity/config/signing guards;
 - production privacy-readiness gate that intentionally blocks AAB release until the public privacy contact is externally verified and the live policy contains no unresolved release markers;
-- ordinary commercial CI builds both Debug APK and unsigned Release AAB preflight.
+- ordinary commercial CI builds both Debug APK and unsigned Release AAB preflight;
+- release lint Error/Fatal findings are blocking in ordinary commercial CI; the 2026-08-31 baseline was reduced from 19 Error/Fatal findings to 0 before enabling the gate.
 
 These completed items should not be reopened merely because the older V1 audit still describes their pre-cleanup state.
 
@@ -97,7 +98,7 @@ A GitHub Debug APK uses the `.dev` package and is not evidence that production P
 
 These do not block continued external setup, but should be completed before broad public rollout:
 
-- [ ] Turn Android release lint into a real gate. Current `app/build.gradle` still has `lint { abortOnError false }`; first run/audit `lintRelease`, fix justified release errors, then make critical lint failures blocking.
+- [x] Turn Android release lint into a real gate. `lintRelease` was audited on 2026-08-31, 19 Error/Fatal findings were resolved or narrowly isolated where the inherited AppCompat bridge intentionally depends on restricted internals, and ordinary commercial CI now blocks on release Error/Fatal findings. The current 534 Warning baseline remains visible/non-blocking for incremental cleanup.
 - [ ] Run a physical-device/OEM matrix for AutoTap overlay recovery, fullscreen coordinate handling and Accessibility lifecycle.
 - [ ] Run camera/microphone permission and save-path regression on several Android versions for Underwater Camera.
 - [ ] Perform final English and Simplified Chinese copy/brand review across onboarding, billing, AI states, privacy and Accessibility disclosure.

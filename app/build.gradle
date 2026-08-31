@@ -93,7 +93,7 @@ android {
     // Source namespace remains inherited during refactor; applicationId is already isolated.
     namespace 'org.solovyev.android.calculator'
     lint {
-        abortOnError false
+        abortOnError true
         disable 'ContentDescription', 'IconLauncherShape'
         warning 'MissingTranslation'
     }
