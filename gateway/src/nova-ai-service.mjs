@@ -25,6 +25,7 @@ const EXPLAIN_OPERATION = 'EXPLAIN_CALCULATION';
 const NATURAL_LANGUAGE_OPERATION = 'PARSE_NATURAL_LANGUAGE_CALCULATION';
 const FOLLOW_UP_OPERATION = 'FOLLOW_UP_CALCULATION';
 const ERROR_EXPLANATION_OPERATION = 'EXPLAIN_CALCULATION_ERROR';
+const BUILD_FORMULA_OPERATION = 'BUILD_FORMULA';
 
 /** Server-authoritative orchestration for one Nova AI request. */
 export class NovaAiService {
@@ -154,6 +155,20 @@ function validateClientRequest(request) {
         operation: ERROR_EXPLANATION_OPERATION,
         expression,
         evaluationError,
+        localeTag: boundedLocale(request.localeTag),
+      }),
+    };
+  }
+
+  if (request?.operation === BUILD_FORMULA_OPERATION) {
+    const formulaGoal = safeText(request.formulaGoal);
+    if (!formulaGoal || formulaGoal.length > 2000) return { ok: false, requestId };
+    return {
+      ok: true,
+      request: Object.freeze({
+        requestId,
+        operation: BUILD_FORMULA_OPERATION,
+        formulaGoal,
         localeTag: boundedLocale(request.localeTag),
       }),
     };
