@@ -10,6 +10,8 @@ required = [
     Path('NOTICE'),
     Path('docs/PLAY_DATA_SAFETY_BASELINE.md'),
     Path('docs/PRIVACY_POLICY_DRAFT.md'),
+    Path('docs/COMMERCIAL_IDENTITY_AUDIT_V1.md'),
+    Path('docs/COMMERCIAL_RELEASE_READINESS_CURRENT.md'),
     Path('app/src/main/assets/legal/LICENSE.txt'),
     Path('app/src/main/assets/legal/NOTICE.txt'),
 ]
@@ -62,6 +64,23 @@ privacy = Path('docs/PRIVACY_POLICY_DRAFT.md').read_text(encoding='utf-8')
 if 'DRAFT' not in privacy or 'Required before publication' not in privacy:
     raise SystemExit('Nova commercial docs guard: privacy draft must remain explicitly non-production until finalized')
 
+historical_audit = Path('docs/COMMERCIAL_IDENTITY_AUDIT_V1.md').read_text(encoding='utf-8')
+if 'SUPERSEDED historical audit' not in historical_audit or 'COMMERCIAL_RELEASE_READINESS_CURRENT.md' not in historical_audit:
+    raise SystemExit('Nova commercial docs guard: V1 identity audit must remain marked as superseded and point to current readiness')
+
+readiness = Path('docs/COMMERCIAL_RELEASE_READINESS_CURRENT.md').read_text(encoding='utf-8')
+for marker in [
+    'P0 external production blockers',
+    'com.wpuu.novacalculator',
+    'NOVA_PRIVACY_CONTACT_VERIFIED=true',
+    'Google Play application and Play Integrity',
+    'Google Play Billing products',
+    'Google Play policy declarations',
+    'Repository-side next quality work (P1)',
+]:
+    if marker not in readiness:
+        raise SystemExit(f'Nova commercial docs guard: current release readiness missing marker: {marker}')
+
 privacy_route = Path('gateway/api/privacy.mjs')
 privacy_module = Path('gateway/src/privacy-policy-page.mjs')
 if not privacy_route.is_file() or not privacy_module.is_file():
@@ -74,5 +93,5 @@ if '/api/privacy' not in settings or 'btnPrivacyPolicy' not in layout:
 if 'btnOpenSourceLicenses' not in layout or 'legal/LICENSE.txt' not in settings:
     raise SystemExit('Nova commercial docs guard: in-app open-source-license entry is missing')
 
-print('Nova commercial README, licensing, packaged notices and privacy-policy baseline OK')
+print('Nova commercial README, licensing, packaged notices, privacy baseline and release-readiness docs OK')
 PY
