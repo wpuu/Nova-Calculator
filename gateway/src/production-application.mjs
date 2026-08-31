@@ -40,6 +40,7 @@ export function createProductionNovaGatewayApplication(options = {}) {
       paidReserveFraction: poolOptions.paidReserveFraction,
       cooldownOnFailureMs: poolOptions.cooldownOnFailureMs,
       maxFailuresBeforeCooldown: poolOptions.maxFailuresBeforeCooldown,
+      credentialDisableMs: poolOptions.credentialDisableMs,
       now: poolOptions.now,
     },
   ));

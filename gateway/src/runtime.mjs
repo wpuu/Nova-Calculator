@@ -17,6 +17,7 @@ export function createGatewayRuntime(env = process.env, options = {}) {
     paidReserveFraction: config.paidReserveFraction,
     cooldownOnFailureMs: config.cooldownOnFailureMs,
     maxFailuresBeforeCooldown: config.maxFailuresBeforeCooldown,
+    credentialDisableMs: config.credentialDisableMs,
     now: options.now,
   });
   const keyPool = typeof options.keyPoolFactory === 'function'
@@ -60,6 +61,7 @@ function readConfig(env) {
     maxTokens: positiveInt(env.NOVA_PROVIDER_MAX_TOKENS ?? 800, 'NOVA_PROVIDER_MAX_TOKENS'),
     cooldownOnFailureMs: positiveInt(env.NOVA_PROVIDER_FAILURE_COOLDOWN_MS ?? 30_000, 'NOVA_PROVIDER_FAILURE_COOLDOWN_MS'),
     maxFailuresBeforeCooldown: positiveInt(env.NOVA_PROVIDER_FAILURE_THRESHOLD ?? 3, 'NOVA_PROVIDER_FAILURE_THRESHOLD'),
+    credentialDisableMs: positiveInt(env.NOVA_PROVIDER_CREDENTIAL_DISABLE_MS ?? 21_600_000, 'NOVA_PROVIDER_CREDENTIAL_DISABLE_MS'),
   });
 }
 

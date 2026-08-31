@@ -28,6 +28,9 @@ Optional capacity policy:
 - `NOVA_PROVIDER_MAX_TOKENS` — default `800`
 - `NOVA_PROVIDER_FAILURE_COOLDOWN_MS` — default `30000`
 - `NOVA_PROVIDER_FAILURE_THRESHOLD` — default `3`
+- `NOVA_PROVIDER_CREDENTIAL_DISABLE_MS` — default `21600000` (6 hours); shared quarantine after a provider rejects a credential. Use a bounded value so a future key rotation is automatically re-evaluated instead of inheriting a permanent Redis disable flag.
+
+A provider HTTP 429 also saturates that credential's shared current-minute RPM counter in Redis. This prevents another horizontally scaled gateway instance from reusing the same credential in the same minute merely because the upstream `Retry-After` is shorter than Nova's one-minute accounting window.
 
 ### Nova session signing
 
@@ -47,7 +50,7 @@ Optional namespacing:
 - `NOVA_PROVIDER_REDIS_KEY_PREFIX` — default `nova:provider:v1`
 - `NOVA_QUOTA_REDIS_TIMEOUT_MS` — Redis REST timeout override
 
-The same Redis service can safely back both namespaces. Provider API key **secrets are never written to Redis**; provider capacity state contains only opaque ids, counters, cooldown/failure state and disable state.
+The same Redis service can safely back both namespaces. Provider API key **secrets are never written to Redis**; provider capacity state contains only opaque ids, counters, cooldown/failure state and temporary disable state.
 
 ### Google Play Integrity server decode
 

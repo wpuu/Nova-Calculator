@@ -79,7 +79,7 @@ test('runtime can inject an asynchronous shared provider pool without exposing s
     async reportFailure() {},
     async setEnabled() {},
   };
-  const runtime = createGatewayRuntime(env(), {
+  const runtime = createGatewayRuntime(env({ NOVA_PROVIDER_CREDENTIAL_DISABLE_MS: '3600000' }), {
     keyPoolFactory(options) {
       factoryCalls.push(options);
       return sharedPool;
@@ -105,6 +105,7 @@ test('runtime can inject an asynchronous shared provider pool without exposing s
   assert.equal(factoryCalls.length, 1);
   assert.equal(factoryCalls[0].keys.length, 2);
   assert.equal(factoryCalls[0].keys[0].secret, 'secret-a');
+  assert.equal(factoryCalls[0].credentialDisableMs, 3_600_000);
   assert.equal(runtime.safeSummary.sharedProviderCapacity, true);
   assert.equal(leases[0].priority, REQUEST_PRIORITY.AI_PLUS);
   assert.equal(JSON.stringify(runtime.safeSummary).includes('secret-a'), false);
@@ -122,5 +123,9 @@ test('runtime rejects missing provider secrets and invalid capacity settings', (
   assert.throws(
     () => createGatewayRuntime(env({ NOVA_PAID_RESERVE_FRACTION: '1' })),
     />= 0 and < 1/,
+  );
+  assert.throws(
+    () => createGatewayRuntime(env({ NOVA_PROVIDER_CREDENTIAL_DISABLE_MS: '0' })),
+    /NOVA_PROVIDER_CREDENTIAL_DISABLE_MS must be a positive integer/,
   );
 });

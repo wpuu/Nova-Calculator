@@ -53,7 +53,57 @@ test('shared provider pool returns null when Redis reports no globally eligible 
   assert.equal(await pool.lease(REQUEST_PRIORITY.AI_PLUS), null);
 });
 
-test('shared provider reports success, rate limit, transient failure and credential disable atomically', async () => {
+test('429 atomically cools the key and saturates its current minute capacity', async () => {
+  const calls = [];
+  const nowMs = 1_725_000_005_000;
+  const minuteStartMs = Math.floor(nowMs / 60_000) * 60_000;
+  const pool = new RedisProviderKeyPool(keys(), {
+    now: () => nowMs,
+    evalClient: {
+      async eval(script, redisKeys, args) {
+        calls.push({ script, redisKeys, args });
+        return [1, 20];
+      },
+    },
+  });
+
+  await pool.reportRateLimit('key-1', 5_000);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].script, REDIS_PROVIDER_CAPACITY_SCRIPTS.reportRateLimit);
+  assert.match(calls[0].redisKeys[0], /:cool:key-1$/);
+  assert.match(calls[0].redisKeys[1], /:fail:key-1$/);
+  assert.equal(calls[0].redisKeys[2], `nova:provider:v1:m:key-1:${minuteStartMs}`);
+  assert.equal(calls[0].args[0], 5_000);
+  assert.equal(calls[0].args[2], 20);
+  assert.ok(calls[0].args[3] > nowMs);
+  assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.reportRateLimit, /usage < rpmLimit/);
+  assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.reportRateLimit, /PEXPIREAT/);
+});
+
+test('credential rejection uses bounded shared quarantine and explicit re-enable clears it', async () => {
+  const calls = [];
+  const pool = new RedisProviderKeyPool(keys(), {
+    credentialDisableMs: 3_600_000,
+    evalClient: {
+      async eval(script, redisKeys, args) {
+        calls.push({ script, redisKeys, args });
+        return 1;
+      },
+    },
+  });
+
+  await pool.setEnabled('key-2', false);
+  await pool.setEnabled('key-2', true);
+
+  assert.equal(calls[0].script, REDIS_PROVIDER_CAPACITY_SCRIPTS.setEnabled);
+  assert.deepEqual(calls[0].args, [0, 3_600_000]);
+  assert.deepEqual(calls[1].args, [1, 3_600_000]);
+  assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.setEnabled, /'PX', disableMs/);
+  assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.setEnabled, /DEL/);
+  assert.equal(pool.safeSummary().credentialDisableMs, 3_600_000);
+});
+
+test('shared provider reports success and transient failure atomically', async () => {
   const calls = [];
   const pool = new RedisProviderKeyPool(keys(), {
     maxFailuresBeforeCooldown: 4,
@@ -67,19 +117,11 @@ test('shared provider reports success, rate limit, transient failure and credent
   });
 
   await pool.reportSuccess('key-1');
-  await pool.reportRateLimit('key-1', 45_000);
   await pool.reportFailure('key-2');
-  await pool.setEnabled('key-2', false);
-  await pool.setEnabled('key-2', true);
 
   assert.equal(calls[0].script, REDIS_PROVIDER_CAPACITY_SCRIPTS.reportSuccess);
-  assert.equal(calls[1].script, REDIS_PROVIDER_CAPACITY_SCRIPTS.reportRateLimit);
-  assert.equal(calls[1].args[0], 45_000);
-  assert.equal(calls[2].script, REDIS_PROVIDER_CAPACITY_SCRIPTS.reportFailure);
-  assert.deepEqual(calls[2].args.slice(0, 2), [4, 25_000]);
-  assert.equal(calls[3].script, REDIS_PROVIDER_CAPACITY_SCRIPTS.setEnabled);
-  assert.equal(calls[3].args[0], 0);
-  assert.equal(calls[4].args[0], 1);
+  assert.equal(calls[1].script, REDIS_PROVIDER_CAPACITY_SCRIPTS.reportFailure);
+  assert.deepEqual(calls[1].args.slice(0, 2), [4, 25_000]);
 });
 
 test('shared provider pool rejects forged Redis selections and invalid key ids', async () => {
@@ -98,12 +140,23 @@ test('shared provider pool rejects forged Redis selections and invalid key ids',
   await assert.rejects(() => excluded.reportFailure('missing'), /unknown key id/);
 });
 
-test('shared provider capacity scripts enforce minute accounting, cooldown and persistent disable state', () => {
+test('shared provider capacity scripts enforce minute accounting, cooldown and temporary disable state', () => {
   assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.lease, /INCR/);
   assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.lease, /PEXPIREAT/);
   assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.lease, /coolingDown/);
   assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.lease, /sharedDisabled/);
-  assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.reportRateLimit, /PTTL/);
+  assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.reportRateLimit, /rpmLimit/);
   assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.reportFailure, /threshold/);
+  assert.match(REDIS_PROVIDER_CAPACITY_SCRIPTS.setEnabled, /disableMs/);
   assert.doesNotMatch(REDIS_PROVIDER_CAPACITY_SCRIPTS.reportSuccess, /cool/);
+});
+
+test('invalid credential quarantine duration fails closed before Redis', () => {
+  assert.throws(
+    () => new RedisProviderKeyPool(keys(), {
+      credentialDisableMs: 0,
+      evalClient: { eval: async () => 1 },
+    }),
+    /credentialDisableMs must be positive/,
+  );
 });

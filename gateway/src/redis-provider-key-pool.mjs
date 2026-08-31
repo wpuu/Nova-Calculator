@@ -3,6 +3,7 @@ import { REQUEST_PRIORITY } from './provider-key-pool.mjs';
 const WINDOW_MS = 60_000;
 const EXTRA_WINDOW_RETENTION_MS = 60_000;
 const FAILURE_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+const DEFAULT_CREDENTIAL_DISABLE_MS = 6 * 60 * 60 * 1000;
 
 const LEASE_SCRIPT = `
 local keyCount = tonumber(ARGV[1])
@@ -77,13 +78,27 @@ return redis.call('DEL', KEYS[1])
 
 const REPORT_RATE_LIMIT_SCRIPT = `
 local retryMs = tonumber(ARGV[1])
+local failureRetentionMs = tonumber(ARGV[2])
+local rpmLimit = tonumber(ARGV[3])
+local minuteExpireAt = tonumber(ARGV[4])
+
 local currentTtl = redis.call('PTTL', KEYS[1])
 if currentTtl < retryMs then
   redis.call('SET', KEYS[1], '1', 'PX', retryMs)
 end
+
 local failures = redis.call('INCR', KEYS[2])
-redis.call('PEXPIRE', KEYS[2], tonumber(ARGV[2]))
-return failures
+redis.call('PEXPIRE', KEYS[2], failureRetentionMs)
+
+-- A provider 429 is authoritative evidence that this credential has no usable capacity for the
+-- current local minute window. Saturate the shared minute counter so another Vercel instance
+-- cannot immediately retry the same key merely because Retry-After is shorter than 60 seconds.
+local usage = tonumber(redis.call('GET', KEYS[3]) or '0')
+if usage < rpmLimit then
+  redis.call('SET', KEYS[3], tostring(rpmLimit))
+end
+redis.call('PEXPIREAT', KEYS[3], minuteExpireAt)
+return {failures, rpmLimit}
 `;
 
 const REPORT_FAILURE_SCRIPT = `
@@ -105,7 +120,8 @@ const SET_ENABLED_SCRIPT = `
 if ARGV[1] == '1' then
   return redis.call('DEL', KEYS[1])
 end
-redis.call('SET', KEYS[1], '1')
+local disableMs = tonumber(ARGV[2])
+redis.call('SET', KEYS[1], '1', 'PX', disableMs)
 return 1
 `;
 
@@ -113,8 +129,8 @@ return 1
  * Multi-instance provider-key capacity pool backed by atomic Redis Lua scripts.
  *
  * Raw provider secrets never enter Redis. Redis stores only opaque key ids, counters, cooldowns,
- * failure counts and disabled flags. The selected id is mapped back to its secret only inside this
- * server process immediately before the upstream request.
+ * failure counts and temporary disabled flags. Credential failures quarantine a key for a bounded
+ * period rather than permanently poisoning a reused opaque id after a future key rotation.
  */
 export class RedisProviderKeyPool {
   constructor(keys, options = {}) {
@@ -134,6 +150,10 @@ export class RedisProviderKeyPool {
     this.maxFailuresBeforeCooldown = positiveInteger(
       options.maxFailuresBeforeCooldown ?? 3,
       'maxFailuresBeforeCooldown',
+    );
+    this.credentialDisableMs = positiveInteger(
+      options.credentialDisableMs ?? DEFAULT_CREDENTIAL_DISABLE_MS,
+      'credentialDisableMs',
     );
     this.keyPrefix = normalizePrefix(options.keyPrefix ?? 'nova:provider:v1');
 
@@ -194,10 +214,17 @@ export class RedisProviderKeyPool {
   async reportRateLimit(id, retryAfterMs = WINDOW_MS) {
     const key = this.requireKey(id);
     const retryMs = Math.max(1_000, finitePositive(retryAfterMs, WINDOW_MS));
+    const nowMs = nonNegativeInteger(this.now(), 'now');
+    const minuteStartMs = Math.floor(nowMs / WINDOW_MS) * WINDOW_MS;
+    const minuteExpireAt = minuteStartMs + WINDOW_MS + EXTRA_WINDOW_RETENTION_MS;
     await this.evalClient.eval(
       REPORT_RATE_LIMIT_SCRIPT,
-      [this.cooldownKey(key.id), this.failureKey(key.id)],
-      [retryMs, FAILURE_RETENTION_MS],
+      [
+        this.cooldownKey(key.id),
+        this.failureKey(key.id),
+        this.minuteKey(key.id, minuteStartMs),
+      ],
+      [retryMs, FAILURE_RETENTION_MS, key.rpmLimit, minuteExpireAt],
     );
   }
 
@@ -215,7 +242,7 @@ export class RedisProviderKeyPool {
     await this.evalClient.eval(
       SET_ENABLED_SCRIPT,
       [this.disabledKey(key.id)],
-      [enabled ? 1 : 0],
+      [enabled ? 1 : 0, this.credentialDisableMs],
     );
   }
 
@@ -224,6 +251,7 @@ export class RedisProviderKeyPool {
       providerCapacity: 'redis-atomic',
       keyCount: this.keys.length,
       paidReserveFraction: this.paidReserveFraction,
+      credentialDisableMs: this.credentialDisableMs,
     });
   }
 
