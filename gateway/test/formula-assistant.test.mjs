@@ -51,16 +51,18 @@ test('formula builder uses a narrow data-only prompt and returns a sanitized JSO
   assert.equal(body.temperature, 0);
   assert.equal(body.messages[0].content.includes('do not save or execute anything'), true);
   assert.equal(body.messages[0].content.includes('Do not emit assignments'), true);
+  assert.equal(body.messages[0].content.includes('intentionally fails Nova validation'), true);
   assert.equal(body.messages[1].content.includes('<formula_goal>'), true);
 });
 
-test('formula builder rejects executable, malformed and duplicate-parameter candidates', async () => {
+test('formula builder rejects executable, malformed, duplicate-parameter and unsupported candidates', async () => {
   const badCandidates = [
     '{"name":"bad","parameters":["x"],"expression":"x;rm -rf /","description":"bad"}',
     '{"name":"bad","parameters":["x","x"],"expression":"x+1","description":"bad"}',
     '{"name":"1bad","parameters":["x"],"expression":"x+1","description":"bad"}',
     '{"name":"bad","parameters":["x"],"expression":"1+1","description":"unused parameter"}',
     '{"name":"bad","parameters":["x"],"expression":"(x+1","description":"unbalanced"}',
+    '{"name":"","parameters":[],"expression":"","description":""}',
     'not-json',
   ];
 
