@@ -6,13 +6,27 @@ Routes:
 
 - `POST /api/session` — proof-gated anonymous Nova session
 - `POST /api/ai` — authenticated Nova AI request
+- `POST /api/billing` — authenticated Google Play purchase/entitlement verification
+- `GET /api/privacy` — public Nova commercial privacy policy
 - `GET /api/health` — coarse configuration health only; never returns secrets or provider identity
 
 The project pins Node.js 22.x to match CI.
 
 ## Required server-only environment variables
 
-These values belong only in the Vercel project environment. Never place them in Android resources, BuildConfig, the public repository, screenshots or client logs.
+These values belong only in the Vercel project environment. Never place secrets in Android resources, BuildConfig, the public repository, screenshots or client logs.
+
+### Public privacy-policy identity
+
+The `/api/privacy` route is public and intentionally independent from AI/Redis initialization so the policy can remain reachable even if another Gateway dependency is temporarily unavailable.
+
+Required deployment values:
+
+- `NOVA_PRIVACY_PUBLISHER_NAME` — public publisher/legal identity shown in the privacy policy
+- `NOVA_PRIVACY_CONTACT_EMAIL` — monitored public privacy/support email
+- `NOVA_PRIVACY_EFFECTIVE_DATE` — optional `YYYY-MM-DD`; defaults to the policy baseline date when omitted
+
+These values are public configuration, not credentials. Do not put a private/personal email here unless it is intended to be publicly visible in Google Play and the privacy policy.
 
 ### Upstream AI provider
 
@@ -82,6 +96,8 @@ The Android app needs only public/routable configuration, not server credentials
 
 - production AI URL → `https://<gateway-domain>/api/ai`
 - anonymous-session URL → `https://<gateway-domain>/api/session`
+- billing URL → `https://<gateway-domain>/api/billing`
+- privacy policy is derived from the same Gateway origin → `https://<gateway-domain>/api/privacy`
 - Play Integrity Cloud project number → public numeric project configuration used by the Android Play Integrity SDK
 
 The following must **never** ship in the APK:
@@ -100,7 +116,9 @@ Before enabling production AI in an APK:
 1. Freeze the real production application id; `.dev` is forbidden.
 2. Link that exact app/package to the correct Google Cloud project in Play Console.
 3. Configure the Android Play Integrity Cloud project number.
-4. Configure the Vercel server-only variables above.
-5. Confirm `/api/health` returns HTTP 200 without exposing internal configuration.
-6. Confirm a Play-installed build can obtain `/api/session` and then call `/api/ai`.
-7. Keep the debug/development APK fail-closed when no production Play project number is supplied.
+4. Configure all Vercel server-only variables above plus the public privacy publisher/contact values.
+5. Confirm `/api/privacy` returns HTTP 200 from a browser without authentication and shows the intended publisher/contact.
+6. Confirm `/api/health` returns HTTP 200 without exposing internal configuration.
+7. Confirm a Play-installed build can obtain `/api/session`, call `/api/ai`, and verify/restore purchases through `/api/billing`.
+8. Confirm the in-app “隐私政策” entry opens the same public policy page and “开源许可” displays the bundled LICENSE/NOTICE.
+9. Keep the debug/development APK fail-closed when no production Play project number is supplied.
