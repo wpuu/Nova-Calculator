@@ -1,12 +1,17 @@
 package org.solovyev.android.widget.menu;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.view.menu.ListMenuItemView;
+
 import java.lang.reflect.Field;
 
+// Legacy AppCompat menu bridge. Keep the restricted type dependency isolated in this class rather
+// than allowing callers across Nova to depend on AppCompat's internal menu implementation.
+@SuppressLint("RestrictedApi")
 final class ListMenuItemViewCompat {
 
     @Nullable

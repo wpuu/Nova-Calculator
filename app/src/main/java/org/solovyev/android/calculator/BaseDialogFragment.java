@@ -9,8 +9,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
@@ -57,7 +59,12 @@ public abstract class BaseDialogFragment extends DialogFragment implements View.
         final View view = onCreateDialogView(context, inflater, savedInstanceState);
         if (view != null) {
             final int spacing = context.getResources().getDimensionPixelSize(R.dimen.cpp_dialog_spacing);
-            b.setView(view, spacing, spacing, spacing, spacing);
+            final FrameLayout container = new FrameLayout(context);
+            container.setPadding(spacing, spacing, spacing, spacing);
+            container.addView(view, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT));
+            b.setView(container);
             BaseActivity.fixFonts(view, typeface);
         }
         onPrepareDialog(b);

@@ -3,6 +3,7 @@ package org.solovyev.android.calculator.wizard;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -49,6 +50,16 @@ public class WizardActivity extends BaseActivity implements WizardsAware, Shared
         pager = (ViewPager) findViewById(R.id.pager);
         pagerAdapter = new WizardPagerAdapter(flow, getSupportFragmentManager());
         pager.setAdapter(pagerAdapter);
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (pager.getCurrentItem() == 0) {
+                    finishWizardAbruptly();
+                } else {
+                    pager.setCurrentItem(pager.getCurrentItem() - 1);
+                }
+            }
+        });
         final PageIndicator titleIndicator = (PageIndicator) findViewById(R.id.pager_indicator);
         titleIndicator.setViewPager(pager);
         final Wizard wizard = wizardUi.getWizard();
@@ -78,15 +89,6 @@ public class WizardActivity extends BaseActivity implements WizardsAware, Shared
     protected void inject(@Nonnull AppComponent component) {
         super.inject(component);
         component.inject(this);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (pager.getCurrentItem() == 0) {
-            finishWizardAbruptly();
-        } else {
-            pager.setCurrentItem(pager.getCurrentItem() - 1);
-        }
     }
 
     @Override

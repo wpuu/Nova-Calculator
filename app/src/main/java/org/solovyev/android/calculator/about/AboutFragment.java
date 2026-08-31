@@ -61,7 +61,9 @@ public class AboutFragment extends BaseFragment {
         if (App.getTheme().light) {
             imageView.setImageResource(R.drawable.logo_wizard_light);
         }
-        textView.setText(getString(R.string.c_about_content, BuildConfig.VERSION_NAME));
+        final String aboutText = getString(R.string.c_about_content)
+                .replace("%1$s", BuildConfig.VERSION_NAME);
+        textView.setText(aboutText);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
 
         if (isEmpty(translatorsView.getText())) {

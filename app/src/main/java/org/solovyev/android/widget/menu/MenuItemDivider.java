@@ -1,16 +1,21 @@
 package org.solovyev.android.widget.menu;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.view.menu.MenuItemImpl;
 import androidx.appcompat.view.menu.MenuView;
 
+// Legacy AppCompat menu divider bridge. Restricted AppCompat menu types are deliberately isolated
+// here until the inherited menu implementation is replaced with a public-API-only equivalent.
+@SuppressLint("RestrictedApi")
 @SuppressWarnings("unused")
 public class MenuItemDivider extends View implements MenuView.ItemView {
 

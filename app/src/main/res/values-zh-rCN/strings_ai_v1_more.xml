@@ -3,7 +3,7 @@
     <string name="nova_ai_natural_action">用文字描述计算</string>
     <string name="nova_ai_natural_title">用文字描述计算</string>
     <string name="nova_ai_natural_description">用日常语言描述一个计算。Nova AI 会把它转换为计算器算式，再由本地计算器计算结果。</string>
-    <string name="nova_ai_natural_hint">例如：8536 打 85 折后，再加 13% 税</string>
+    <string name="nova_ai_natural_hint" formatted="false">例如：8536 打 85 折后，再加 13% 税</string>
     <string name="nova_ai_natural_submit">转换</string>
     <string name="nova_ai_natural_empty">请输入需要转换的计算。</string>
     <string name="nova_ai_natural_loading">正在把你的描述转换为计算器算式…</string>

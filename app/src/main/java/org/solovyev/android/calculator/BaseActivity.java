@@ -27,7 +27,6 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -168,7 +167,7 @@ public abstract class BaseActivity extends AppCompatActivity implements SharedPr
         toolbar = contentView.findViewById(R.id.toolbar);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             mainView.setOnApplyWindowInsetsListener((v, windowInsets) -> {
-                final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                final Insets insets = windowInsets.getInsets(WindowInsets.Type.systemBars());
                 final ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
                 lp.topMargin = insets.top;
                 lp.bottomMargin = insets.bottom;
