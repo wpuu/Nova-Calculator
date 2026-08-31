@@ -1,0 +1,172 @@
+name: Android Production AAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: Google Play versionCode (must increase for every upload)
+        required: true
+        type: string
+      version_name:
+        description: Human-readable versionName, for example 0.2.0-alpha02
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-signed-production-aab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+
+    env:
+      NOVA_AI_GATEWAY_URL: ${{ vars.NOVA_AI_GATEWAY_URL }}
+      NOVA_ANONYMOUS_SESSION_URL: ${{ vars.NOVA_ANONYMOUS_SESSION_URL }}
+      NOVA_BILLING_URL: ${{ vars.NOVA_BILLING_URL }}
+      NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER: ${{ vars.NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER }}
+      NOVA_VERSION_CODE: ${{ inputs.version_code }}
+      NOVA_VERSION_NAME: ${{ inputs.version_name }}
+      NOVA_UPLOAD_KEYSTORE_B64: ${{ secrets.NOVA_UPLOAD_KEYSTORE_B64 }}
+      NOVA_UPLOAD_STORE_PASSWORD: ${{ secrets.NOVA_UPLOAD_STORE_PASSWORD }}
+      NOVA_UPLOAD_KEY_ALIAS: ${{ secrets.NOVA_UPLOAD_KEY_ALIAS }}
+      NOVA_UPLOAD_KEY_PASSWORD: ${{ secrets.NOVA_UPLOAD_KEY_PASSWORD }}
+      NOVA_UPLOAD_KEYSTORE_TYPE: ${{ vars.NOVA_UPLOAD_KEYSTORE_TYPE || 'JKS' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Restrict release source branch
+        shell: bash
+        run: |
+          case "$GITHUB_REF_NAME" in
+            main|commercial/nova-ai-v1) ;;
+            *)
+              echo "Production AAB may only be built from main or commercial/nova-ai-v1" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Adapt pinned plotter library for current Android Gradle Plugin
+        run: |
+          cat > plotter/lib/build.gradle <<'PLOTTER'
+          apply plugin: 'com.android.library'
+
+          android {
+              namespace 'org.solovyev.android.plotter'
+              compileSdk 36
+
+              defaultConfig {
+                  minSdk 21
+                  targetSdk 36
+              }
+          }
+
+          dependencies {
+              implementation fileTree(dir: 'libs', include: ['*.jar'])
+              implementation 'androidx.annotation:annotation:1.8.2'
+          }
+          PLOTTER
+
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path('plotter/lib/src/main/java')
+          for path in root.rglob('*.java'):
+              text = path.read_text(encoding='utf-8')
+              updated = text.replace('android.support.annotation.', 'androidx.annotation.')
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+          PY
+
+      - name: Verify source and policy guards
+        run: |
+          bash scripts/verify-commercial-source.sh
+          bash scripts/verify-nova-identities.sh
+          bash scripts/verify-accessibility-disclosure.sh
+          bash scripts/verify-production-release-config.sh
+
+      - name: Verify required upload-key secrets are present
+        shell: bash
+        run: |
+          for name in \
+            NOVA_UPLOAD_KEYSTORE_B64 \
+            NOVA_UPLOAD_STORE_PASSWORD \
+            NOVA_UPLOAD_KEY_ALIAS \
+            NOVA_UPLOAD_KEY_PASSWORD; do
+            if [ -z "${!name:-}" ]; then
+              echo "Missing required production Environment secret: $name" >&2
+              exit 1
+            fi
+          done
+          case "$NOVA_UPLOAD_KEYSTORE_TYPE" in
+            JKS|PKCS12) ;;
+            *) echo "NOVA_UPLOAD_KEYSTORE_TYPE must be JKS or PKCS12" >&2; exit 1 ;;
+          esac
+
+      - name: Test gateway and commercial contracts
+        run: |
+          (cd gateway && npm test)
+          ./gradlew :app:testDebugUnitTest \
+            --tests 'org.solovyev.android.calculator.entitlement.*Test' \
+            --tests 'org.solovyev.android.calculator.ai.*Test' \
+            --tests 'org.solovyev.android.calculator.billing.*Test' \
+            --stacktrace --no-daemon
+
+      - name: Build unsigned production AAB
+        run: ./gradlew :app:bundleRelease --stacktrace --no-daemon
+
+      - name: Sign and verify production AAB
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEYSTORE="$RUNNER_TEMP/nova-upload-keystore"
+          trap 'rm -f "$KEYSTORE"' EXIT
+          printf '%s' "$NOVA_UPLOAD_KEYSTORE_B64" | base64 --decode > "$KEYSTORE"
+          chmod 600 "$KEYSTORE"
+
+          keytool -list \
+            -storetype "$NOVA_UPLOAD_KEYSTORE_TYPE" \
+            -keystore "$KEYSTORE" \
+            -storepass "$NOVA_UPLOAD_STORE_PASSWORD" \
+            -alias "$NOVA_UPLOAD_KEY_ALIAS" >/dev/null
+
+          mkdir -p build-artifacts
+          jarsigner \
+            -keystore "$KEYSTORE" \
+            -storetype "$NOVA_UPLOAD_KEYSTORE_TYPE" \
+            -storepass "$NOVA_UPLOAD_STORE_PASSWORD" \
+            -keypass "$NOVA_UPLOAD_KEY_PASSWORD" \
+            -signedjar build-artifacts/Nova-Calculator-production.aab \
+            app/build/outputs/bundle/release/app-release.aab \
+            "$NOVA_UPLOAD_KEY_ALIAS"
+
+          jarsigner -verify -verbose -certs build-artifacts/Nova-Calculator-production.aab >/dev/null
+          sha256sum build-artifacts/Nova-Calculator-production.aab \
+            | tee build-artifacts/SHA256SUMS.txt
+
+      - name: Upload signed production AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nova-Calculator-production-aab-${{ inputs.version_code }}
+          path: build-artifacts/
+          if-no-files-found: error
+          retention-days: 30

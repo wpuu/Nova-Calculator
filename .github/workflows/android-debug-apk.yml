@@ -61,7 +61,7 @@ jobs:
           }
           EOF
 
-          python3 - <<'PY'
+          python3 - <<'PY2'
           from pathlib import Path
           root = Path('plotter/lib/src/main/java')
           count = 0
@@ -72,13 +72,28 @@ jobs:
                   path.write_text(updated, encoding='utf-8')
                   count += 1
           print(f'Migrated AndroidX annotation imports in {count} Plotter Java files')
-          PY
+          PY2
 
       - name: Verify commercial source guard
         run: bash scripts/verify-commercial-source.sh
 
       - name: Verify Nova Android identities
         run: bash scripts/verify-nova-identities.sh
+
+      - name: Verify production release guard contract
+        env:
+          NOVA_AI_GATEWAY_URL: https://ci.nova-calculator.dev/api/ai
+          NOVA_ANONYMOUS_SESSION_URL: https://ci.nova-calculator.dev/api/session
+          NOVA_BILLING_URL: https://ci.nova-calculator.dev/api/billing
+          NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER: '123456789'
+          NOVA_VERSION_CODE: '20001'
+          NOVA_VERSION_NAME: 0.2.0-ci
+        run: |
+          if env -u NOVA_BILLING_URL bash scripts/verify-production-release-config.sh >/dev/null 2>&1; then
+            echo 'Production release guard unexpectedly accepted missing billing URL' >&2
+            exit 1
+          fi
+          bash scripts/verify-production-release-config.sh
 
       - name: Verify Accessibility disclosure and scope
         run: bash scripts/verify-accessibility-disclosure.sh
