@@ -3,7 +3,7 @@
     android:key="screen-auto-clicker"
     android:title="@string/pref_auto_clicker_category">
 
-    <SwitchPreferenceCompat
+    <org.solovyev.android.calculator.autoclicker.AutoClickerConsentSwitchPreference
         android:defaultValue="false"
         android:key="auto_clicker_intent"
         android:summary="@string/pref_auto_clicker_enable_summary"
@@ -15,6 +15,24 @@
         android:key="auto_clicker_hint"
         android:selectable="false"
         android:summary="@string/pref_auto_clicker_hint" />
+
+    <org.solovyev.android.calculator.autoclicker.AutoClickerDisplayBoundsPreference
+        android:key="auto_clicker_display_bounds"
+        android:title="@string/autotap_display_bounds_title"
+        android:summary="@string/autotap_display_bounds_unknown"
+        android:selectable="true" />
+
+    <org.solovyev.android.calculator.autoclicker.AutoClickerProfilesPreference
+        android:key="auto_clicker_profiles"
+        android:title="@string/auto_clicker_profiles_title"
+        android:summary="@string/auto_clicker_profiles_summary"
+        android:selectable="true" />
+
+    <org.solovyev.android.calculator.autoclicker.NovaAutoTapUpgradePreference
+        android:key="auto_clicker_upgrade"
+        android:title="@string/nova_billing_title"
+        android:summary="@string/nova_billing_entry_summary"
+        android:selectable="true" />
 
     <!-- Diagnostics panel: hidden unless a concrete failure occurs. Shows the full fix
          for the current error code and offers a one-tap repair for self-serviceable

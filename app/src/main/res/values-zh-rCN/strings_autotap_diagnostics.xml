@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autotap_display_bounds_title">识别到的屏幕范围</string>
+    <string name="autotap_display_bounds_summary">AutoTap 最近识别为 %1$d × %2$d 像素 · 点此刷新显示值</string>
+    <string name="autotap_display_bounds_unknown">尚未记录 AutoTap 屏幕范围 · 先开启一次 AutoTap，再点此查看</string>
+</resources>

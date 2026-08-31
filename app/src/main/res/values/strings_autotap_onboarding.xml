@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autotap_onboarding_title">What do you want to use?</string>
+    <string name="autotap_onboarding_message">Nova includes the calculator and AutoTap. AutoTap lets you place two targets, save setups, and start or stop only with the volume keys. Opening AutoTap here does not grant any permission.</string>
+    <string name="autotap_onboarding_open">Open AutoTap</string>
+    <string name="autotap_onboarding_calculator">Continue calculator</string>
+</resources>

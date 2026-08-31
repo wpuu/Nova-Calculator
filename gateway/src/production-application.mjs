@@ -3,6 +3,8 @@ import { googleAndroidPublisherAccessTokenProviderFromEnv } from './google-andro
 import { googlePlayIntegrityDecoderFromEnv } from './google-play-integrity-decoder.mjs';
 import { GooglePlayPurchaseVerifier } from './google-play-purchase-verifier.mjs';
 import { PlayIntegrityInstallationProofVerifier } from './play-integrity-proof-verifier.mjs';
+import { createProductFunnelFetchHandler } from './product-funnel-service.mjs';
+import { RedisProductEventStore } from './redis-product-event-store.mjs';
 import { redisQuotaStoreFromEnv } from './quota-store-runtime.mjs';
 import { RedisProviderKeyPool } from './redis-provider-key-pool.mjs';
 import { upstashRedisEvalClientFromEnv } from './upstash-redis-eval-client.mjs';
@@ -11,8 +13,8 @@ import { upstashRedisEvalClientFromEnv } from './upstash-redis-eval-client.mjs';
  * Production deployment composition for Nova Gateway.
  *
  * This is the only layer that binds the provider-neutral core to concrete server adapters:
- * shared Redis capacity/accounting, Google Play Integrity server decoding, and (when credentials
- * are configured) Google Play purchase verification. All credentials remain server-side.
+ * shared Redis capacity/accounting, privacy-safe product funnel aggregation, Google Play Integrity
+ * server decoding, and (when credentials are configured) Google Play purchase verification.
  */
 export function createProductionNovaGatewayApplication(options = {}) {
   const env = options.env ?? process.env;
@@ -43,6 +45,14 @@ export function createProductionNovaGatewayApplication(options = {}) {
       now: poolOptions.now,
     },
   ));
+
+  const productEventStore = options.productEventStore
+    ?? (redisEvalClient ? new RedisProductEventStore({
+      evalClient: redisEvalClient,
+      keyPrefix: env.NOVA_PRODUCT_EVENT_REDIS_KEY_PREFIX || 'nova:product:v1',
+      retentionDays: env.NOVA_PRODUCT_EVENT_RETENTION_DAYS || 120,
+      dailySubjectLimit: env.NOVA_PRODUCT_EVENT_DAILY_SUBJECT_LIMIT || 500,
+    }) : null);
 
   let integrityDecoder = options.integrityDecoder;
   let installationProofVerifier = options.installationProofVerifier;
@@ -84,18 +94,41 @@ export function createProductionNovaGatewayApplication(options = {}) {
     keyPoolFactory,
     installationProofVerifier,
     purchaseVerifier,
+    productEventStore,
   });
+
+  let productFunnelHandler = null;
+  const productAnalyticsAdminToken = String(
+    env.NOVA_PRODUCT_ANALYTICS_ADMIN_TOKEN ?? '',
+  ).trim();
+  if (productEventStore && productAnalyticsAdminToken) {
+    try {
+      productFunnelHandler = createProductFunnelFetchHandler({
+        store: productEventStore,
+        adminToken: productAnalyticsAdminToken,
+        now,
+      });
+    } catch {
+      // An invalid/missing admin token disables the read endpoint only. It must never disable
+      // customer AI, billing, sessions, or write-side product analytics.
+      productFunnelHandler = null;
+    }
+  }
 
   return Object.freeze({
     ...core,
+    productFunnelHandler,
     safeSummary: Object.freeze({
       ...core.safeSummary,
-      deploymentComposition: 'production-v2-billing',
+      deploymentComposition: 'production-v3-growth',
       androidPackageName: packageName,
       sharedQuotaStore: true,
       sharedProviderCapacity: true,
       playIntegrityServerDecode: !options.installationProofVerifier,
       googlePlayPurchaseVerification: Boolean(purchaseVerifier),
+      redisProductFunnelAggregation: Boolean(productEventStore),
+      pseudonymousProductEventRateLimit: Boolean(productEventStore),
+      adminProductFunnel: Boolean(productFunnelHandler),
     }),
   });
 }

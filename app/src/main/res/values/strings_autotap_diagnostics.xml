@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autotap_display_bounds_title">Detected display bounds</string>
+    <string name="autotap_display_bounds_summary">AutoTap last detected %1$d × %2$d px · tap to refresh this value</string>
+    <string name="autotap_display_bounds_unknown">No AutoTap display reading yet · enable AutoTap once, then tap here</string>
+</resources>

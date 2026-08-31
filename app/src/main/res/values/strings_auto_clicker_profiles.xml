@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auto_clicker_profiles_title">Saved AutoTap setups</string>
+    <string name="auto_clicker_profiles_summary">Save target positions and timing, then restore them in one tap.</string>
+    <string name="auto_clicker_profile_save_current">Save current setup</string>
+    <string name="auto_clicker_profile_default_name">Setup %1$d</string>
+    <string name="auto_clicker_profile_saved">AutoTap setup saved</string>
+    <string name="auto_clicker_profile_loaded">AutoTap setup loaded</string>
+    <string name="auto_clicker_profile_load">Load setup</string>
+    <string name="auto_clicker_profile_overwrite">Replace with current setup</string>
+    <string name="auto_clicker_profile_delete">Delete setup</string>
+    <string name="auto_clicker_profile_delete_confirm">Delete “%1$s”?</string>
+    <string name="auto_clicker_profile_limit_title">Saved setup limit</string>
+    <string name="auto_clicker_profile_limit_free">Free includes 1 saved setup. Nova Pro unlocks up to 20 saved setups.</string>
+    <string name="auto_clicker_profile_limit_pro">You have reached the current limit of 20 saved setups.</string>
+</resources>

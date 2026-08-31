@@ -1,6 +1,7 @@
 package org.solovyev.android.calculator;
 
 import dagger.Component;
+import org.solovyev.android.calculator.analytics.NovaProductAnalytics;
 import org.solovyev.android.calculator.billing.NovaBillingCoordinator;
 import org.solovyev.android.calculator.converter.ConverterFragment;
 import org.solovyev.android.calculator.errors.FixableErrorFragment;
@@ -71,4 +72,5 @@ public interface AppComponent {
     void inject(FloatingCalculatorBroadcastReceiver receiver);
 
     NovaBillingCoordinator billingCoordinator();
+    NovaProductAnalytics productAnalytics();
 }

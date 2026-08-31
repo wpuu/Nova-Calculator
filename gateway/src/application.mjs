@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import {
   AnonymousSessionService,
   createAnonymousSessionFetchHandler,
@@ -8,6 +10,10 @@ import {
 } from './billing-entitlement-service.mjs';
 import { createNovaFetchHandler } from './http-handler.mjs';
 import { NovaAiService } from './nova-ai-service.mjs';
+import {
+  ProductEventService,
+  createProductEventFetchHandler,
+} from './product-event-service.mjs';
 import { DailyQuotaLedger } from './quota-ledger.mjs';
 import { quotaLimitsForPriority, quotaPolicyFromEnv } from './quota-policy.mjs';
 import { REQUEST_PRIORITY } from './provider-key-pool.mjs';
@@ -34,6 +40,11 @@ export function createNovaGatewayApplication(options = {}) {
     keyPoolFactory: options.keyPoolFactory,
   });
   const sessionTokens = sessionTokenServiceFromEnv(env, { now });
+  const authVerifier = Object.freeze({
+    verify(authorization) {
+      return sessionTokens.verify(authorization);
+    },
+  });
   const quotaPolicy = quotaPolicyFromEnv(env);
   const freeLimits = quotaLimitsForPriority(quotaPolicy, REQUEST_PRIORITY.FREE);
   const proLimits = quotaLimitsForPriority(quotaPolicy, REQUEST_PRIORITY.PRO);
@@ -45,11 +56,7 @@ export function createNovaGatewayApplication(options = {}) {
     newReservationId: options.newReservationId,
   });
   const aiService = new NovaAiService({
-    authVerifier: Object.freeze({
-      verify(authorization) {
-        return sessionTokens.verify(authorization);
-      },
-    }),
+    authVerifier,
     quotaLedger,
     dispatcher: providerRuntime.dispatcher,
   });
@@ -61,11 +68,7 @@ export function createNovaGatewayApplication(options = {}) {
   let billingHandler = null;
   if (options.purchaseVerifier) {
     const billingService = new BillingEntitlementService({
-      authVerifier: Object.freeze({
-        verify(authorization) {
-          return sessionTokens.verify(authorization);
-        },
-      }),
+      authVerifier,
       purchaseVerifier: options.purchaseVerifier,
       issueEntitlementSession({ subjectId, entitlements }) {
         // Keep the same pseudonymous subject that was established by the Play-Integrity-gated
@@ -78,14 +81,34 @@ export function createNovaGatewayApplication(options = {}) {
           ttlMs: sessionTokens.accountTtlMs,
         });
       },
+      onVerifiedEntitlements: options.productEventStore ? async ({ subjectId, entitlements }) => {
+        await options.productEventStore.record(Object.freeze({
+          eventId: `srv_${randomUUID().replaceAll('-', '')}`,
+          event: 'pro_purchase_verified',
+          subjectId,
+          entitlement: entitlementLabel(entitlements),
+          receivedAtEpochMs: Number(now()),
+        }));
+      } : null,
     });
     billingHandler = createBillingEntitlementFetchHandler({ service: billingService });
+  }
+
+  let productEventHandler = null;
+  if (options.productEventStore) {
+    const productEventService = new ProductEventService({
+      authVerifier,
+      eventStore: options.productEventStore,
+      now,
+    });
+    productEventHandler = createProductEventFetchHandler({ service: productEventService });
   }
 
   return Object.freeze({
     aiHandler: createNovaFetchHandler({ service: aiService }),
     anonymousSessionHandler: createAnonymousSessionFetchHandler({ service: anonymousSessionService }),
     billingHandler,
+    productEventHandler,
     safeSummary: Object.freeze({
       ...providerRuntime.safeSummary,
       freeDailyLimit: freeLimits.dailyLimit,
@@ -97,6 +120,15 @@ export function createNovaGatewayApplication(options = {}) {
       signedNovaSessions: true,
       proofGatedAnonymousSessions: true,
       serverVerifiedPlayBilling: Boolean(options.purchaseVerifier),
+      privacySafeProductEvents: Boolean(options.productEventStore),
+      serverAuthoritativePurchaseAnalytics: Boolean(options.purchaseVerifier && options.productEventStore),
     }),
   });
+}
+
+function entitlementLabel(entitlements) {
+  const values = Array.isArray(entitlements) ? entitlements : [];
+  if (values.includes('AI_PLUS')) return 'AI_PLUS';
+  if (values.includes('PRO_LIFETIME')) return 'PRO_LIFETIME';
+  return 'FREE';
 }

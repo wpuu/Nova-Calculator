@@ -9,6 +9,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import org.solovyev.android.calculator.analytics.NovaProductAnalytics;
+import org.solovyev.android.calculator.preferences.PreferencesActivity;
 import org.solovyev.android.calculator.wizard.CalculatorWizards;
 import org.solovyev.android.wizard.Wizard;
 import org.solovyev.android.wizard.Wizards;
@@ -23,6 +25,8 @@ import static org.solovyev.android.wizard.WizardUi.*;
 @Singleton
 public class StartupHelper {
 
+    private static final String AUTOTAP_CHOICE_SHOWN_V1 = "nova.autotap.choice-shown-v1";
+
     @Named(AppModule.PREFS_UI)
     @Inject
     SharedPreferences uiPreferences;
@@ -30,6 +34,8 @@ public class StartupHelper {
     SharedPreferences preferences;
     @Inject
     Wizards wizards;
+    @Inject
+    NovaProductAnalytics productAnalytics;
 
     @Inject
     public StartupHelper() {
@@ -42,6 +48,37 @@ public class StartupHelper {
         handleOnMainActivityOpened(activity, editor, opened == null ? 0 : opened);
         UiPreferences.appVersion.putPreference(editor, App.getAppVersionCode(activity));
         editor.apply();
+    }
+
+    /**
+     * Shows a one-time product choice only after the inherited first-time wizard is complete.
+     * This never requests Accessibility permission: choosing AutoTap only opens its settings page,
+     * where the separate prominent disclosure remains mandatory before any system permission UI.
+     */
+    public void maybeShowAutoTapChoice(@NonNull AppCompatActivity activity) {
+        if (activity.isFinishing() || activity.isDestroyed()) return;
+        if (uiPreferences.getBoolean(AUTOTAP_CHOICE_SHOWN_V1, false)) return;
+
+        final Wizard wizard = wizards.getWizard(CalculatorWizards.FIRST_TIME_WIZARD);
+        if (!wizard.isFinished()) return;
+
+        final Integer opened = UiPreferences.opened.getPreference(uiPreferences);
+        // This is acquisition onboarding, not a popup for long-time upgraded users.
+        if (opened == null || opened > 3) return;
+
+        uiPreferences.edit().putBoolean(AUTOTAP_CHOICE_SHOWN_V1, true).apply();
+        new AlertDialog.Builder(activity, App.getTheme().alertDialogTheme)
+                .setTitle(R.string.autotap_onboarding_title)
+                .setMessage(R.string.autotap_onboarding_message)
+                .setPositiveButton(R.string.autotap_onboarding_open, (dialog, which) -> {
+                    productAnalytics.autoTapSettingsOpened(NovaProductAnalytics.EntrySource.OTHER);
+                    activity.startActivity(PreferencesActivity.makeIntent(
+                            activity,
+                            R.xml.preferences_auto_clicker,
+                            R.string.pref_auto_clicker_category));
+                })
+                .setNegativeButton(R.string.autotap_onboarding_calculator, null)
+                .show();
     }
 
     private void handleOnMainActivityOpened(@NonNull final AppCompatActivity activity, @NonNull SharedPreferences.Editor editor, int opened) {

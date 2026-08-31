@@ -86,23 +86,53 @@ jobs:
             --tests 'org.solovyev.android.calculator.entitlement.*Test' \
             --tests 'org.solovyev.android.calculator.ai.*Test' \
             --tests 'org.solovyev.android.calculator.billing.*Test' \
+            --tests 'org.solovyev.android.calculator.autoclicker.*Test' \
+            --tests 'org.solovyev.android.calculator.analytics.*Test' \
             --stacktrace --no-daemon
+
+      - name: Create disposable CI upload key
+        run: |
+          mkdir -p "$RUNNER_TEMP/nova-ci-signing"
+          keytool -genkeypair \
+            -storetype JKS \
+            -keystore "$RUNNER_TEMP/nova-ci-signing/nova-upload.jks" \
+            -storepass nova-ci-store-pass \
+            -alias nova-ci-upload \
+            -keypass nova-ci-key-pass \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 3650 \
+            -dname "CN=Nova CI, OU=CI, O=Nova, L=Test, S=Test, C=US"
+
+      - name: Verify Play release configuration and build signed AAB
+        env:
+          NOVA_ANDROID_PACKAGE_NAME: com.wpuu.novaautotap.ci
+          NOVA_AI_GATEWAY_URL: https://nova-ci.example/api/ai
+          NOVA_ANONYMOUS_SESSION_URL: https://nova-ci.example/api/session
+          NOVA_BILLING_URL: https://nova-ci.example/api/billing
+          NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER: '123456789'
+          NOVA_UPLOAD_KEYSTORE_PATH: ${{ runner.temp }}/nova-ci-signing/nova-upload.jks
+          NOVA_UPLOAD_STORE_PASSWORD: nova-ci-store-pass
+          NOVA_UPLOAD_KEY_ALIAS: nova-ci-upload
+          NOVA_UPLOAD_KEY_PASSWORD: nova-ci-key-pass
+        run: ./gradlew :app:verifyNovaPlayReleaseConfig :app:bundleRelease --stacktrace --no-daemon
 
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --stacktrace --no-daemon
 
-      - name: Collect APK
+      - name: Collect APK and CI release AAB
         if: success()
         run: |
           mkdir -p build-artifacts
           cp app/build/outputs/apk/debug/app-debug.apk build-artifacts/Nova-Calculator-commercial-debug.apk
-          sha256sum build-artifacts/Nova-Calculator-commercial-debug.apk | tee build-artifacts/SHA256SUMS.txt
+          cp app/build/outputs/bundle/release/app-release.aab build-artifacts/Nova-Calculator-commercial-ci-release.aab
+          sha256sum build-artifacts/Nova-Calculator-commercial-debug.apk build-artifacts/Nova-Calculator-commercial-ci-release.aab | tee build-artifacts/SHA256SUMS.txt
 
-      - name: Upload debug APK
+      - name: Upload build artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Nova-Calculator-commercial-debug-apk
+          name: Nova-Calculator-commercial-builds
           path: build-artifacts/
           if-no-files-found: error
           retention-days: 14

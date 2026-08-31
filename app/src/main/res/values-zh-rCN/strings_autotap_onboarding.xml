@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autotap_onboarding_title">你想先使用哪个功能？</string>
+    <string name="autotap_onboarding_message">Nova 同时包含计算器和 AutoTap。AutoTap 可放置两个目标点、保存方案，并且只通过音量键开始或停止。这里只是进入 AutoTap 设置，不会自动授予任何权限。</string>
+    <string name="autotap_onboarding_open">打开 AutoTap</string>
+    <string name="autotap_onboarding_calculator">继续使用计算器</string>
+</resources>
