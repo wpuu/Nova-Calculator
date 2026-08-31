@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cpp_app_name_on_screen">Nova Calculator (Floating)</string>
+    <string name="c_first_start_text">Welcome to Nova Calculator AI.\n\nCalculate normally first. When you need more context, use AI to understand formulas, explain results, or turn everyday language into a calculation.</string>
+    <string name="c_calc_ad_free_title">Nova Pro</string>
+    <string name="c_calc_ad_free_summary">Unlock Nova Pro benefits</string>
+    <string name="cpp_purchase_text">Purchases and subscriptions are handled by Google Play. Nova updates your entitlements after the purchase is verified by the server.</string>
+    <string name="cpp_purchase_title">Nova Pro</string>
+
+    <string name="auto_clicker_service_description">AutoTap lets you use the volume keys to perform deterministic taps at two positions you choose.</string>
+    <string name="pref_auto_clicker_category">AutoTap</string>
+    <string name="pref_auto_clicker_enable_title">Enable AutoTap</string>
+    <string name="pref_auto_clicker_enable_summary">Requires Accessibility permission. Volume Up starts tapping and Volume Down stops. The status indicator and two target circles are only for display and dragging; tapping or double-tapping them never starts AutoTap. When AutoTap is disabled, the volume keys control system volume normally.</string>
+    <string name="pref_auto_clicker_hint">Drag the two target circles onto the positions you want to tap. Volume Up starts and Volume Down stops. The status indicator and both targets can be dragged and remember their previous positions; tapping or double-tapping them never starts or stops AutoTap.</string>
+    <string name="pref_auto_clicker_interval_title">Tap interval (ms)</string>
+    <string name="pref_auto_clicker_interval_summary">Default: 40 ms</string>
+    <string name="pref_auto_clicker_duration_title">Tap duration (seconds)</string>
+    <string name="pref_auto_clicker_duration_summary">Default: 60 seconds</string>
+
+    <string name="auto_clicker_diagnostic_title">AutoTap is not working · Error code %1$d</string>
+    <string name="auto_clicker_retry_now">Retry now</string>
+    <string name="auto_clicker_retry_summary">Try to show the AutoTap targets again</string>
+    <string name="auto_clicker_retry_requested">Retry requested</string>
+    <string name="auto_clicker_open_accessibility_settings">Open Accessibility settings</string>
+    <string name="auto_clicker_open_overlay_settings">Open Display over other apps settings</string>
+    <string name="auto_clicker_copy_diagnostics">Copy diagnostics</string>
+    <string name="auto_clicker_reopen_accessibility_hint">Turn Nova Calculator Accessibility off and on again</string>
+    <string name="auto_clicker_restart_app_hint">Force stop the app, then reopen it</string>
+    <string name="auto_clicker_restart_device_hint">Restart the device and try again</string>
+    <string name="auto_clicker_clear_cache_hint">Clear the app cache (your settings will be kept)</string>
+    <string name="auto_clicker_diagnostic_copied">Diagnostics copied for troubleshooting</string>
+    <string name="auto_clicker_failure_1">The system temporarily refused to show the AutoTap targets. Check the permission to display over other apps. If your device has no such switch, reopen Nova Calculator in Accessibility settings and tap Retry now.</string>
+    <string name="auto_clicker_failure_2">The system window token is temporarily unavailable. Tap Retry now first. If it still fails, turn Nova Calculator Accessibility off and on again, then restart the device if needed.</string>
+    <string name="auto_clicker_failure_3">The current display area is temporarily unavailable. Exit split screen, casting, or other floating tools, return to the main screen, and tap Retry now. If needed, reopen the Accessibility service.</string>
+    <string name="auto_clicker_failure_4">AutoTap encountered a temporary system error. Try Retry now, reopen the Accessibility service, force stop and reopen the app, then restart the device. You can copy diagnostics for troubleshooting.</string>
+    <string name="auto_clicker_failure_5">Enable Nova Calculator in system Accessibility settings, then return and tap Retry now. The targets will be restored automatically.</string>
+    <string name="auto_clicker_failure_6">The AutoTap service has not finished initializing. Tap Retry now. If the problem continues, turn Nova Calculator Accessibility off and on again, then restart the device if needed.</string>
+    <string name="auto_clicker_failure_7">Accessibility is connected, but the AutoTap targets are not visible yet. Tap Retry now. If they still do not appear, exit split screen/casting/other floating tools, reopen Accessibility, and restart the device. Some devices may also require background activity permission.</string>
+</resources>

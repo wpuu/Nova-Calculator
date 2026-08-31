@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nova_ai_natural_action">用文字描述计算</string>
+    <string name="nova_ai_natural_title">用文字描述计算</string>
+    <string name="nova_ai_natural_description">用日常语言描述一个计算。Nova AI 会把它转换为计算器算式，再由本地计算器计算结果。</string>
+    <string name="nova_ai_natural_hint">例如：8536 打 85 折后，再加 13% 税</string>
+    <string name="nova_ai_natural_submit">转换</string>
+    <string name="nova_ai_natural_empty">请输入需要转换的计算。</string>
+    <string name="nova_ai_natural_loading">正在把你的描述转换为计算器算式…</string>
+    <string name="nova_ai_natural_invalid">Nova 无法安全转换这段描述。请改成更简单的计算，并包含所需的全部数字。</string>
+    <string name="nova_ai_natural_ready">算式已填入。使用前请确认算式和计算器结果。</string>
+
+    <string name="nova_ai_follow_up_action">继续问这个计算</string>
+    <string name="nova_ai_follow_up_title">继续问这个计算</string>
+    <string name="nova_ai_follow_up_description">围绕当前算式或已经由计算器验证的结果继续提一个问题。</string>
+    <string name="nova_ai_follow_up_hint">例如：为什么要先打折再计算税？</string>
+    <string name="nova_ai_follow_up_submit">提问</string>
+    <string name="nova_ai_follow_up_empty">请输入与当前计算相关的问题。</string>
+    <string name="nova_ai_follow_up_loading">正在根据当前算式和已验证结果回答…</string>
+    <string name="nova_ai_follow_up_invalid">Nova 无法把这个问题识别为与当前计算相关的问题。</string>
+
+    <string name="nova_ai_error_action">解释这个错误</string>
+    <string name="nova_ai_error_title">为什么这个计算失败</string>
+    <string name="nova_ai_error_loading">正在解释计算器错误，不会修改你的算式…</string>
+    <string name="nova_ai_error_invalid">Nova 暂时无法安全解释这个计算器错误。</string>
+</resources>
