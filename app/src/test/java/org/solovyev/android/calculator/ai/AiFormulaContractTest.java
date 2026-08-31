@@ -48,6 +48,8 @@ public class AiFormulaContractTest {
         assertRejected("{\"name\":\"bad\",\"parameters\":[\"x\"],\"expression\":\"x;run()\",\"description\":\"bad\"}");
         assertRejected("{\"name\":\"bad\",\"parameters\":[\"x\",\"x\"],\"expression\":\"x+1\",\"description\":\"bad\"}");
         assertRejected("{\"name\":\"bad\",\"parameters\":[\"x\"],\"expression\":\"1+1\",\"description\":\"bad\"}");
+        assertRejected("{\"name\":\"bad\",\"parameters\":[\"x\",\"y\"],\"expression\":\"x+1\",\"description\":\"partially unused parameters\"}");
+        assertRejected("{\"name\":\"bad\",\"parameters\":[\"x\",\"tax\"],\"expression\":\"tax+1\",\"description\":\"identifier substring must not count\"}");
         assertRejected("{\"name\":\"bad\",\"parameters\":[\"x\"],\"expression\":\"(x+1\",\"description\":\"bad\"}");
     }
 
