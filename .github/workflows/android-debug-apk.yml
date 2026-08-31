@@ -80,6 +80,9 @@ jobs:
       - name: Verify Nova Android identities
         run: bash scripts/verify-nova-identities.sh
 
+      - name: Verify Accessibility disclosure and scope
+        run: bash scripts/verify-accessibility-disclosure.sh
+
       - name: Test gateway capacity core
         run: cd gateway && npm test
 

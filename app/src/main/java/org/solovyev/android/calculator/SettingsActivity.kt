@@ -22,6 +22,15 @@ import org.solovyev.android.calculator.autoclicker.AutoClickerService
  */
 class SettingsActivity : AppCompatActivity() {
 
+    companion object {
+        /**
+         * Bump this key when the AccessibilityService purpose/data handling changes so existing
+         * users must see and affirm the new disclosure before AutoTap can be armed again.
+         */
+        private const val PREF_AUTOTAP_ACCESSIBILITY_DISCLOSURE_V1 =
+            "nova.autotap.accessibility_disclosure.v1.accepted"
+    }
+
     private val prefs: SharedPreferences by lazy {
         PreferenceManager.getDefaultSharedPreferences(this)
     }
@@ -32,17 +41,94 @@ class SettingsActivity : AppCompatActivity() {
         val switchEnabled = findViewById<Switch>(R.id.switchAutoClickerEnabled) ?: return
         if (!AutoClickerPlatform.isSupportedSdk(Build.VERSION.SDK_INT)) {
             if (switchEnabled.isChecked) {
-                updatingAutoClickerSwitch = true
-                switchEnabled.isChecked = false
-                updatingAutoClickerSwitch = false
+                setAutoClickerSwitchChecked(switchEnabled, false)
             }
             return
         }
         val intent = Preferences.AutoClicker.intent.getPreference(prefs)
         if (switchEnabled.isChecked == intent) return
+        setAutoClickerSwitchChecked(switchEnabled, intent)
+    }
+
+    private fun setAutoClickerSwitchChecked(switchEnabled: Switch, checked: Boolean) {
+        if (switchEnabled.isChecked == checked) return
         updatingAutoClickerSwitch = true
-        switchEnabled.isChecked = intent
+        switchEnabled.isChecked = checked
         updatingAutoClickerSwitch = false
+    }
+
+    private fun setAutoClickerIntent(enabled: Boolean) {
+        prefs.edit()
+            .putBoolean(Preferences.AutoClicker.intent.getKey(), enabled)
+            .apply()
+    }
+
+    private fun openAccessibilitySettings() {
+        try {
+            startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        } catch (_: Exception) {
+            Toast.makeText(
+                this,
+                "无法打开系统无障碍设置，请在系统设置中手动打开。",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    /**
+     * Google Play prominent-disclosure flow for a non-accessibility-tool use of AccessibilityService.
+     * No user intent is persisted and no system permission screen is opened until the user takes the
+     * affirmative "同意并继续" action.
+     */
+    private fun requestAutoClickerEnable(switchEnabled: Switch) {
+        if (prefs.getBoolean(PREF_AUTOTAP_ACCESSIBILITY_DISCLOSURE_V1, false)) {
+            setAutoClickerIntent(true)
+            if (!AutoClickerService.isAccessibilityEnabled(this)) {
+                openAccessibilitySettings()
+            }
+            return
+        }
+
+        // The switch is only a request to start the consent flow. Keep the feature visibly off
+        // until the user has affirmatively accepted the separate AccessibilityService disclosure.
+        setAutoClickerSwitchChecked(switchEnabled, false)
+        setAutoClickerIntent(false)
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("连点辅助需要无障碍服务")
+            .setMessage(
+                "Nova 的连点辅助仅在你明确开启后使用 Android 无障碍服务。\n\n" +
+                    "服务会：\n" +
+                    "• 接收窗口变化事件，用于在全屏或横竖屏切换后恢复两个悬浮点击标记；\n" +
+                    "• 监听音量+和音量-，作为你主动开始/停止连点的控制键；\n" +
+                    "• 按你拖动设置的两个屏幕坐标发送点击手势。\n\n" +
+                    "Nova 的无障碍服务不能读取窗口内容（canRetrieveWindowContent=false），" +
+                    "不会读取屏幕文字、输入内容或账号信息，也不会通过无障碍服务收集、" +
+                    "上传或分享个人数据。AI 不会使用无障碍服务自主决定点击位置或执行操作。\n\n" +
+                    "选择“同意并继续”后才会打开系统无障碍设置；你仍需在系统中手动授权，" +
+                    "并可随时在系统设置或本页关闭连点辅助。"
+            )
+            .setPositiveButton("同意并继续") { _, _ ->
+                prefs.edit()
+                    .putBoolean(PREF_AUTOTAP_ACCESSIBILITY_DISCLOSURE_V1, true)
+                    .putBoolean(Preferences.AutoClicker.intent.getKey(), true)
+                    .apply()
+                setAutoClickerSwitchChecked(switchEnabled, true)
+                if (!AutoClickerService.isAccessibilityEnabled(this)) {
+                    openAccessibilitySettings()
+                }
+            }
+            .setNegativeButton("不同意") { _, _ ->
+                setAutoClickerIntent(false)
+                setAutoClickerSwitchChecked(switchEnabled, false)
+            }
+            .create()
+
+        dialog.setOnCancelListener {
+            setAutoClickerIntent(false)
+            setAutoClickerSwitchChecked(switchEnabled, false)
+        }
+        dialog.show()
     }
 
     private val autoClickerPreferenceListener =
@@ -112,6 +198,13 @@ class SettingsActivity : AppCompatActivity() {
                 .putBoolean(Preferences.AutoClicker.intent.getKey(), false)
                 .putBoolean(Preferences.AutoClicker.enabled.getKey(), false)
                 .apply()
+        } else if (!prefs.getBoolean(PREF_AUTOTAP_ACCESSIBILITY_DISCLOSURE_V1, false)
+            && Preferences.AutoClicker.intent.getPreference(prefs)) {
+            // Commercial upgrades from an older build must not inherit a pre-disclosure armed state.
+            prefs.edit()
+                .putBoolean(Preferences.AutoClicker.intent.getKey(), false)
+                .putBoolean(Preferences.AutoClicker.enabled.getKey(), false)
+                .apply()
         }
         switchEnabled.isChecked = autoClickerSupported &&
             Preferences.AutoClicker.intent.getPreference(prefs)
@@ -123,15 +216,11 @@ class SettingsActivity : AppCompatActivity() {
             if (updatingAutoClickerSwitch || !autoClickerSupported) {
                 return@setOnCheckedChangeListener
             }
-            prefs.edit()
-                .putBoolean(Preferences.AutoClicker.intent.getKey(), isChecked)
-                .apply()
-            if (isChecked && !AutoClickerService.isAccessibilityEnabled(this)) {
-                try {
-                    startActivity(android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                } catch (_: Exception) {
-                }
+            if (!isChecked) {
+                setAutoClickerIntent(false)
+                return@setOnCheckedChangeListener
             }
+            requestAutoClickerEnable(switchEnabled)
         }
 
         val etInterval = findViewById<EditText>(R.id.etClickInterval)
