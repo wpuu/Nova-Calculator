@@ -76,15 +76,10 @@ public final class AiFormulaCandidate {
             if (description.length() > 500) {
                 throw new IllegalArgumentException("formula candidate description is too long");
             }
-            boolean usesParameter = false;
             for (String parameter : parameters) {
-                if (Pattern.compile("\\b" + Pattern.quote(parameter) + "\\b").matcher(expression).find()) {
-                    usesParameter = true;
-                    break;
+                if (!usesIdentifier(expression, parameter)) {
+                    throw new IllegalArgumentException("formula candidate does not use every declared parameter");
                 }
-            }
-            if (!usesParameter) {
-                throw new IllegalArgumentException("formula candidate does not use its parameters");
             }
             return new AiFormulaCandidate(name, parameters, expression.replaceAll(" {2,}", " "), description);
         } catch (JSONException e) {
@@ -96,6 +91,10 @@ public final class AiFormulaCandidate {
     public List<String> getParameters() { return parameters; }
     public String getExpression() { return expression; }
     public String getDescription() { return description; }
+
+    private static boolean usesIdentifier(String expression, String identifier) {
+        return Pattern.compile("\\b" + Pattern.quote(identifier) + "\\b").matcher(expression).find();
+    }
 
     private static boolean balancedParentheses(String expression) {
         int depth = 0;
