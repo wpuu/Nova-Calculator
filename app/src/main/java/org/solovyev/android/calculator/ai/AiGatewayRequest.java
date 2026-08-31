@@ -10,6 +10,7 @@ public final class AiGatewayRequest {
     private final String naturalLanguageQuery;
     private final String followUpQuestion;
     private final String evaluationError;
+    private final String formulaGoal;
     private final String localeTag;
 
     public AiGatewayRequest(String requestId,
@@ -50,6 +51,7 @@ public final class AiGatewayRequest {
         this.requestId = requireText(requestId, "requestId");
         if (operation == null) throw new IllegalArgumentException("operation must not be null");
         this.operation = operation;
+        this.formulaGoal = "";
 
         if (operation == AiOperation.EXPLAIN_CALCULATION) {
             this.expression = requireText(expression, "expression");
@@ -79,9 +81,20 @@ public final class AiGatewayRequest {
             throw new IllegalArgumentException("unsupported AI operation");
         }
 
-        this.localeTag = localeTag == null || localeTag.trim().isEmpty()
-                ? "und"
-                : localeTag.trim();
+        this.localeTag = normalizeLocale(localeTag);
+    }
+
+    /** Dedicated constructor keeps formula-building data separate from calculator-result fields. */
+    public AiGatewayRequest(String requestId, String formulaGoal, String localeTag) {
+        this.requestId = requireText(requestId, "requestId");
+        this.operation = AiOperation.BUILD_FORMULA;
+        this.expression = "";
+        this.deterministicResult = "";
+        this.naturalLanguageQuery = "";
+        this.followUpQuestion = "";
+        this.evaluationError = "";
+        this.formulaGoal = requireText(formulaGoal, "formulaGoal");
+        this.localeTag = normalizeLocale(localeTag);
     }
 
     public String getRequestId() { return requestId; }
@@ -91,6 +104,7 @@ public final class AiGatewayRequest {
     public String getNaturalLanguageQuery() { return naturalLanguageQuery; }
     public String getFollowUpQuestion() { return followUpQuestion; }
     public String getEvaluationError() { return evaluationError; }
+    public String getFormulaGoal() { return formulaGoal; }
     public String getLocaleTag() { return localeTag; }
 
     private static String requireText(String value, String name) {
@@ -98,5 +112,9 @@ public final class AiGatewayRequest {
             throw new IllegalArgumentException(name + " must not be blank");
         }
         return value.trim();
+    }
+
+    private static String normalizeLocale(String localeTag) {
+        return localeTag == null || localeTag.trim().isEmpty() ? "und" : localeTag.trim();
     }
 }

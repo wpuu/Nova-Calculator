@@ -28,6 +28,8 @@ public final class AiGatewayJsonCodec {
             } else if (request.getOperation() == AiOperation.EXPLAIN_CALCULATION_ERROR) {
                 json.put("expression", request.getExpression());
                 json.put("evaluationError", request.getEvaluationError());
+            } else if (request.getOperation() == AiOperation.BUILD_FORMULA) {
+                json.put("formulaGoal", request.getFormulaGoal());
             } else {
                 throw new IllegalArgumentException("unsupported AI operation");
             }

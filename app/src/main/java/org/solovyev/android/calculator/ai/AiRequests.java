@@ -58,4 +58,8 @@ public final class AiRequests {
                 evaluationError,
                 localeTag);
     }
+
+    public static AiGatewayRequest buildFormula(String formulaGoal, String localeTag) {
+        return new AiGatewayRequest(UUID.randomUUID().toString(), formulaGoal, localeTag);
+    }
 }

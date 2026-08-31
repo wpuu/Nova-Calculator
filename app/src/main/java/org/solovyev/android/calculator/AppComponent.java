@@ -9,6 +9,7 @@ import org.solovyev.android.calculator.floating.FloatingCalculatorBroadcastRecei
 import org.solovyev.android.calculator.floating.FloatingCalculatorService;
 import org.solovyev.android.calculator.floating.FloatingCalculatorView;
 import org.solovyev.android.calculator.functions.BaseFunctionFragment;
+import org.solovyev.android.calculator.functions.EditFunctionFragment;
 import org.solovyev.android.calculator.functions.FunctionsFragment;
 import org.solovyev.android.calculator.history.BaseHistoryFragment;
 import org.solovyev.android.calculator.history.EditHistoryFragment;
@@ -42,6 +43,7 @@ public interface AppComponent {
     void inject(PlotFunctionsFragment fragment);
     void inject(FixableErrorFragment fragment);
     void inject(BaseFunctionFragment fragment);
+    void inject(EditFunctionFragment fragment);
     void inject(PlotEditFunctionFragment fragment);
     void inject(EditVariableFragment fragment);
     void inject(EditHistoryFragment fragment);

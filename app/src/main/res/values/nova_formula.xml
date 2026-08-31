@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nova_ai_formula_action">AI formula</string>
+    <string name="nova_ai_formula_title">Create formula with AI</string>
+    <string name="nova_ai_formula_description">Describe a reusable calculation. AI will only fill a candidate; review it and tap Done before it is saved.</string>
+    <string name="nova_ai_formula_hint">Example: Gross margin percentage using selling price and cost</string>
+    <string name="nova_ai_formula_submit">Generate</string>
+    <string name="nova_ai_formula_empty">Describe the formula you want to create.</string>
+    <string name="nova_ai_formula_loading">Generating a reusable formula candidate…</string>
+    <string name="nova_ai_formula_invalid">Nova could not produce a safe reusable formula for that request.</string>
+    <string name="nova_ai_formula_local_invalid">The generated formula did not pass the calculator’s local validation.</string>
+    <string name="nova_ai_formula_applied">Candidate filled in. Review the name, parameters and expression, then tap Done to save.</string>
+</resources>

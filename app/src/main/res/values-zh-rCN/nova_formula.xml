@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nova_ai_formula_action">AI公式</string>
+    <string name="nova_ai_formula_title">用AI创建公式</string>
+    <string name="nova_ai_formula_description">描述一个可重复使用的计算。AI只会填入候选公式；检查无误并点击“完成”后才会保存。</string>
+    <string name="nova_ai_formula_hint">例如：输入售价和成本，计算毛利率</string>
+    <string name="nova_ai_formula_submit">生成</string>
+    <string name="nova_ai_formula_empty">请先描述你要创建的公式。</string>
+    <string name="nova_ai_formula_loading">正在生成可复用公式候选…</string>
+    <string name="nova_ai_formula_invalid">Nova无法为这个需求生成安全的可复用公式。</string>
+    <string name="nova_ai_formula_local_invalid">生成的公式没有通过计算器本地校验。</string>
+    <string name="nova_ai_formula_applied">候选公式已填入。请检查名称、参数和表达式，然后点击“完成”保存。</string>
+</resources>
