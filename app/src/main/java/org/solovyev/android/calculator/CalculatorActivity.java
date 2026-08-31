@@ -12,12 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Contact details
- *
- * Email: se.solovyev@gmail.com
- * Site:  http://se.solovyev.org
  */
 
 package org.solovyev.android.calculator;
@@ -25,6 +19,8 @@ package org.solovyev.android.calculator;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
@@ -32,19 +28,28 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import org.solovyev.android.calculator.ai.AiGatewayFeatureConfig;
+import org.solovyev.android.calculator.ai.AiGatewayRequest;
+import org.solovyev.android.calculator.ai.AiGatewayResponse;
+import org.solovyev.android.calculator.ai.AiNaturalLanguageCoordinator;
 import org.solovyev.android.calculator.converter.ConverterFragment;
 import org.solovyev.android.calculator.databinding.ActivityMainBinding;
 import org.solovyev.android.calculator.history.History;
 import org.solovyev.android.calculator.keyboard.PartialKeyboardUi;
 import org.solovyev.android.widget.menu.CustomPopupMenu;
+
+import java.util.Locale;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,10 +72,18 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
     ActivityLauncher launcher;
     @Inject
     StartupHelper startupHelper;
+    @Inject
+    Editor calculatorEditor;
+    @Inject
+    AiGatewayFeatureConfig aiGatewayFeatureConfig;
+    @Inject
+    AiNaturalLanguageCoordinator aiNaturalLanguageCoordinator;
     @Nullable
     View partialKeyboard;
     FrameLayout editor;
     View mainMenuButton;
+    @Nullable
+    private AlertDialog aiNaturalLanguageDialog;
     private boolean useBackAsPrevious;
 
     public CalculatorActivity() {
@@ -140,6 +153,8 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
 
     @Override
     protected void onDestroy() {
+        aiNaturalLanguageCoordinator.cancelCurrent();
+        dismissNaturalLanguageDialog();
         if (partialKeyboard != null) {
             partialKeyboardUi.onDestroyView();
         }
@@ -170,6 +185,115 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
         return true;
     }
 
+    private void showNaturalLanguageInput() {
+        if (!aiGatewayFeatureConfig.isEnabled()) {
+            Toast.makeText(this, R.string.nova_ai_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final EditText input = new EditText(this);
+        input.setHint(R.string.nova_ai_natural_hint);
+        input.setInputType(InputType.TYPE_CLASS_TEXT
+                | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        input.setMinLines(2);
+        input.setMaxLines(5);
+        input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2000)});
+
+        new AlertDialog.Builder(this, App.getTheme().alertDialogTheme)
+                .setTitle(R.string.nova_ai_natural_title)
+                .setMessage(R.string.nova_ai_natural_description)
+                .setView(input)
+                .setNegativeButton(R.string.cpp_cancel, null)
+                .setPositiveButton(R.string.nova_ai_natural_submit, (dialog, which) -> {
+                    final String query = input.getText() == null ? "" : input.getText().toString().trim();
+                    if (query.isEmpty()) {
+                        Toast.makeText(this, R.string.nova_ai_natural_empty, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    parseNaturalLanguage(query);
+                })
+                .show();
+    }
+
+    private void parseNaturalLanguage(@Nonnull String query) {
+        aiNaturalLanguageCoordinator.cancelCurrent();
+        dismissNaturalLanguageDialog();
+
+        final AlertDialog dialog = new AlertDialog.Builder(this, App.getTheme().alertDialogTheme)
+                .setTitle(R.string.nova_ai_natural_title)
+                .setMessage(R.string.nova_ai_natural_loading)
+                .setNegativeButton(R.string.cpp_cancel,
+                        (d, which) -> aiNaturalLanguageCoordinator.cancelCurrent())
+                .create();
+        aiNaturalLanguageDialog = dialog;
+        dialog.setOnDismissListener(d -> {
+            if (aiNaturalLanguageDialog == dialog) {
+                aiNaturalLanguageDialog = null;
+                aiNaturalLanguageCoordinator.cancelCurrent();
+            }
+        });
+        dialog.show();
+
+        aiNaturalLanguageCoordinator.parse(
+                query,
+                Locale.getDefault().toLanguageTag(),
+                new AiNaturalLanguageCoordinator.Listener() {
+                    @Override
+                    public void onStarted(AiGatewayRequest request) {
+                    }
+
+                    @Override
+                    public void onFinished(AiGatewayResponse response) {
+                        if (isFinishing() || isDestroyed()
+                                || aiNaturalLanguageDialog != dialog
+                                || !dialog.isShowing()) {
+                            return;
+                        }
+                        if (response != null && response.isSuccess()) {
+                            final String candidate = response.getCandidateExpression();
+                            if (candidate != null && !candidate.trim().isEmpty()) {
+                                calculatorEditor.setText(candidate.trim());
+                                dialog.dismiss();
+                                Toast.makeText(
+                                        CalculatorActivity.this,
+                                        R.string.nova_ai_natural_ready,
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                        dialog.setMessage(messageForNaturalLanguage(response));
+                    }
+                });
+    }
+
+    @Nonnull
+    private CharSequence messageForNaturalLanguage(@Nullable AiGatewayResponse response) {
+        if (response == null) return getString(R.string.nova_ai_unavailable);
+        switch (response.getStatus()) {
+            case AUTH_REQUIRED:
+                return getString(R.string.nova_ai_auth_required);
+            case QUOTA_EXHAUSTED:
+                return getString(R.string.nova_ai_quota_exhausted);
+            case RATE_LIMITED:
+                return getString(R.string.nova_ai_rate_limited);
+            case INVALID_REQUEST:
+                return getString(R.string.nova_ai_natural_invalid);
+            case TEMPORARILY_UNAVAILABLE:
+            case SUCCESS:
+            default:
+                return getString(R.string.nova_ai_unavailable);
+        }
+    }
+
+    private void dismissNaturalLanguageDialog() {
+        final AlertDialog dialog = aiNaturalLanguageDialog;
+        aiNaturalLanguageDialog = null;
+        if (dialog != null) {
+            dialog.setOnDismissListener(null);
+            if (dialog.isShowing()) dialog.dismiss();
+        }
+    }
+
     final class MainMenu implements PopupMenu.OnMenuItemClickListener {
 
         @Nullable
@@ -189,14 +313,13 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
                 updateMode();
                 updateAngleUnits();
                 updateNumeralBase();
+                updateAiActions();
                 popup.show();
             }
         }
 
         private void updateMode() {
-            if (popup == null) {
-                return;
-            }
+            if (popup == null) return;
             final Menu menu = popup.getMenu();
             final MenuItem menuItem = menu.findItem(R.id.menu_mode);
             menuItem.setTitle(makeTitle(R.string.cpp_mode, getActivityMode().name));
@@ -212,9 +335,7 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
         }
 
         private void updateAngleUnits() {
-            if (popup == null) {
-                return;
-            }
+            if (popup == null) return;
             final Menu menu = popup.getMenu();
             final MenuItem menuItem = menu.findItem(R.id.menu_angle_units);
             final AngleUnit angles = Engine.Preferences.angleUnit.getPreference(preferences);
@@ -222,19 +343,26 @@ public class CalculatorActivity extends BaseActivity implements View.OnClickList
         }
 
         private void updateNumeralBase() {
-            if (popup == null) {
-                return;
-            }
+            if (popup == null) return;
             final Menu menu = popup.getMenu();
             final MenuItem menuItem = menu.findItem(R.id.menu_numeral_base);
             final NumeralBase numeralBase = Engine.Preferences.numeralBase.getPreference(preferences);
             menuItem.setTitle(makeTitle(R.string.cpp_radix, Engine.Preferences.numeralBaseName(numeralBase)));
         }
 
+        private void updateAiActions() {
+            if (popup == null) return;
+            final MenuItem item = popup.getMenu().findItem(R.id.menu_ai_natural_language);
+            if (item != null) item.setVisible(aiGatewayFeatureConfig.isEnabled());
+        }
+
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             int itemId = item.getItemId();
-            if (itemId == R.id.menu_settings) {
+            if (itemId == R.id.menu_ai_natural_language) {
+                showNaturalLanguageInput();
+                return true;
+            } else if (itemId == R.id.menu_settings) {
                 launcher.showSettings();
                 return true;
             } else if (itemId == R.id.menu_tools) {

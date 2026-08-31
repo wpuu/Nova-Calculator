@@ -2,11 +2,7 @@ import { NOVA_GATEWAY_STATUS } from './nova-ai-service.mjs';
 
 const DEFAULT_MAX_BODY_BYTES = 16 * 1024;
 
-/**
- * Framework-neutral Fetch API handler for Nova's public AI endpoint.
- *
- * It exposes only Nova-level response states. Provider/model/key details stay behind NovaAiService.
- */
+/** Framework-neutral Fetch API handler for Nova's public AI endpoint. */
 export function createNovaFetchHandler({ service, maxBodyBytes = DEFAULT_MAX_BODY_BYTES }) {
   if (!service || typeof service.execute !== 'function') {
     throw new Error('createNovaFetchHandler requires service.execute');
@@ -65,7 +61,7 @@ function sanitizeServiceResponse(result, fallbackRequestId) {
   const status = Object.values(NOVA_GATEWAY_STATUS).includes(result?.status)
     ? result.status
     : NOVA_GATEWAY_STATUS.TEMPORARILY_UNAVAILABLE;
-  return {
+  const response = {
     requestId: safeRequestId(result?.requestId) || fallbackRequestId,
     status,
     answer: status === NOVA_GATEWAY_STATUS.SUCCESS && typeof result?.answer === 'string'
@@ -75,6 +71,11 @@ function sanitizeServiceResponse(result, fallbackRequestId) {
     remainingRequestHint: integerHint(result?.remainingRequestHint),
     quotaResetAtEpochMs: nonNegative(result?.quotaResetAtEpochMs),
   };
+  if (status === NOVA_GATEWAY_STATUS.SUCCESS && typeof result?.candidateExpression === 'string') {
+    const candidate = result.candidateExpression.trim();
+    if (candidate) response.candidateExpression = candidate.slice(0, 1024);
+  }
+  return response;
 }
 
 function invalidResponse(requestId) {

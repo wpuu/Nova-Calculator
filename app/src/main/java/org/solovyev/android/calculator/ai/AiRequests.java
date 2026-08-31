@@ -19,4 +19,15 @@ public final class AiRequests {
                 deterministicResult,
                 localeTag);
     }
+
+    public static AiGatewayRequest parseNaturalLanguageCalculation(String naturalLanguageQuery,
+                                                                   String localeTag) {
+        return new AiGatewayRequest(
+                UUID.randomUUID().toString(),
+                AiOperation.PARSE_NATURAL_LANGUAGE_CALCULATION,
+                null,
+                null,
+                naturalLanguageQuery,
+                localeTag);
+    }
 }

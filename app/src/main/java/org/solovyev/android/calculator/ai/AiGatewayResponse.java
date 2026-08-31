@@ -6,6 +6,7 @@ public final class AiGatewayResponse {
     private final String requestId;
     private final AiGatewayStatus status;
     private final String answer;
+    private final String candidateExpression;
     private final long retryAfterSeconds;
     private final int remainingRequestHint;
     private final long quotaResetAtEpochMs;
@@ -13,6 +14,16 @@ public final class AiGatewayResponse {
     public AiGatewayResponse(String requestId,
                              AiGatewayStatus status,
                              String answer,
+                             long retryAfterSeconds,
+                             int remainingRequestHint,
+                             long quotaResetAtEpochMs) {
+        this(requestId, status, answer, "", retryAfterSeconds, remainingRequestHint, quotaResetAtEpochMs);
+    }
+
+    public AiGatewayResponse(String requestId,
+                             AiGatewayStatus status,
+                             String answer,
+                             String candidateExpression,
                              long retryAfterSeconds,
                              int remainingRequestHint,
                              long quotaResetAtEpochMs) {
@@ -25,6 +36,9 @@ public final class AiGatewayResponse {
         this.requestId = requestId.trim();
         this.status = status;
         this.answer = answer == null ? "" : answer;
+        this.candidateExpression = status == AiGatewayStatus.SUCCESS && candidateExpression != null
+                ? candidateExpression.trim()
+                : "";
         this.retryAfterSeconds = Math.max(0L, retryAfterSeconds);
         this.remainingRequestHint = Math.max(-1, remainingRequestHint);
         this.quotaResetAtEpochMs = Math.max(0L, quotaResetAtEpochMs);
@@ -40,6 +54,11 @@ public final class AiGatewayResponse {
 
     public String getAnswer() {
         return answer;
+    }
+
+    /** Candidate calculator expression returned only for natural-language parsing. */
+    public String getCandidateExpression() {
+        return candidateExpression;
     }
 
     public long getRetryAfterSeconds() {

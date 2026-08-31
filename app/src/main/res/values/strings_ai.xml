@@ -8,4 +8,14 @@
     <string name="nova_ai_rate_limited">AI is busy right now. Please try again shortly.</string>
     <string name="nova_ai_invalid_request">This calculation cannot be explained by AI yet.</string>
     <string name="nova_ai_unavailable">Nova AI is temporarily unavailable. Your calculator result is unchanged.</string>
+
+    <string name="nova_ai_natural_action">Calculate from words</string>
+    <string name="nova_ai_natural_title">Calculate from words</string>
+    <string name="nova_ai_natural_description">Describe one calculation in everyday language. Nova AI converts it to a calculator expression; the local calculator computes the result.</string>
+    <string name="nova_ai_natural_hint">Example: 8536 with 15% off, then add 13% tax</string>
+    <string name="nova_ai_natural_submit">Convert</string>
+    <string name="nova_ai_natural_empty">Enter a calculation to convert.</string>
+    <string name="nova_ai_natural_loading">Converting your request to a calculator expression…</string>
+    <string name="nova_ai_natural_invalid">Nova could not convert that request safely. Try a simpler calculation with all required numbers included.</string>
+    <string name="nova_ai_natural_ready">Expression inserted. Review it and the calculator result before using it.</string>
 </resources>

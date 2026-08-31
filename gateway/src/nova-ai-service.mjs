@@ -21,17 +21,15 @@ export const QUOTA_DECISION = Object.freeze({
   RATE_LIMITED: 'RATE_LIMITED',
 });
 
+const EXPLAIN_OPERATION = 'EXPLAIN_CALCULATION';
+const NATURAL_LANGUAGE_OPERATION = 'PARSE_NATURAL_LANGUAGE_CALCULATION';
+
 /**
  * Server-authoritative orchestration for one Nova AI request.
  *
- * Required collaborators:
- * - authVerifier.verify(authorization) -> principal|null
- * - quotaLedger.reserve(context) -> quota decision
- * - quotaLedger.commit(reservationId)
- * - quotaLedger.release(reservationId)
- * - dispatcher.dispatch(request, priority)
- *
  * Android-side entitlement state is deliberately not an input to authorization or priority.
+ * Natural-language parsing may return a candidate expression, never an authoritative numeric
+ * result. Android evaluates that expression with the deterministic calculator engine.
  */
 export class NovaAiService {
   constructor({ authVerifier, quotaLedger, dispatcher }) {
@@ -98,6 +96,7 @@ export class NovaAiService {
       await settleQuietly(this.quotaLedger, 'commit', quota.reservationId);
       return gatewayResponse(validated.request.requestId, NOVA_GATEWAY_STATUS.SUCCESS, {
         answer: providerResult?.answer,
+        candidateExpression: providerResult?.candidateExpression,
         remainingRequestHint: quota.remainingRequestHint,
         quotaResetAtEpochMs: quota.quotaResetAtEpochMs,
       });
@@ -121,24 +120,47 @@ export function priorityForPrincipal(principal) {
 function validateClientRequest(request) {
   const requestId = safeText(request?.requestId);
   if (!requestId) return { ok: false, requestId: 'invalid' };
-  if (request?.operation !== 'EXPLAIN_CALCULATION') return { ok: false, requestId };
 
-  const expression = safeText(request.expression);
-  const deterministicResult = safeText(request.deterministicResult);
-  if (!expression || !deterministicResult || expression.length > 4096 || deterministicResult.length > 1024) {
-    return { ok: false, requestId };
+  if (request?.operation === EXPLAIN_OPERATION) {
+    const expression = safeText(request.expression);
+    const deterministicResult = safeText(request.deterministicResult);
+    if (!expression || !deterministicResult || expression.length > 4096 || deterministicResult.length > 1024) {
+      return { ok: false, requestId };
+    }
+    return {
+      ok: true,
+      request: Object.freeze({
+        requestId,
+        operation: EXPLAIN_OPERATION,
+        expression,
+        deterministicResult,
+        localeTag: boundedLocale(request.localeTag),
+      }),
+    };
   }
 
-  return {
-    ok: true,
-    request: Object.freeze({
-      requestId,
-      operation: 'EXPLAIN_CALCULATION',
-      expression,
-      deterministicResult,
-      localeTag: safeText(request.localeTag) || 'und',
-    }),
-  };
+  if (request?.operation === NATURAL_LANGUAGE_OPERATION) {
+    const naturalLanguageQuery = safeText(request.naturalLanguageQuery);
+    if (!naturalLanguageQuery || naturalLanguageQuery.length > 2000) {
+      return { ok: false, requestId };
+    }
+    return {
+      ok: true,
+      request: Object.freeze({
+        requestId,
+        operation: NATURAL_LANGUAGE_OPERATION,
+        naturalLanguageQuery,
+        localeTag: boundedLocale(request.localeTag),
+      }),
+    };
+  }
+
+  return { ok: false, requestId };
+}
+
+function boundedLocale(value) {
+  const locale = safeText(value) || 'und';
+  return locale.length <= 64 ? locale : 'und';
 }
 
 function normalizePrincipal(principal) {
@@ -178,14 +200,21 @@ async function settleQuietly(ledger, method, reservationId) {
 }
 
 function gatewayResponse(requestId, status, options = {}) {
-  return Object.freeze({
+  const response = {
     requestId,
     status,
     answer: status === NOVA_GATEWAY_STATUS.SUCCESS ? safeText(options.answer) || '' : '',
     retryAfterSeconds: nonNegativeNumber(options.retryAfterSeconds),
     remainingRequestHint: integerHint(options.remainingRequestHint),
     quotaResetAtEpochMs: nonNegativeNumber(options.quotaResetAtEpochMs),
-  });
+  };
+  const candidateExpression = status === NOVA_GATEWAY_STATUS.SUCCESS
+    ? safeText(options.candidateExpression)
+    : '';
+  if (candidateExpression) {
+    response.candidateExpression = candidateExpression.slice(0, 1024);
+  }
+  return Object.freeze(response);
 }
 
 function safeText(value) {

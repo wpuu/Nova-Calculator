@@ -18,8 +18,14 @@ public final class AiGatewayJsonCodec {
             final JSONObject json = new JSONObject();
             json.put("requestId", request.getRequestId());
             json.put("operation", request.getOperation().name());
-            json.put("expression", request.getExpression());
-            json.put("deterministicResult", request.getDeterministicResult());
+            if (request.getOperation() == AiOperation.EXPLAIN_CALCULATION) {
+                json.put("expression", request.getExpression());
+                json.put("deterministicResult", request.getDeterministicResult());
+            } else if (request.getOperation() == AiOperation.PARSE_NATURAL_LANGUAGE_CALCULATION) {
+                json.put("naturalLanguageQuery", request.getNaturalLanguageQuery());
+            } else {
+                throw new IllegalArgumentException("unsupported AI operation");
+            }
             json.put("localeTag", request.getLocaleTag());
             return json.toString();
         } catch (JSONException e) {
@@ -39,10 +45,14 @@ public final class AiGatewayJsonCodec {
             final String answer = status == AiGatewayStatus.SUCCESS
                     ? json.optString("answer", "")
                     : "";
+            final String candidateExpression = status == AiGatewayStatus.SUCCESS
+                    ? json.optString("candidateExpression", "")
+                    : "";
             return new AiGatewayResponse(
                     requestId,
                     status,
                     answer,
+                    candidateExpression,
                     json.optLong("retryAfterSeconds", 0L),
                     json.optInt("remainingRequestHint", -1),
                     json.optLong("quotaResetAtEpochMs", 0L));

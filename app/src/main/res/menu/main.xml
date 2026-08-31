@@ -77,6 +77,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_ai_natural_language"
+        android:title="@string/nova_ai_natural_action"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_settings"
         android:title="@string/cpp_settings"
         app:showAsAction="never" />
