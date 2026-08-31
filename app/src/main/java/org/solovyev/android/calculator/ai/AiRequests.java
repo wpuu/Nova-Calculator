@@ -30,4 +30,18 @@ public final class AiRequests {
                 naturalLanguageQuery,
                 localeTag);
     }
+
+    public static AiGatewayRequest followUpCalculation(String expression,
+                                                       String deterministicResult,
+                                                       String question,
+                                                       String localeTag) {
+        return new AiGatewayRequest(
+                UUID.randomUUID().toString(),
+                AiOperation.FOLLOW_UP_CALCULATION,
+                expression,
+                deterministicResult,
+                null,
+                question,
+                localeTag);
+    }
 }

@@ -18,4 +18,13 @@
     <string name="nova_ai_natural_loading">Converting your request to a calculator expression…</string>
     <string name="nova_ai_natural_invalid">Nova could not convert that request safely. Try a simpler calculation with all required numbers included.</string>
     <string name="nova_ai_natural_ready">Expression inserted. Review it and the calculator result before using it.</string>
+
+    <string name="nova_ai_follow_up_action">Ask about this calculation</string>
+    <string name="nova_ai_follow_up_title">Ask about this calculation</string>
+    <string name="nova_ai_follow_up_description">Ask one question about the current expression or its verified calculator result.</string>
+    <string name="nova_ai_follow_up_hint">Example: Why is the tax applied after the discount?</string>
+    <string name="nova_ai_follow_up_submit">Ask</string>
+    <string name="nova_ai_follow_up_empty">Enter a question about this calculation.</string>
+    <string name="nova_ai_follow_up_loading">Answering from the current expression and verified result…</string>
+    <string name="nova_ai_follow_up_invalid">Nova could not answer that as a question about the current calculation.</string>
 </resources>

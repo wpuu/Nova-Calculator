@@ -23,28 +23,17 @@ export const QUOTA_DECISION = Object.freeze({
 
 const EXPLAIN_OPERATION = 'EXPLAIN_CALCULATION';
 const NATURAL_LANGUAGE_OPERATION = 'PARSE_NATURAL_LANGUAGE_CALCULATION';
+const FOLLOW_UP_OPERATION = 'FOLLOW_UP_CALCULATION';
 
-/**
- * Server-authoritative orchestration for one Nova AI request.
- *
- * Android-side entitlement state is deliberately not an input to authorization or priority.
- * Natural-language parsing may return a candidate expression, never an authoritative numeric
- * result. Android evaluates that expression with the deterministic calculator engine.
- */
+/** Server-authoritative orchestration for one Nova AI request. */
 export class NovaAiService {
   constructor({ authVerifier, quotaLedger, dispatcher }) {
-    if (!authVerifier || typeof authVerifier.verify !== 'function') {
-      throw new Error('NovaAiService requires authVerifier.verify');
-    }
-    if (!quotaLedger || typeof quotaLedger.reserve !== 'function') {
-      throw new Error('NovaAiService requires quotaLedger.reserve');
-    }
+    if (!authVerifier || typeof authVerifier.verify !== 'function') throw new Error('NovaAiService requires authVerifier.verify');
+    if (!quotaLedger || typeof quotaLedger.reserve !== 'function') throw new Error('NovaAiService requires quotaLedger.reserve');
     if (typeof quotaLedger.commit !== 'function' || typeof quotaLedger.release !== 'function') {
       throw new Error('NovaAiService requires quotaLedger commit/release');
     }
-    if (!dispatcher || typeof dispatcher.dispatch !== 'function') {
-      throw new Error('NovaAiService requires dispatcher.dispatch');
-    }
+    if (!dispatcher || typeof dispatcher.dispatch !== 'function') throw new Error('NovaAiService requires dispatcher.dispatch');
     this.authVerifier = authVerifier;
     this.quotaLedger = quotaLedger;
     this.dispatcher = dispatcher;
@@ -60,9 +49,7 @@ export class NovaAiService {
     } catch {
       principal = null;
     }
-    if (!principal) {
-      return gatewayResponse(validated.request.requestId, NOVA_GATEWAY_STATUS.AUTH_REQUIRED);
-    }
+    if (!principal) return gatewayResponse(validated.request.requestId, NOVA_GATEWAY_STATUS.AUTH_REQUIRED);
 
     const priority = priorityForPrincipal(principal);
     let quota;
@@ -122,28 +109,12 @@ function validateClientRequest(request) {
   if (!requestId) return { ok: false, requestId: 'invalid' };
 
   if (request?.operation === EXPLAIN_OPERATION) {
-    const expression = safeText(request.expression);
-    const deterministicResult = safeText(request.deterministicResult);
-    if (!expression || !deterministicResult || expression.length > 4096 || deterministicResult.length > 1024) {
-      return { ok: false, requestId };
-    }
-    return {
-      ok: true,
-      request: Object.freeze({
-        requestId,
-        operation: EXPLAIN_OPERATION,
-        expression,
-        deterministicResult,
-        localeTag: boundedLocale(request.localeTag),
-      }),
-    };
+    return validateExpressionContext(request, requestId, EXPLAIN_OPERATION);
   }
 
   if (request?.operation === NATURAL_LANGUAGE_OPERATION) {
     const naturalLanguageQuery = safeText(request.naturalLanguageQuery);
-    if (!naturalLanguageQuery || naturalLanguageQuery.length > 2000) {
-      return { ok: false, requestId };
-    }
+    if (!naturalLanguageQuery || naturalLanguageQuery.length > 2000) return { ok: false, requestId };
     return {
       ok: true,
       request: Object.freeze({
@@ -155,7 +126,39 @@ function validateClientRequest(request) {
     };
   }
 
+  if (request?.operation === FOLLOW_UP_OPERATION) {
+    const context = validateExpressionContext(request, requestId, FOLLOW_UP_OPERATION);
+    if (!context.ok) return context;
+    const followUpQuestion = safeText(request.followUpQuestion);
+    if (!followUpQuestion || followUpQuestion.length > 2000) return { ok: false, requestId };
+    return {
+      ok: true,
+      request: Object.freeze({
+        ...context.request,
+        followUpQuestion,
+      }),
+    };
+  }
+
   return { ok: false, requestId };
+}
+
+function validateExpressionContext(request, requestId, operation) {
+  const expression = safeText(request.expression);
+  const deterministicResult = safeText(request.deterministicResult);
+  if (!expression || !deterministicResult || expression.length > 4096 || deterministicResult.length > 1024) {
+    return { ok: false, requestId };
+  }
+  return {
+    ok: true,
+    request: Object.freeze({
+      requestId,
+      operation,
+      expression,
+      deterministicResult,
+      localeTag: boundedLocale(request.localeTag),
+    }),
+  };
 }
 
 function boundedLocale(value) {
@@ -173,16 +176,12 @@ function normalizePrincipal(principal) {
 }
 
 function normalizeQuotaDecision(decision) {
-  if (!decision || !Object.values(QUOTA_DECISION).includes(decision.status)) {
-    throw new Error('invalid quota decision');
-  }
-
+  if (!decision || !Object.values(QUOTA_DECISION).includes(decision.status)) throw new Error('invalid quota decision');
   const common = {
     remainingRequestHint: integerHint(decision.remainingRequestHint),
     quotaResetAtEpochMs: nonNegativeNumber(decision.quotaResetAtEpochMs),
     retryAfterSeconds: nonNegativeNumber(decision.retryAfterSeconds),
   };
-
   if (decision.status === QUOTA_DECISION.ALLOWED) {
     const reservationId = safeText(decision.reservationId);
     if (!reservationId) throw new Error('allowed quota decision requires reservationId');
@@ -195,7 +194,6 @@ async function settleQuietly(ledger, method, reservationId) {
   try {
     await ledger[method](reservationId);
   } catch {
-    // A reservation already protected capacity. Accounting reconciliation belongs to the ledger.
   }
 }
 
@@ -208,12 +206,8 @@ function gatewayResponse(requestId, status, options = {}) {
     remainingRequestHint: integerHint(options.remainingRequestHint),
     quotaResetAtEpochMs: nonNegativeNumber(options.quotaResetAtEpochMs),
   };
-  const candidateExpression = status === NOVA_GATEWAY_STATUS.SUCCESS
-    ? safeText(options.candidateExpression)
-    : '';
-  if (candidateExpression) {
-    response.candidateExpression = candidateExpression.slice(0, 1024);
-  }
+  const candidateExpression = status === NOVA_GATEWAY_STATUS.SUCCESS ? safeText(options.candidateExpression) : '';
+  if (candidateExpression) response.candidateExpression = candidateExpression.slice(0, 1024);
   return Object.freeze(response);
 }
 

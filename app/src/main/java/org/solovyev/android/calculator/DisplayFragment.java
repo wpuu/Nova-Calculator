@@ -12,12 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Contact details
- *
- * Email: se.solovyev@gmail.com
- * Site:  http://se.solovyev.org
  */
 
 package org.solovyev.android.calculator;
@@ -25,11 +19,15 @@ package org.solovyev.android.calculator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,6 +38,7 @@ import com.squareup.otto.Bus;
 
 import org.solovyev.android.calculator.ai.AiExplainCoordinator;
 import org.solovyev.android.calculator.ai.AiGatewayFeatureConfig;
+import org.solovyev.android.calculator.ai.AiGatewayRequest;
 import org.solovyev.android.calculator.ai.AiGatewayResponse;
 import org.solovyev.android.calculator.converter.ConverterFragment;
 import org.solovyev.android.calculator.jscl.JsclOperation;
@@ -57,7 +56,6 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
         MenuItem.OnMenuItemClickListener {
 
     private enum ConversionMenuItem {
-
         to_bin(NumeralBase.bin, R.string.convert_to_bin),
         to_dec(NumeralBase.dec, R.string.convert_to_dec),
         to_hex(NumeralBase.hex, R.string.convert_to_hex);
@@ -73,40 +71,25 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
 
         @Nullable
         public static ConversionMenuItem getByTitle(int title) {
-            if (title == R.string.convert_to_bin) {
-                return to_bin;
-            } else if (title == R.string.convert_to_dec) {
-                return to_dec;
-            } else if (title == R.string.convert_to_hex) {
-                return to_hex;
-            }
+            if (title == R.string.convert_to_bin) return to_bin;
+            if (title == R.string.convert_to_dec) return to_dec;
+            if (title == R.string.convert_to_hex) return to_hex;
             return null;
         }
     }
 
     DisplayView displayView;
-    @Inject
-    SharedPreferences preferences;
-    @Inject
-    ErrorReporter errorReporter;
-    @Inject
-    Display display;
-    @Inject
-    ActivityLauncher launcher;
-    @Inject
-    Bus bus;
-    @Inject
-    Calculator calculator;
-    @Inject
-    Engine engine;
-    @Inject
-    Editor editor;
-    @Inject
-    AiGatewayFeatureConfig aiGatewayFeatureConfig;
-    @Inject
-    AiExplainCoordinator aiExplainCoordinator;
-    @Nullable
-    private AlertDialog aiExplanationDialog;
+    @Inject SharedPreferences preferences;
+    @Inject ErrorReporter errorReporter;
+    @Inject Display display;
+    @Inject ActivityLauncher launcher;
+    @Inject Bus bus;
+    @Inject Calculator calculator;
+    @Inject Engine engine;
+    @Inject Editor editor;
+    @Inject AiGatewayFeatureConfig aiGatewayFeatureConfig;
+    @Inject AiExplainCoordinator aiExplainCoordinator;
+    @Nullable private AlertDialog aiExplanationDialog;
 
     public DisplayFragment() {
         super(R.layout.cpp_app_display);
@@ -119,8 +102,7 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = super.onCreateView(inflater, container, savedInstanceState);
         displayView = view.findViewById(R.id.calculator_display);
         display.setView(displayView);
@@ -137,15 +119,13 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-            ContextMenu.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         final DisplayState state = display.getState();
-        if (!state.valid) {
-            return;
-        }
+        if (!state.valid) return;
         addMenu(menu, R.string.cpp_copy, this);
         if (canExplain(state)) {
             addMenu(menu, R.string.nova_ai_explain_action, this);
+            addMenu(menu, R.string.nova_ai_follow_up_action, this);
         }
 
         final Generic result = state.getResult();
@@ -153,9 +133,7 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
         if (result != null) {
             if (operation == JsclOperation.numeric && result.getConstants().isEmpty()) {
                 for (ConversionMenuItem item : ConversionMenuItem.values()) {
-                    if (isMenuItemVisible(item, result)) {
-                        addMenu(menu, item.title, this);
-                    }
+                    if (isMenuItemVisible(item, result)) addMenu(menu, item.title, this);
                 }
                 try {
                     result.doubleValue();
@@ -163,16 +141,12 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
                 } catch (NotDoubleException ignored) {
                 }
             }
-            if (launcher.canPlot(result)) {
-                addMenu(menu, R.string.c_plot, this);
-            }
+            if (launcher.canPlot(result)) addMenu(menu, R.string.c_plot, this);
         }
     }
 
     private boolean canExplain(@Nonnull DisplayState state) {
-        if (!aiGatewayFeatureConfig.isEnabled() || !state.valid) {
-            return false;
-        }
+        if (!aiGatewayFeatureConfig.isEnabled() || !state.valid) return false;
         final String expression = editor.getState().getTextString();
         return expression != null
                 && !expression.trim().isEmpty()
@@ -181,13 +155,10 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
     }
 
     protected boolean isMenuItemVisible(@NonNull ConversionMenuItem menuItem,
-            @Nonnull Generic generic) {
+                                        @Nonnull Generic generic) {
         final NumeralBase fromNumeralBase = engine.getMathEngine().getNumeralBase();
-        if (fromNumeralBase != menuItem.toNumeralBase) {
-            return calculator.canConvert(generic, fromNumeralBase, menuItem.toNumeralBase);
-        }
-
-        return false;
+        return fromNumeralBase != menuItem.toNumeralBase
+                && calculator.canConvert(generic, fromNumeralBase, menuItem.toNumeralBase);
     }
 
     @Override
@@ -220,14 +191,13 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
         } else if (itemId == R.string.nova_ai_explain_action) {
             explainCurrentCalculation(state);
             return true;
+        } else if (itemId == R.string.nova_ai_follow_up_action) {
+            askAboutCurrentCalculation(state);
+            return true;
         } else if (itemId == R.string.convert_to_bin || itemId == R.string.convert_to_dec || itemId == R.string.convert_to_hex) {
             final ConversionMenuItem menuItem = ConversionMenuItem.getByTitle(item.getItemId());
-            if (menuItem == null) {
-                return false;
-            }
-            if (result != null) {
-                calculator.convert(state, menuItem.toNumeralBase);
-            }
+            if (menuItem == null) return false;
+            if (result != null) calculator.convert(state, menuItem.toNumeralBase);
             return true;
         } else if (itemId == R.string.c_convert) {
             ConverterFragment.show(getActivity(), getValue(result));
@@ -240,21 +210,80 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void explainCurrentCalculation(@Nonnull DisplayState state) {
-        if (!canExplain(state) || getActivity() == null) {
-            return;
-        }
+        if (!canExplain(state) || getActivity() == null) return;
         final String expression = editor.getState().getTextString().trim();
         final String deterministicResult = state.text.trim();
         final String localeTag = Locale.getDefault().toLanguageTag();
 
+        showAiAnswerDialog(
+                R.string.nova_ai_explain_title,
+                R.string.nova_ai_explain_loading,
+                listener -> aiExplainCoordinator.explain(
+                        expression,
+                        deterministicResult,
+                        localeTag,
+                        listener),
+                R.string.nova_ai_invalid_request);
+    }
+
+    private void askAboutCurrentCalculation(@Nonnull DisplayState state) {
+        if (!canExplain(state) || getActivity() == null) return;
+        final EditText input = new EditText(getActivity());
+        input.setHint(R.string.nova_ai_follow_up_hint);
+        input.setInputType(InputType.TYPE_CLASS_TEXT
+                | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        input.setMinLines(2);
+        input.setMaxLines(5);
+        input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2000)});
+
+        new AlertDialog.Builder(getActivity(), App.getTheme().alertDialogTheme)
+                .setTitle(R.string.nova_ai_follow_up_title)
+                .setMessage(R.string.nova_ai_follow_up_description)
+                .setView(input)
+                .setNegativeButton(R.string.cpp_cancel, null)
+                .setPositiveButton(R.string.nova_ai_follow_up_submit, (dialog, which) -> {
+                    final String question = input.getText() == null ? "" : input.getText().toString().trim();
+                    if (question.isEmpty()) {
+                        Toast.makeText(getActivity(), R.string.nova_ai_follow_up_empty, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    followUpCurrentCalculation(state, question);
+                })
+                .show();
+    }
+
+    private void followUpCurrentCalculation(@Nonnull DisplayState state,
+                                            @Nonnull String question) {
+        if (!canExplain(state) || getActivity() == null) return;
+        final String expression = editor.getState().getTextString().trim();
+        final String deterministicResult = state.text.trim();
+        final String localeTag = Locale.getDefault().toLanguageTag();
+
+        showAiAnswerDialog(
+                R.string.nova_ai_follow_up_title,
+                R.string.nova_ai_follow_up_loading,
+                listener -> aiExplainCoordinator.followUp(
+                        expression,
+                        deterministicResult,
+                        question,
+                        localeTag,
+                        listener),
+                R.string.nova_ai_follow_up_invalid);
+    }
+
+    private void showAiAnswerDialog(@StringRes int title,
+                                    @StringRes int loadingMessage,
+                                    @Nonnull AiRequestStarter starter,
+                                    @StringRes int invalidMessage) {
+        if (getActivity() == null) return;
         aiExplainCoordinator.cancelCurrent();
         dismissAiDialog();
 
         final AlertDialog dialog = new AlertDialog.Builder(
-                getActivity(),
-                App.getTheme().alertDialogTheme)
-                .setTitle(R.string.nova_ai_explain_title)
-                .setMessage(R.string.nova_ai_explain_loading)
+                getActivity(), App.getTheme().alertDialogTheme)
+                .setTitle(title)
+                .setMessage(loadingMessage)
                 .setNegativeButton(R.string.cpp_cancel, (d, which) -> aiExplainCoordinator.cancelCurrent())
                 .create();
         aiExplanationDialog = dialog;
@@ -266,30 +295,23 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
         });
         dialog.show();
 
-        aiExplainCoordinator.explain(
-                expression,
-                deterministicResult,
-                localeTag,
-                new AiExplainCoordinator.Listener() {
-                    @Override
-                    public void onStarted(org.solovyev.android.calculator.ai.AiGatewayRequest request) {
-                    }
+        starter.start(new AiExplainCoordinator.Listener() {
+            @Override
+            public void onStarted(AiGatewayRequest request) {
+            }
 
-                    @Override
-                    public void onFinished(AiGatewayResponse response) {
-                        if (!isAdded() || aiExplanationDialog != dialog || !dialog.isShowing()) {
-                            return;
-                        }
-                        dialog.setMessage(messageFor(response));
-                    }
-                });
+            @Override
+            public void onFinished(AiGatewayResponse response) {
+                if (!isAdded() || aiExplanationDialog != dialog || !dialog.isShowing()) return;
+                dialog.setMessage(messageFor(response, invalidMessage));
+            }
+        });
     }
 
     @Nonnull
-    private CharSequence messageFor(@Nullable AiGatewayResponse response) {
-        if (response == null) {
-            return getString(R.string.nova_ai_unavailable);
-        }
+    private CharSequence messageFor(@Nullable AiGatewayResponse response,
+                                    @StringRes int invalidMessage) {
+        if (response == null) return getString(R.string.nova_ai_unavailable);
         switch (response.getStatus()) {
             case SUCCESS:
                 final String answer = response.getAnswer();
@@ -303,7 +325,7 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
             case RATE_LIMITED:
                 return getString(R.string.nova_ai_rate_limited);
             case INVALID_REQUEST:
-                return getString(R.string.nova_ai_invalid_request);
+                return getString(invalidMessage);
             case TEMPORARILY_UNAVAILABLE:
             default:
                 return getString(R.string.nova_ai_unavailable);
@@ -315,20 +337,20 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
         aiExplanationDialog = null;
         if (dialog != null) {
             dialog.setOnDismissListener(null);
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
+            if (dialog.isShowing()) dialog.dismiss();
         }
     }
 
     private static double getValue(@Nullable Generic result) {
-        if (result == null) {
-            return 1d;
-        }
+        if (result == null) return 1d;
         try {
             return result.doubleValue();
         } catch (NotDoubleException ignored) {
             return 1d;
         }
+    }
+
+    private interface AiRequestStarter {
+        void start(AiExplainCoordinator.Listener listener);
     }
 }

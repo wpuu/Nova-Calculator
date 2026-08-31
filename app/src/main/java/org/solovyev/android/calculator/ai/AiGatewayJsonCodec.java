@@ -11,9 +11,7 @@ public final class AiGatewayJsonCodec {
     }
 
     public static String encodeRequest(AiGatewayRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException("request must not be null");
-        }
+        if (request == null) throw new IllegalArgumentException("request must not be null");
         try {
             final JSONObject json = new JSONObject();
             json.put("requestId", request.getRequestId());
@@ -23,6 +21,10 @@ public final class AiGatewayJsonCodec {
                 json.put("deterministicResult", request.getDeterministicResult());
             } else if (request.getOperation() == AiOperation.PARSE_NATURAL_LANGUAGE_CALCULATION) {
                 json.put("naturalLanguageQuery", request.getNaturalLanguageQuery());
+            } else if (request.getOperation() == AiOperation.FOLLOW_UP_CALCULATION) {
+                json.put("expression", request.getExpression());
+                json.put("deterministicResult", request.getDeterministicResult());
+                json.put("followUpQuestion", request.getFollowUpQuestion());
             } else {
                 throw new IllegalArgumentException("unsupported AI operation");
             }
@@ -35,16 +37,12 @@ public final class AiGatewayJsonCodec {
 
     public static AiGatewayResponse decodeResponse(String body, String fallbackRequestId) {
         final String fallback = requireFallbackId(fallbackRequestId);
-        if (body == null || body.trim().isEmpty()) {
-            return unavailable(fallback);
-        }
+        if (body == null || body.trim().isEmpty()) return unavailable(fallback);
         try {
             final JSONObject json = new JSONObject(body);
             final String requestId = nonBlank(json.optString("requestId", ""), fallback);
             final AiGatewayStatus status = parseStatus(json.optString("status", ""));
-            final String answer = status == AiGatewayStatus.SUCCESS
-                    ? json.optString("answer", "")
-                    : "";
+            final String answer = status == AiGatewayStatus.SUCCESS ? json.optString("answer", "") : "";
             final String candidateExpression = status == AiGatewayStatus.SUCCESS
                     ? json.optString("candidateExpression", "")
                     : "";
