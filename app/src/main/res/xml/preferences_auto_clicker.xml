@@ -16,6 +16,12 @@
         android:selectable="false"
         android:summary="@string/pref_auto_clicker_hint" />
 
+    <org.solovyev.android.calculator.autoclicker.AutoClickerDisplayBoundsPreference
+        android:key="auto_clicker_display_bounds"
+        android:title="@string/autotap_display_bounds_title"
+        android:summary="@string/autotap_display_bounds_unknown"
+        android:selectable="true" />
+
     <org.solovyev.android.calculator.autoclicker.AutoClickerProfilesPreference
         android:key="auto_clicker_profiles"
         android:title="@string/auto_clicker_profiles_title"
