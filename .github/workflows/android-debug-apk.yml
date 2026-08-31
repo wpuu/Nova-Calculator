@@ -77,6 +77,9 @@ jobs:
       - name: Verify commercial source guard
         run: bash scripts/verify-commercial-source.sh
 
+      - name: Verify commercial docs and licensing
+        run: bash scripts/verify-commercial-docs.sh
+
       - name: Verify Nova Android identities
         run: bash scripts/verify-nova-identities.sh
 

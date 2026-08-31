@@ -100,6 +100,7 @@ jobs:
       - name: Verify source and policy guards
         run: |
           bash scripts/verify-commercial-source.sh
+          bash scripts/verify-commercial-docs.sh
           bash scripts/verify-nova-identities.sh
           bash scripts/verify-accessibility-disclosure.sh
           bash scripts/verify-production-release-config.sh

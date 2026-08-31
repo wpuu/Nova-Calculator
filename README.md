@@ -1,42 +1,68 @@
-# Nova Calculator
+# Nova Calculator AI
 
-An open-source Android scientific calculator application with a hidden feature set. On the surface, Nova Calculator functions entirely as a standard, fully-featured calculator. However, it contains a highly-concealed "Secret Code Trigger System" designed for specific use cases.
+Nova Calculator AI is an Android scientific calculator that keeps deterministic calculation at the center and adds contextual AI only when the user asks for help understanding or expressing a calculation.
 
-## Features
+The commercial product line is calculator-first: normal calculations remain usable without AI, and supported exact arithmetic is computed by the calculator engine rather than delegated to a language model.
 
-*   **Fully Functional Calculator:** Provides a complete set of scientific calculator features, serving its primary purpose without compromise.
-*   **Secret Code Trigger System:** Users can enter specific numeric sequences during normal calculations to seamlessly trigger background events without disrupting the calculation progress.
-*   **Dynamic Suffix Interception:** Replaces traditional "equals sign triggers" or "exact text matches" with dynamic suffix interception (`endsWith`). The secret code works even amidst complex calculations (e.g., `1500 * 30...`), making it extremely natural.
-*   **Accidental Touch Prevention:**
-    *   **Backspace Immunity:** Prevents triggering if the code is formed by deleting characters.
-    *   **Startup Shield:** Ignores codes formed during the loading of calculation history on app startup.
-*   **Emergency Stop & Status Indicator:**
-    *   Specific actions change the color of the "Backspace" button subtly to indicate active background processes.
-    *   A single tap on the Backspace button instantly stops the background process, saves any necessary files, and restores the button color.
-*   **Power Optimization & Screen Management:**
-    *   `FLAG_KEEP_SCREEN_ON` is enforced to prevent the screen from locking while the app is foregrounded.
-    *   Auto-dimming feature drops screen brightness to near zero after 2 minutes of inactivity, saving power while keeping the app active. Touching the screen instantly restores brightness.
+## Core calculator and AI features
 
-## Hardware & Permission Handling
+- Scientific calculator, history, variables, custom functions and graphing.
+- **Explain current result** — ask why a calculation produced its result and receive a step-oriented explanation.
+- **Natural-language calculation** — describe calculations such as discounts, tax, tips, splitting bills or other everyday math in words; Nova converts the intent into a calculator expression and validates the result with the deterministic engine where supported.
+- **Contextual follow-up** — continue asking about the current expression/result without opening a generic chat experience.
+- **Error explanation** — explain invalid or incomplete calculator expressions without silently changing them.
+- **Formula assistant** — describe a reusable formula, review the generated candidate and save it for later use.
 
-*   **Silent Shutter Strategy:** Attempts to mute the system volume to `0` before capturing media to ensure silence. Includes fail-safes (e.g., `try-catch` blocks) to prevent app crashes on strict OEM skins (like Huawei or Android 10+ devices) if volume modification is blocked by system policies.
-*   **CameraX Integration:** Utilizes AndroidX CameraX for seamless capture capabilities with minimal visible UI elements.
+AI provider credentials, model routing and purchase verification remain server-side behind the Nova Gateway. Provider API keys are not embedded in the Android application.
 
-## Architecture
+## Explicit tools
 
-This project is built using:
-*   Java / Kotlin
-*   AndroidX CameraX
-*   Otto Bus (with reflection-based subscriber discovery to ensure event delivery)
-*   Dagger for Dependency Injection
+### AutoTap
 
-## Building the Project
+AutoTap is an optional, user-controlled two-point click helper available on Android 7.0 / API 24 and newer.
 
-1.  Clone this repository.
-2.  Open the project in Android Studio.
-3.  Sync Gradle dependencies.
-4.  Build and run the project on an Android device or emulator.
+- The user explicitly enables it from Nova Tools.
+- Nova presents a dedicated AccessibilityService disclosure and requires affirmative consent before opening Android Accessibility settings.
+- Volume Up starts clicking and Volume Down stops it.
+- The two target indicators are positioned by the user and the automation is deterministic.
+- The AccessibilityService cannot retrieve window content (`canRetrieveWindowContent=false`). It does not read screen text, account data or typed content.
+- AI does not choose click targets or autonomously operate AccessibilityService.
 
-## License
+### Underwater Camera
 
-This project is released under the [Apache License 2.0](LICENSE).
+Underwater Camera is a visible camera tool intended for waterproof cases where touch input is difficult.
+
+- Camera access begins only after the user explicitly enters the tool and accepts the camera disclosure/permission flow.
+- Volume Up takes photos; Volume Down starts/stops video.
+- Microphone access is requested only when the user chooses video with sound; silent video remains available.
+- Photos and videos are written to the device MediaStore (`Pictures/UnderwaterCamera` and `Movies/UnderwaterCamera`). Nova does not upload these captures as part of the camera feature.
+
+## Commercial privacy and safety boundaries
+
+The commercial branch intentionally does **not** include calculator-code-triggered hidden camera, microphone or video capture, covert background recording, or an evidence-export workflow. Sensitive device capabilities are exposed as explicit tools with user-visible permission flows.
+
+Nova AI does not autonomously control AccessibilityService. AI math requests are routed through the Nova Gateway; upstream model credentials and infrastructure remain server-side.
+
+See:
+
+- [`docs/PLAY_DATA_SAFETY_BASELINE.md`](docs/PLAY_DATA_SAFETY_BASELINE.md) — current Play Console data-flow/declaration baseline.
+- [`docs/PRIVACY_POLICY_DRAFT.md`](docs/PRIVACY_POLICY_DRAFT.md) — privacy-policy draft and remaining publication decisions.
+- [`docs/NOVA_ANDROID_RELEASE.md`](docs/NOVA_ANDROID_RELEASE.md) — guarded production AAB workflow and release configuration.
+
+## Build
+
+Development builds use the isolated application id:
+
+`com.wpuu.novacalculator.dev`
+
+The candidate production application id is:
+
+`com.wpuu.novacalculator`
+
+Normal CI builds the commercial debug APK and performs an unsigned release-AAB preflight. Production signing is a separate, manually triggered GitHub Actions workflow protected by the `production` environment and never requires committing an upload keystore or password to the repository.
+
+## License and attribution
+
+Nova Calculator AI includes substantial code derived from **Calculator++ / android-calculatorpp**, originally developed by Sergey Solovyev (`serso` / `se.solovyev`). Original source-file copyright and Apache License 2.0 notices are retained where present.
+
+The repository is distributed under the Apache License, Version 2.0. See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
