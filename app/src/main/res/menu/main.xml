@@ -82,13 +82,13 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/menu_settings"
-        android:title="@string/cpp_settings"
+        android:id="@+id/menu_tools"
+        android:title="@string/autotap_menu_title"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/menu_tools"
-        android:title="工具"
+        android:id="@+id/menu_settings"
+        android:title="@string/cpp_settings"
         app:showAsAction="never" />
 
     <item

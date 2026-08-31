@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="autotap_menu_title">AutoTap · Volume-key clicker</string>
+    <string name="autotap_menu_subtitle">Set tap targets, timing and saved setups</string>
+</resources>
