@@ -77,6 +77,9 @@ jobs:
       - name: Verify commercial source guard
         run: bash scripts/verify-commercial-source.sh
 
+      - name: Verify Nova Android identities
+        run: bash scripts/verify-nova-identities.sh
+
       - name: Test gateway capacity core
         run: cd gateway && npm test
 
@@ -90,6 +93,11 @@ jobs:
 
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --stacktrace --no-daemon
+
+      - name: Build unsigned release AAB preflight
+        run: |
+          ./gradlew :app:bundleRelease --stacktrace --no-daemon
+          test -s app/build/outputs/bundle/release/app-release.aab
 
       - name: Collect APK
         if: success()
