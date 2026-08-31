@@ -9,12 +9,32 @@ import re
 
 build_gradle = Path('app/build.gradle').read_text(encoding='utf-8')
 
-prod = re.search(r'^\s*applicationId\s+["\']([^"\']+)["\']\s*$', build_gradle, re.MULTILINE)
+expected_prod = 'com.wpuu.novacalculator'
+literal = re.search(r'^\s*applicationId\s+["\']([^"\']+)["\']\s*$', build_gradle, re.MULTILINE)
+variable = re.search(r'^\s*applicationId\s+([A-Za-z_][A-Za-z0-9_]*)\s*$', build_gradle, re.MULTILINE)
+constant = re.search(
+    r'^\s*def\s+novaProductionApplicationId\s*=\s*["\']([^"\']+)["\']\s*$',
+    build_gradle,
+    re.MULTILINE,
+)
 debug = re.search(r'^\s*applicationIdSuffix\s+["\']([^"\']+)["\']\s*$', build_gradle, re.MULTILINE)
-if not prod or prod.group(1) != 'com.wpuu.novacalculator':
-    raise SystemExit('Nova production release guard: release applicationId must be com.wpuu.novacalculator')
+
+if literal:
+    prod = literal.group(1)
+elif variable and variable.group(1) == 'novaProductionApplicationId' and constant:
+    prod = constant.group(1)
+else:
+    raise SystemExit('Nova production release guard: release applicationId is missing or not frozen')
+if prod != expected_prod:
+    raise SystemExit(f'Nova production release guard: release applicationId must be {expected_prod}')
 if not debug or debug.group(1) != '.dev':
     raise SystemExit('Nova production release guard: debug applicationIdSuffix must be .dev')
+
+requested_package = os.environ.get('NOVA_ANDROID_PACKAGE_NAME', '').strip()
+if requested_package and requested_package != expected_prod:
+    raise SystemExit(
+        f'Nova production release guard: NOVA_ANDROID_PACKAGE_NAME must be {expected_prod} when provided'
+    )
 
 required_paths = {
     'NOVA_AI_GATEWAY_URL': '/api/ai',
@@ -69,7 +89,7 @@ if not re.fullmatch(r'[0-9A-Za-z][0-9A-Za-z._-]{0,49}', version_name):
 
 print(
     'Nova production release config OK: '
-    f'applicationId={prod.group(1)} origin=https://{next(iter(origins))[0]} '
+    f'applicationId={prod} origin=https://{next(iter(origins))[0]} '
     f'versionCode={version_code} versionName={version_name} PlayIntegrity=enabled'
 )
 PY
