@@ -44,4 +44,18 @@ public final class AiRequests {
                 question,
                 localeTag);
     }
+
+    public static AiGatewayRequest explainCalculationError(String expression,
+                                                           String evaluationError,
+                                                           String localeTag) {
+        return new AiGatewayRequest(
+                UUID.randomUUID().toString(),
+                AiOperation.EXPLAIN_CALCULATION_ERROR,
+                expression,
+                null,
+                null,
+                null,
+                evaluationError,
+                localeTag);
+    }
 }

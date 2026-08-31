@@ -25,6 +25,9 @@ public final class AiGatewayJsonCodec {
                 json.put("expression", request.getExpression());
                 json.put("deterministicResult", request.getDeterministicResult());
                 json.put("followUpQuestion", request.getFollowUpQuestion());
+            } else if (request.getOperation() == AiOperation.EXPLAIN_CALCULATION_ERROR) {
+                json.put("expression", request.getExpression());
+                json.put("evaluationError", request.getEvaluationError());
             } else {
                 throw new IllegalArgumentException("unsupported AI operation");
             }

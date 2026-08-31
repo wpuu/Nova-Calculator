@@ -24,6 +24,7 @@ export const QUOTA_DECISION = Object.freeze({
 const EXPLAIN_OPERATION = 'EXPLAIN_CALCULATION';
 const NATURAL_LANGUAGE_OPERATION = 'PARSE_NATURAL_LANGUAGE_CALCULATION';
 const FOLLOW_UP_OPERATION = 'FOLLOW_UP_CALCULATION';
+const ERROR_EXPLANATION_OPERATION = 'EXPLAIN_CALCULATION_ERROR';
 
 /** Server-authoritative orchestration for one Nova AI request. */
 export class NovaAiService {
@@ -136,6 +137,24 @@ function validateClientRequest(request) {
       request: Object.freeze({
         ...context.request,
         followUpQuestion,
+      }),
+    };
+  }
+
+  if (request?.operation === ERROR_EXPLANATION_OPERATION) {
+    const expression = safeText(request.expression);
+    const evaluationError = safeText(request.evaluationError);
+    if (!expression || expression.length > 4096 || !evaluationError || evaluationError.length > 2000) {
+      return { ok: false, requestId };
+    }
+    return {
+      ok: true,
+      request: Object.freeze({
+        requestId,
+        operation: ERROR_EXPLANATION_OPERATION,
+        expression,
+        evaluationError,
+        localeTag: boundedLocale(request.localeTag),
       }),
     };
   }

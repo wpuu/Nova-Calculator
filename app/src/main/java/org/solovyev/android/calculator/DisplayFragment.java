@@ -154,6 +154,15 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
                 && !state.text.trim().isEmpty();
     }
 
+    private boolean canExplainError(@Nonnull DisplayState state) {
+        if (!aiGatewayFeatureConfig.isEnabled() || state.valid) return false;
+        final String expression = editor.getState().getTextString();
+        return expression != null
+                && !expression.trim().isEmpty()
+                && state.text != null
+                && !state.text.trim().isEmpty();
+    }
+
     protected boolean isMenuItemVisible(@NonNull ConversionMenuItem menuItem,
                                         @Nonnull Generic generic) {
         final NumeralBase fromNumeralBase = engine.getMathEngine().getNumeralBase();
@@ -169,8 +178,24 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
             v.showContextMenu();
             v.setOnCreateContextMenuListener(null);
         } else {
-            showEvaluationError(v.getContext(), state.text);
+            showEvaluationError(state);
         }
+    }
+
+    private void showEvaluationError(@Nonnull DisplayState state) {
+        final Context context = getContext();
+        if (context == null) return;
+        final String errorMessage = state.text == null ? "" : state.text;
+        final AlertDialog.Builder builder = new AlertDialog.Builder(
+                context, App.getTheme().alertDialogTheme)
+                .setMessage(errorMessage)
+                .setNegativeButton(R.string.cpp_cancel, null);
+        if (canExplainError(state)) {
+            builder.setPositiveButton(
+                    R.string.nova_ai_error_action,
+                    (dialog, which) -> explainCurrentError(state));
+        }
+        builder.create().show();
     }
 
     public static void showEvaluationError(@Nonnull Context context,
@@ -224,6 +249,23 @@ public class DisplayFragment extends BaseFragment implements View.OnClickListene
                         localeTag,
                         listener),
                 R.string.nova_ai_invalid_request);
+    }
+
+    private void explainCurrentError(@Nonnull DisplayState state) {
+        if (!canExplainError(state) || getActivity() == null) return;
+        final String expression = editor.getState().getTextString().trim();
+        final String evaluationError = state.text.trim();
+        final String localeTag = Locale.getDefault().toLanguageTag();
+
+        showAiAnswerDialog(
+                R.string.nova_ai_error_title,
+                R.string.nova_ai_error_loading,
+                listener -> aiExplainCoordinator.explainError(
+                        expression,
+                        evaluationError,
+                        localeTag,
+                        listener),
+                R.string.nova_ai_error_invalid);
     }
 
     private void askAboutCurrentCalculation(@Nonnull DisplayState state) {

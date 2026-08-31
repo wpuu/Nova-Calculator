@@ -4,5 +4,6 @@ package org.solovyev.android.calculator.ai;
 public enum AiOperation {
     EXPLAIN_CALCULATION,
     PARSE_NATURAL_LANGUAGE_CALCULATION,
-    FOLLOW_UP_CALCULATION
+    FOLLOW_UP_CALCULATION,
+    EXPLAIN_CALCULATION_ERROR
 }

@@ -3,7 +3,7 @@ package org.solovyev.android.calculator.ai;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Coordinates explicit AI questions about the current verified calculator result.
+ * Coordinates explicit AI questions about the current calculator context.
  * Only the newest request remains active so stale responses cannot overwrite newer context.
  */
 public final class AiExplainCoordinator {
@@ -32,6 +32,16 @@ public final class AiExplainCoordinator {
                 expression,
                 deterministicResult,
                 question,
+                localeTag), listener);
+    }
+
+    public void explainError(String expression,
+                             String evaluationError,
+                             String localeTag,
+                             Listener listener) {
+        execute(AiRequests.explainCalculationError(
+                expression,
+                evaluationError,
                 localeTag), listener);
     }
 

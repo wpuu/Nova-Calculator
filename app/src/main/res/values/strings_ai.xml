@@ -27,4 +27,9 @@
     <string name="nova_ai_follow_up_empty">Enter a question about this calculation.</string>
     <string name="nova_ai_follow_up_loading">Answering from the current expression and verified result…</string>
     <string name="nova_ai_follow_up_invalid">Nova could not answer that as a question about the current calculation.</string>
+
+    <string name="nova_ai_error_action">Explain this error</string>
+    <string name="nova_ai_error_title">Why this calculation failed</string>
+    <string name="nova_ai_error_loading">Explaining the calculator error without changing your expression…</string>
+    <string name="nova_ai_error_invalid">Nova could not explain this calculator error safely.</string>
 </resources>

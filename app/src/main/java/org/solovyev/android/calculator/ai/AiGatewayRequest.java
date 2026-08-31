@@ -9,6 +9,7 @@ public final class AiGatewayRequest {
     private final String deterministicResult;
     private final String naturalLanguageQuery;
     private final String followUpQuestion;
+    private final String evaluationError;
     private final String localeTag;
 
     public AiGatewayRequest(String requestId,
@@ -16,7 +17,7 @@ public final class AiGatewayRequest {
                             String expression,
                             String deterministicResult,
                             String localeTag) {
-        this(requestId, operation, expression, deterministicResult, null, null, localeTag);
+        this(requestId, operation, expression, deterministicResult, null, null, null, localeTag);
     }
 
     public AiGatewayRequest(String requestId,
@@ -25,7 +26,7 @@ public final class AiGatewayRequest {
                             String deterministicResult,
                             String naturalLanguageQuery,
                             String localeTag) {
-        this(requestId, operation, expression, deterministicResult, naturalLanguageQuery, null, localeTag);
+        this(requestId, operation, expression, deterministicResult, naturalLanguageQuery, null, null, localeTag);
     }
 
     public AiGatewayRequest(String requestId,
@@ -34,6 +35,17 @@ public final class AiGatewayRequest {
                             String deterministicResult,
                             String naturalLanguageQuery,
                             String followUpQuestion,
+                            String localeTag) {
+        this(requestId, operation, expression, deterministicResult, naturalLanguageQuery, followUpQuestion, null, localeTag);
+    }
+
+    public AiGatewayRequest(String requestId,
+                            AiOperation operation,
+                            String expression,
+                            String deterministicResult,
+                            String naturalLanguageQuery,
+                            String followUpQuestion,
+                            String evaluationError,
                             String localeTag) {
         this.requestId = requireText(requestId, "requestId");
         if (operation == null) throw new IllegalArgumentException("operation must not be null");
@@ -44,16 +56,25 @@ public final class AiGatewayRequest {
             this.deterministicResult = requireText(deterministicResult, "deterministicResult");
             this.naturalLanguageQuery = "";
             this.followUpQuestion = "";
+            this.evaluationError = "";
         } else if (operation == AiOperation.PARSE_NATURAL_LANGUAGE_CALCULATION) {
             this.expression = "";
             this.deterministicResult = "";
             this.naturalLanguageQuery = requireText(naturalLanguageQuery, "naturalLanguageQuery");
             this.followUpQuestion = "";
+            this.evaluationError = "";
         } else if (operation == AiOperation.FOLLOW_UP_CALCULATION) {
             this.expression = requireText(expression, "expression");
             this.deterministicResult = requireText(deterministicResult, "deterministicResult");
             this.naturalLanguageQuery = "";
             this.followUpQuestion = requireText(followUpQuestion, "followUpQuestion");
+            this.evaluationError = "";
+        } else if (operation == AiOperation.EXPLAIN_CALCULATION_ERROR) {
+            this.expression = requireText(expression, "expression");
+            this.deterministicResult = "";
+            this.naturalLanguageQuery = "";
+            this.followUpQuestion = "";
+            this.evaluationError = requireText(evaluationError, "evaluationError");
         } else {
             throw new IllegalArgumentException("unsupported AI operation");
         }
@@ -69,6 +90,7 @@ public final class AiGatewayRequest {
     public String getDeterministicResult() { return deterministicResult; }
     public String getNaturalLanguageQuery() { return naturalLanguageQuery; }
     public String getFollowUpQuestion() { return followUpQuestion; }
+    public String getEvaluationError() { return evaluationError; }
     public String getLocaleTag() { return localeTag; }
 
     private static String requireText(String value, String name) {
