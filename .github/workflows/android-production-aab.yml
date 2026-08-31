@@ -26,6 +26,7 @@ jobs:
       NOVA_ANONYMOUS_SESSION_URL: ${{ vars.NOVA_ANONYMOUS_SESSION_URL }}
       NOVA_BILLING_URL: ${{ vars.NOVA_BILLING_URL }}
       NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER: ${{ vars.NOVA_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER }}
+      NOVA_PRIVACY_CONTACT_VERIFIED: ${{ vars.NOVA_PRIVACY_CONTACT_VERIFIED }}
       NOVA_VERSION_CODE: ${{ inputs.version_code }}
       NOVA_VERSION_NAME: ${{ inputs.version_name }}
       NOVA_UPLOAD_KEYSTORE_B64: ${{ secrets.NOVA_UPLOAD_KEYSTORE_B64 }}
@@ -140,16 +141,10 @@ jobs:
             exit 1
           }
 
-          PRIVACY_BODY="$(curl --fail --silent --show-error --location --max-time 15 \
-            --retry 2 --retry-delay 1 "$ORIGIN/api/privacy")"
-          printf '%s' "$PRIVACY_BODY" | grep -q 'Nova Calculator AI Privacy Policy' || {
-            echo 'Nova public privacy policy is missing or invalid' >&2
-            exit 1
-          }
-          printf '%s' "$PRIVACY_BODY" | grep -q 'Privacy contact:' || {
-            echo 'Nova public privacy policy does not expose the configured privacy contact' >&2
-            exit 1
-          }
+          PRIVACY_FILE="$RUNNER_TEMP/nova-production-privacy-policy.html"
+          curl --fail --silent --show-error --location --max-time 15 \
+            --retry 2 --retry-delay 1 "$ORIGIN/api/privacy" > "$PRIVACY_FILE"
+          bash scripts/verify-production-privacy-readiness.sh "$PRIVACY_FILE"
 
       - name: Test gateway and commercial contracts
         run: |

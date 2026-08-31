@@ -98,6 +98,36 @@ jobs:
           fi
           bash scripts/verify-production-release-config.sh
 
+      - name: Verify production privacy readiness gate contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          CLEAN_POLICY="$RUNNER_TEMP/nova-privacy-clean.html"
+          DRAFT_POLICY="$RUNNER_TEMP/nova-privacy-draft.html"
+
+          cat > "$CLEAN_POLICY" <<'EOF'
+          <!doctype html>
+          <title>Nova Calculator AI Privacy Policy</title>
+          <p>Privacy contact: privacy@example.invalid</p>
+          EOF
+
+          if NOVA_PRIVACY_CONTACT_VERIFIED=false \
+            bash scripts/verify-production-privacy-readiness.sh "$CLEAN_POLICY" >/dev/null 2>&1; then
+            echo 'Privacy readiness guard unexpectedly accepted missing operator verification.' >&2
+            exit 1
+          fi
+
+          NOVA_PRIVACY_CONTACT_VERIFIED=true \
+            bash scripts/verify-production-privacy-readiness.sh "$CLEAN_POLICY"
+
+          cp "$CLEAN_POLICY" "$DRAFT_POLICY"
+          printf '\n<p>Release Draft - before public release verify the domain.</p>\n' >> "$DRAFT_POLICY"
+          if NOVA_PRIVACY_CONTACT_VERIFIED=true \
+            bash scripts/verify-production-privacy-readiness.sh "$DRAFT_POLICY" >/dev/null 2>&1; then
+            echo 'Privacy readiness guard unexpectedly accepted unresolved release markers.' >&2
+            exit 1
+          fi
+
       - name: Verify Accessibility disclosure and scope
         run: bash scripts/verify-accessibility-disclosure.sh
 
