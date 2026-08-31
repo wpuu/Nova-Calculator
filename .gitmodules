@@ -1,0 +1,3 @@
+[submodule "plotter"]
+	path = plotter
+	url = https://git.bubu1.eu/Bubu/android-plotter

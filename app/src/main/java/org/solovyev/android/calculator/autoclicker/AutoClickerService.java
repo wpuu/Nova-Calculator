@@ -4,19 +4,20 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.GestureDescription;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.content.res.Configuration;
 import android.graphics.Path;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,14 +25,15 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,196 +45,285 @@ import org.solovyev.android.calculator.BuildConfig;
 import org.solovyev.android.calculator.Preferences;
 import org.solovyev.android.calculator.R;
 
-public class AutoClickerService extends AccessibilityService implements SharedPreferences.OnSharedPreferenceChangeListener {
+import java.util.Locale;
+
+/**
+ * Two-point accessibility autoclicker.
+ *
+ * Product rules enforced here:
+ *  - the settings switch only enables/disables the feature and its overlays;
+ *  - the two reticles and the floating status indicator are drag-only;
+ *  - VOLUME_UP starts clicking and VOLUME_DOWN stops clicking;
+ *  - while the feature is enabled both volume keys are consumed, so system volume does not
+ *    change as a side effect;
+ *  - overlay positions are stored as normalized ratios and survive orientation/resolution
+ *    changes;
+ *  - overlay attachment is verified instead of trusting an in-memory boolean, allowing the
+ *    service to self-heal if Android/another full-screen app drops an overlay window.
+ */
+public class AutoClickerService extends AccessibilityService
+        implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "AutoClickerService";
 
-    // Failure codes persisted to auto_clicker_last_failure for the UI to surface.
     private static final int FAILURE_NONE = 0;
     private static final int FAILURE_OVERLAY_PERMISSION = 1;
     private static final int FAILURE_BAD_TOKEN = 2;
     private static final int FAILURE_INVALID_DISPLAY = 3;
     private static final int FAILURE_UNKNOWN = 4;
-    private static final int FAILURE_A11Y_OFF = 5;                 // 无障碍未真正开启 / 服务未绑定
-    private static final int FAILURE_SERVICE_CONNECT_FAILED = 6;   // onServiceConnected 初始化抛异常
-    private static final int FAILURE_TIMEOUT_NO_CIRCLES = 7;       // 超时仍未显示、原因不明
+    private static final int FAILURE_A11Y_OFF = 5;
+    private static final int FAILURE_SERVICE_CONNECT_FAILED = 6;
+    private static final int FAILURE_TIMEOUT_NO_CIRCLES = 7;
 
-    // Stops are provided by (1) the always-touchable "停止连点" floating button shown while
-    // clicking, and (2) the volume-key quick toggle (see onKeyEvent). A persistent status
-    // notification is shown WHILE CLICKING as a reminder that clicking is active, but it
-    // carries NO stop action (the old notification "stop" affordance was removed — it was
-    // redundant and hard to reach mid-clicking). Stopping is only via the button or volume key.
     private static final int CLICK_NOTIFICATION_ID = 1001;
     private static final String CLICK_NOTIFICATION_TAG = "autoclicker";
     private static final String NOTIF_CHANNEL_ID = "autoclicker_channel";
-    // Sent by the UI (PreferencesFragment) when it returns from the system accessibility
-    // settings screen, so the service re-evaluates whether the circles should be shown.
-    // This is a timing safety net: on some ROMs the secure ENABLED_ACCESSIBILITY_SERVICES
-    // string lags behind the actual bind, and the user may toggle the switch before the
-    // service connects. An explicit nudge guarantees a fresh reconcile.
+
     public static final String ACTION_RECONCILE =
             "org.solovyev.android.calculator.autoclicker.RECONCILE";
 
-    // Explicit circle size in dp (26dp). Used for layout, click center and boundary clamp
-    // so that display size / click point / edge clamp all share one source of truth.
-    private int circleSizePx = 0;
-    private int screenW = 0;
-    private int screenH = 0;
+    private static final int CIRCLE_SIZE_DP = 26;
+    private static final int DEFAULT_INTERVAL_MS = 30;
+    private static final int DEFAULT_DURATION_SEC = 60;
+    private static final int MIN_INTERVAL_MS = 40;
+    private static final long NO_SHOW_WATCHDOG_MS = 4000L;
+    private static final long OVERLAY_HEALTH_CHECK_MS = 750L;
+    private static final long OVERLAY_ATTACH_VERIFY_MS = 1000L;
+    private static final long GESTURE_TIMEOUT_MS = 80L;
+    private static final int MAX_CONSECUTIVE_CANCELS = 5;
+    private static final int MAX_INIT_RETRIES = 3;
+    private static final long INIT_RETRY_BASE_MS = 1000L;
 
-    // Cached params for instant effect while clicking (Bug 3).
+    private int circleSizePx;
+    private int screenW;
+    private int screenH;
     private int currentIntervalMs = DEFAULT_INTERVAL_MS;
-    private int currentDurationSec = 60;
+    private int currentDurationSec = DEFAULT_DURATION_SEC;
 
     private WindowManager windowManager;
     private LayoutInflater inflater;
     private int overlayType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
     private final View[] overlayViews = new View[2];
     private final WindowManager.LayoutParams[] paramsArr = new WindowManager.LayoutParams[2];
-    // A small, always-tappable floating button shown whenever the circles are up, so the
-    // user can START / STOP clicking with a normal touch even inside third-party apps where
-    // EMUI withholds the volume-key dispatch. It never gets FLAG_NOT_TOUCHABLE, so it stays
-    // tappable while clicking (the two reticle circles sit in opposite bottom corners).
-    private View floatingButton = null;
-    private WindowManager.LayoutParams floatingParams = null;
-
-    // ----- State model (per design review) -----
-    // serviceConnected : this AccessibilityService instance is currently bound.
-    // overlayReady     : BOTH circles were successfully added to the window.
-    // viewAdded[i]     : circle i specifically was added (used for atomic rollback).
-    // These three are in-memory only. Persistence lives in SharedPreferences:
-    //   auto_clicker_intent   -> user's wish to enable (written by UI / screen-off)
-    //   auto_clicker_enabled  -> actual effective state (written ONLY by this service)
-    private boolean serviceConnected = false;
-    private boolean overlayReady = false;
     private final boolean[] viewAdded = new boolean[2];
+
+    private View floatingButton;
+    private WindowManager.LayoutParams floatingParams;
+
+    private boolean serviceConnected;
+    private boolean overlayReady;
+    private boolean overlayAttachPending;
+    private boolean isClicking;
     private int lastFailure = FAILURE_NONE;
 
-    private boolean isClicking = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private long clickStartTime = 0;
-    private long lastToggleTime = 0;
-    private long lastCircleTapTime = 0; // last clean tap on either reticle circle
-    private long lastBtnTapTime = 0;    // last clean tap on the floating button
-
-    // Watchdog: when the user wants the circles but they still aren't up after a few
-    // seconds, record a definitive error code so the UI can show a concrete fix instead
-    // of an endless "please report this" placeholder. This is the reliable detector for
-    // the "I enabled everything but no circles appear" case on non-EMUI ROMs.
-    private static final long NO_SHOW_WATCHDOG_MS = 4000;
-    private final Runnable noShowRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (preferences == null) return;
-            if (!Preferences.AutoClicker.intent.getPreference(preferences)) return;
-            if (overlayReady) {
-                lastFailure = FAILURE_NONE;
-                persistFailure();
-                return;
-            }
-            boolean grantedNow = serviceConnected || isAccessibilityEnabled(AutoClickerService.this);
-            if (!grantedNow || !serviceConnected) {
-                lastFailure = FAILURE_A11Y_OFF;
-            } else if (lastFailure == FAILURE_NONE) {
-                // Service is bound and accessibility is granted, yet circles are still down
-                // with no specific addView error -> something unexpected; flag it as timeout.
-                lastFailure = FAILURE_TIMEOUT_NO_CIRCLES;
-            }
-            persistFailure();
-        }
-    };
-
-    private void armNoShowWatchdog() {
-        handler.removeCallbacks(noShowRunnable);
-        handler.postDelayed(noShowRunnable, NO_SHOW_WATCHDOG_MS);
-    }
-
-    private void cancelNoShowWatchdog() {
-        handler.removeCallbacks(noShowRunnable);
-    }
-    private static final long TOGGLE_DEBOUNCE_MS = 600;
-    private static final long CLICK_TIME_THRESHOLD_MS = 250;
-    private static final float CLICK_DISTANCE_THRESHOLD_PX = 15f;
-    // A single clean tap does NOT toggle. Two taps within this window do. This prevents
-    // accidental toggles while the user is dragging a circle/button to reposition it.
-    private static final long DOUBLE_TAP_MS = 300;
-    private static final int CIRCLE_SIZE_DP = 26;
-    private static final int DEFAULT_INTERVAL_MS = 30;
-    private static final int DEFAULT_DURATION_SEC = 60;
-    private static final int MIN_INTERVAL_MS = 40; // Safely clamped minimum interval to prevent OS input pipeline stall
-
-    // Flow control & safety watchdog state
-    private boolean isGesturePending = false;
-    private int consecutiveCancelCount = 0;
-    private static final int MAX_CONSECUTIVE_CANCELS = 5;
-    private static final long GESTURE_TIMEOUT_MS = 80; // Watchdog gate; safely above the 10ms gesture stroke. On ROMs that never fire the callback (e.g. EMUI) this becomes the effective click cadence (~80ms + interval).
-
-    private final Runnable gestureTimeoutRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (isGesturePending) {
-                // The system did not report completion within GESTURE_TIMEOUT_MS. On some
-                // ROMs (e.g. EMUI) the GestureResultCallback is unreliable and simply never
-                // fires, so this is NORMAL operation there — NOT an error. The watchdog's
-                // ONLY job is to release the pending gate so the loop can keep going, and to
-                // reschedule the next click. It must NEVER count this as a cancel and must
-                // NEVER stop the service, otherwise the autoclicker would self-terminate on
-                // EMUI after a few taps. Genuine app interception is reported via the real
-                // onCancelled callback, which still triggers the safety stop on its own.
-                Log.w(TAG, "Gesture callback timed out by watchdog (normal on some ROMs); releasing pending gate.");
-                isGesturePending = false;
-                if (isClicking) {
-                    scheduleNextClick();
-                }
-            }
-        }
-    };
-
-    private int targetIndex = 0;
     private SharedPreferences preferences;
     private BroadcastReceiver screenOffReceiver;
     private BroadcastReceiver reconcileReceiver;
+    private boolean screenOffReceiverRegistered;
+    private boolean reconcileReceiverRegistered;
 
-    // Idempotent-registration flags for the three dynamically-registered receivers.
-    // All registration/unregistration happens on the main thread (this service's
-    // single Looper), so plain booleans are safe.
-    private boolean screenOffReceiverRegistered = false;
-    private boolean reconcileReceiverRegistered = false;
+    private long clickStartTime;
+    private int targetIndex;
+    private boolean isGesturePending;
+    private int consecutiveCancelCount;
+    private long clickGeneration;
+    private long gestureSerial;
+    private long pendingGestureSerial;
+    private Runnable pendingGestureTimeout;
+    private long lastOverlayHealthCheckMs;
+    private int initRetryCount;
 
-    // ---- Auto-retry for init failures (error code 6) --------------------------
-    // On API 33+ a missing RECEIVER_NOT_EXPORTED flag historically threw and aborted
-    // initService() before the circles could mount. After the registerReceiverSafe
-    // fix that is gone, but a transient ROM quirk can still fail init once; retry
-    // with a capped linear backoff instead of a dead "contact dev" path.
-    private static final int MAX_INIT_RETRIES = 3;
-    private static final long INIT_RETRY_BASE_MS = 1000L;
-    private int initRetryCount = 0;
+    private static volatile String sLastErrorType = "";
+    private static volatile int sLastRetryCount = 0;
+
+    private final Runnable noShowRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (preferences == null || !Preferences.AutoClicker.intent.getPreference(preferences)) {
+                return;
+            }
+            if (overlayAttachPending) {
+                armNoShowWatchdog();
+                return;
+            }
+            if (isOverlayActuallyReady()) {
+                overlayReady = true;
+                clearFailureIfRecovered();
+                setEffective(true);
+                return;
+            }
+            overlayReady = false;
+            // A live onServiceConnected() callback is authoritative proof that accessibility
+            // is granted. Do not block on Settings.Secure here: some OEMs update that string
+            // late, which was one cause of "enabled but no circles" after returning to the app.
+            if (!serviceConnected) {
+                markFailure(FAILURE_A11Y_OFF, null);
+            } else if (lastFailure == FAILURE_NONE) {
+                markFailure(FAILURE_TIMEOUT_NO_CIRCLES, null);
+            }
+            // One final self-heal attempt. This is intentionally delayed: transient window
+            // changes while switching into a game should not require a phone/app restart.
+            reconcileState();
+        }
+    };
+
+    private final Runnable overlayAttachVerifyRunnable = new Runnable() {
+        @Override
+        public void run() {
+            overlayAttachPending = false;
+            if (preferences == null
+                    || !Preferences.AutoClicker.intent.getPreference(preferences)
+                    || !serviceConnected) {
+                return;
+            }
+            if (isOverlayActuallyReady()) {
+                overlayReady = true;
+                handler.removeCallbacks(noShowRunnable);
+                clearFailureIfRecovered();
+                setEffective(true);
+                return;
+            }
+
+            // WindowManager.addView() returning successfully means Android accepted the window,
+            // but some OEMs do not report View.isAttachedToWindow() until a later UI traversal.
+            // Only treat the overlay as genuinely lost after this delayed verification.
+            Log.w(TAG, "Overlay add was accepted but views are still detached after attach grace period");
+            overlayReady = false;
+            setEffective(false);
+            removeOverlayViewsOnly();
+            armNoShowWatchdog();
+        }
+    };
 
     private final Runnable initRetryRunnable = new Runnable() {
-    @Override
-                            public void run() {
-            if (overlayReady) {
+        @Override
+        public void run() {
+            if (serviceConnected && isOverlayActuallyReady()) {
                 initRetryCount = 0;
-            return;
-        }
+                return;
+            }
             if (initRetryCount >= MAX_INIT_RETRIES) {
                 initRetryCount = 0;
-            return;
-        }
+                return;
+            }
             initRetryCount++;
             sLastRetryCount = initRetryCount;
-            boolean criticalReady = initService();
-            // Only keep retrying while we are still failing at the INIT stage (code 6).
-            // Overlay errors (1-4/7) are user-fixable and must not be auto-retried.
-            if (criticalReady && !overlayReady
-                    && lastFailure == FAILURE_SERVICE_CONNECT_FAILED
-                    && initRetryCount < MAX_INIT_RETRIES) {
-                long delay = INIT_RETRY_BASE_MS * initRetryCount;
-                handler.postDelayed(this, delay);
-        } else {
+            if (!initService() && initRetryCount < MAX_INIT_RETRIES) {
+                handler.postDelayed(this, INIT_RETRY_BASE_MS * initRetryCount);
+            } else {
                 initRetryCount = 0;
+            }
+        }
+    };
+
+    private final Runnable clickRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!isClicking) return;
+
+            if (!isOverlayActuallyReady()) {
+                // A full-screen transition or OEM window-manager reset may detach overlays.
+                // Stop safely, rebuild them, and leave the feature in standby. The user can
+                // start again with volume-up after the indicators are restored.
+                stopClickingInternal(false);
+                overlayReady = false;
+                reconcileState();
+                return;
+            }
+
+            long durationMs = currentDurationSec * 1000L;
+            if (System.currentTimeMillis() - clickStartTime >= durationMs) {
+                stopClicking();
+                return;
+            }
+
+            if (isGesturePending) return;
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                scheduleNextClick();
+                return;
+            }
+
+            final View overlay = overlayViews[targetIndex];
+            targetIndex = (targetIndex + 1) % overlayViews.length;
+            if (overlay == null || !overlay.isAttachedToWindow()) {
+                scheduleNextClick();
+                return;
+            }
+
+            final int width = overlay.getWidth();
+            final int height = overlay.getHeight();
+            if (width <= 0 || height <= 0) {
+                scheduleNextClick();
+                return;
+            }
+
+            final int[] location = new int[2];
+            overlay.getLocationOnScreen(location);
+            final int cx = location[0] + width / 2;
+            final int cy = location[1] + height / 2;
+            dispatchClick(cx, cy);
+        }
+    };
+
+    @Override
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+        try {
+            AccessibilityServiceInfo info = getServiceInfo();
+            if (info != null) {
+                info.flags |= AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS;
+                setServiceInfo(info);
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "Unable to request key filtering at runtime", t);
+        }
+
+        if (!initService()) {
+            serviceConnected = false;
+            markFailure(FAILURE_SERVICE_CONNECT_FAILED, null);
+            setEffective(false);
+            scheduleInitRetry();
         }
     }
-        };
+
+    private boolean initService() {
+        try {
+            DisplayMetrics densityMetrics = getResources().getDisplayMetrics();
+            circleSizePx = Math.max(1,
+                    (int) (CIRCLE_SIZE_DP * densityMetrics.density + 0.5f));
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                overlayType = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                overlayType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            } else {
+                overlayType = WindowManager.LayoutParams.TYPE_PHONE;
+            }
+
+            windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+            inflater = LayoutInflater.from(this);
+            preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.unregisterOnSharedPreferenceChangeListener(this);
+            preferences.registerOnSharedPreferenceChangeListener(this);
+            refreshParamsCache();
+            refreshDisplayBounds();
+            registerScreenOffReceiver();
+            registerReconcileReceiver();
+
+            serviceConnected = true;
+            cancelInitRetry();
+            sLastRetryCount = 0;
+            reconcileState();
+            return true;
+        } catch (Throwable t) {
+            Log.e(TAG, "initService failed", t);
+            markFailure(FAILURE_SERVICE_CONNECT_FAILED, t);
+            return false;
+        }
+    }
 
     private void scheduleInitRetry() {
         handler.removeCallbacks(initRetryRunnable);
@@ -245,180 +336,72 @@ public class AutoClickerService extends AccessibilityService implements SharedPr
         initRetryCount = 0;
     }
 
-    private void requestReconcileNow() {
-        Intent reconcile = new Intent(this, AutoClickerService.class);
-        reconcile.setAction(ACTION_RECONCILE);
-        reconcile.setPackage(getPackageName());
-                try {
-            sendBroadcast(reconcile);
-                } catch (Exception ignored) {
-                }
-            }
-
-    // Non-private diagnostic snapshot for the UI's "copy diagnostic" action (last
-    // resort only). Contains NO credentials, media, other-app input, or raw stack.
-    private static volatile String sLastErrorType = "";
-    private static volatile int sLastRetryCount = 0;
-    @Override
-    protected void onServiceConnected() {
-        super.onServiceConnected();
-        // Ensure volume-key interception is actually active. On some ROMs (e.g. EMUI) the
-        // canRequestFilterKeyEvents flag from the XML meta-data is not honored, so we also
-        // set FLAG_REQUEST_FILTER_KEY_EVENTS here at runtime. Without this, onKeyEvent is
-        // never invoked and the volume-key toggle cannot start/stop clicking.
-        try {
-            AccessibilityServiceInfo si = getServiceInfo();
-            if (si != null) {
-                si.flags |= AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS;
-                setServiceInfo(si);
-            }
-        } catch (Throwable t) {
-            Log.e(TAG, "onServiceConnected: set key-filter flag", t);
-        }
-        if (!initService()) {
-            Log.e(TAG, "onServiceConnected init failed");
-            serviceConnected = false;
-            markFailure(FAILURE_SERVICE_CONNECT_FAILED, null);
-            setEffective(false);
-            scheduleInitRetry();
-        }
-    }
-
-    // Returns true when the critical path (preferences available) is ready so the
-    // caller can decide whether to schedule a retry. Every step is independently
-    // guarded: a failure in any single step is logged but does NOT abort the rest,
-    // and the circles can still be reconciled as long as preferences are present.
-    private boolean initService() {
-        try {
-            DisplayMetrics dm = getResources().getDisplayMetrics();
-            circleSizePx = (int) (CIRCLE_SIZE_DP * dm.density + 0.5f);
-            screenW = dm.widthPixels;
-            screenH = dm.heightPixels;
-        } catch (Throwable t) {
-            Log.e(TAG, "initService: display metrics", t);
-        }
-        // Use TYPE_ACCESSIBILITY_OVERLAY on API 28+ — it is the window type designed for
-        // AccessibilityServices and does NOT require the SYSTEM_ALERT_WINDOW permission,
-        // so the circles appear as soon as the service is granted (no extra "draw over
-        // other apps" prompt). Fall back to the classic types on older APIs.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            overlayType = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            overlayType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            overlayType = WindowManager.LayoutParams.TYPE_PHONE;
-        }
-
-        try {
-            windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        } catch (Throwable t) {
-            Log.e(TAG, "initService: window manager", t);
-        }
-        try {
-            inflater = LayoutInflater.from(this);
-        } catch (Throwable t) {
-            Log.e(TAG, "initService: layout inflater", t);
-        }
-
-        boolean prefsReady = false;
-        try {
-            preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            preferences.registerOnSharedPreferenceChangeListener(this);
-            refreshParamsCache();
-            prefsReady = true;
-        } catch (Throwable t) {
-            Log.e(TAG, "initService: preferences", t);
-        }
-
-        // Receivers are non-critical for mounting the circles; a failure in any one
-        // must NOT prevent the others or the reconcile below.
-        try { registerScreenOffReceiver(); } catch (Throwable t) { Log.e(TAG, "initService: screenOff receiver", t); }
-        try { registerReconcileReceiver(); } catch (Throwable t) { Log.e(TAG, "initService: reconcile receiver", t); }
-
-        // The service is now bound: mark connected (only if the critical path is ready)
-        // and reconcile from current state. This is the single reliable trigger point
-        // that runs after accessibility is granted, so it is what makes
-        // "toggle first, grant later" work.
-        serviceConnected = prefsReady;
-        reconcileState();
-        return prefsReady;
-    }
-
-    // Dynamically register SCREEN_OFF (protected broadcast, must be code-registered).
-    private void registerScreenOffReceiver() {
-        if (screenOffReceiver == null) {
-            screenOffReceiver = new BroadcastReceiver() {
-        @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                        onScreenOff();
-                    }
-                }
-    };
-        }
-        if (screenOffReceiverRegistered) return; // idempotent: already registered
-        registerReceiverSafe(screenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-        screenOffReceiverRegistered = true;
-    }
-
-    // Registers the broadcast the UI sends when it returns from the accessibility settings
-    // screen (or resumes), nudging a fresh reconcile so the circles appear reliably even if
-    // the secure setting lagged or the switch was toggled before the service connected.
-    private void registerReconcileReceiver() {
-        if (reconcileReceiver == null) {
-            reconcileReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (ACTION_RECONCILE.equals(intent.getAction())) {
-                        // Run on the main thread — addView must not happen off the UI thread.
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                reconcileState();
-                            }
-                        });
-                    }
-                }
-            };
-        }
-        if (reconcileReceiverRegistered) return; // idempotent: already registered
-        registerReceiverSafe(reconcileReceiver, new IntentFilter(ACTION_RECONCILE));
-        reconcileReceiverRegistered = true;
-    }
-
-    // Lock screen: fully stop the feature AND clear the user intent, because the product
-    // requires the checkbox to be unchecked on lock. This is intentionally different from
-    // losing accessibility (where we keep the intent so it auto-restores on re-grant).
-    private void onScreenOff() {
-        cancelNoShowWatchdog();
-        cancelInitRetry();
-        stopClicking();
-        removeOverlayViewsOnly();
-        setUserIntent(false);
-        setEffective(false);
-    }
-
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        if (preferences == null || !Preferences.AutoClicker.intent.getPreference(preferences)) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        if (now - lastOverlayHealthCheckMs < OVERLAY_HEALTH_CHECK_MS) return;
+        lastOverlayHealthCheckMs = now;
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                boolean displayChanged = refreshDisplayBounds();
+                if (displayChanged && isOverlayActuallyReady()) {
+                    repositionVisibleOverlays();
+                }
+                if (!isOverlayActuallyReady()) {
+                    overlayReady = false;
+                    reconcileState();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshDisplayBounds();
+                if (isOverlayActuallyReady()) {
+                    repositionVisibleOverlays();
+                } else if (preferences != null
+                        && Preferences.AutoClicker.intent.getPreference(preferences)) {
+                    overlayReady = false;
+                    reconcileState();
+                }
+            }
+        });
     }
 
     @Override
     public void onInterrupt() {
-        // Intentionally a no-op. The system calls onInterrupt during normal accessibility
-        // gesture dispatch (e.g. when one of our own gestures is superseded); stopping the
-        // click loop here would kill clicking after the first few gestures on some ROMs.
-        // The user stops clicking via the notification action, the circle, or lock screen.
+        // Do not stop on normal accessibility interruptions. Explicit stop is volume-down,
+        // disabling the feature, task removal, lock screen, or duration expiry.
     }
 
-    // User removed the calculator task from recents: release volume keys and clear the
-    // enable intent so the service no longer swallows KEYCODE_VOLUME_UP/DOWN. This is the
-    // primary fix for "closed the calculator but volume keys are still hijacked".
+    @Override
+    public boolean onUnbind(Intent intent) {
+        serviceConnected = false;
+        cancelInitRetry();
+        stopClickingInternal(false);
+        removeOverlayViewsOnly();
+        setEffective(false);
+        // Keep auto_clicker_intent. If Android/OEM tears down and later re-binds the
+        // accessibility service, onServiceConnected() will restore the overlays automatically.
+        return super.onUnbind(intent);
+    }
+
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Log.i(TAG, "onTaskRemoved: calculator task removed, releasing volume keys and clearing intent.");
-        cancelNoShowWatchdog();
+        // Explicitly closing the app is different from an OEM/system service restart: release
+        // volume keys and do not resurrect the feature after the task is removed.
         cancelInitRetry();
-        stopClicking();
+        stopClickingInternal(false);
         removeOverlayViewsOnly();
         setUserIntent(false);
         setEffective(false);
@@ -427,9 +410,14 @@ public class AutoClickerService extends AccessibilityService implements SharedPr
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         serviceConnected = false;
+        handler.removeCallbacks(noShowRunnable);
+        handler.removeCallbacks(overlayAttachVerifyRunnable);
         cancelInitRetry();
+        stopClickingInternal(false);
+        removeOverlayViewsOnly();
+        setEffective(false);
+
         if (preferences != null) {
             try {
                 preferences.unregisterOnSharedPreferenceChangeListener(this);
@@ -437,126 +425,53 @@ public class AutoClickerService extends AccessibilityService implements SharedPr
             }
         }
         unregisterReceiverSafe(screenOffReceiver);
-        screenOffReceiver = null;
-        screenOffReceiverRegistered = false;
         unregisterReceiverSafe(reconcileReceiver);
+        screenOffReceiver = null;
         reconcileReceiver = null;
+        screenOffReceiverRegistered = false;
         reconcileReceiverRegistered = false;
-        cancelNoShowWatchdog();
-        stopClicking();
-        removeOverlayViewsOnly();
-        handler.removeCallbacks(gestureTimeoutRunnable);
-        // Clear the user intent when the service is torn down so volume keys are released and
-        // the overlay does not re-appear on the next start. Closing the calculator (task
-        // removed or process killed) must leave the phone in a clean state, not hijack volume.
-        setUserIntent(false);
-        setEffective(false);
+
+        // Deliberately DO NOT clear auto_clicker_intent here. onDestroy can be caused by the
+        // OS/OEM. Keeping the intent is what allows a later service rebind to self-recover.
+        super.onDestroy();
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (Preferences.AutoClicker.intent.getKey().equals(key)) {
-            // User (or the screen-off handler) changed the wish to enable -> re-evaluate.
-            reconcileState();
-        } else if (Preferences.AutoClicker.interval.getKey().equals(key)
-                || Preferences.AutoClicker.duration.getKey().equals(key)) {
-            // Bug 3: refresh cache so a running click loop picks up new values immediately.
-            refreshParamsCache();
+    private void registerScreenOffReceiver() {
+        if (screenOffReceiver == null) {
+            screenOffReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                        onScreenOff();
+                    }
+                }
+            };
         }
+        if (screenOffReceiverRegistered) return;
+        registerReceiverSafe(screenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        screenOffReceiverRegistered = true;
     }
 
-    // Bug 3: parse with fallback so a bad / empty value can never crash the click loop.
-    private void refreshParamsCache() {
-        currentIntervalMs = parsePref(Preferences.AutoClicker.interval.getPreference(preferences), DEFAULT_INTERVAL_MS);
-        currentDurationSec = parsePref(Preferences.AutoClicker.duration.getPreference(preferences), DEFAULT_DURATION_SEC);
+    private void registerReconcileReceiver() {
+        if (reconcileReceiver == null) {
+            reconcileReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (!ACTION_RECONCILE.equals(intent.getAction())) return;
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            reconcileState();
+                        }
+                    });
+                }
+            };
+        }
+        if (reconcileReceiverRegistered) return;
+        registerReceiverSafe(reconcileReceiver, new IntentFilter(ACTION_RECONCILE));
+        reconcileReceiverRegistered = true;
     }
 
-    private int parsePref(String raw, int def) {
-        try {
-            return Integer.parseInt(raw.trim());
-        } catch (Exception ignored) {
-            return def;
-        }
-    }
-
-    // Single source of truth for whether the circles should be up. Idempotent: calling it
-    // repeatedly never double-adds, never double-starts, and never wrongly clears state.
-    // Every branch that leaves the circles down while the user wants them up records a
-    // concrete error code so the UI can show the exact reason and fix.
-    private void reconcileState() {
-        if (preferences == null) return;
-        boolean intent = Preferences.AutoClicker.intent.getPreference(preferences);
-        // `granted` is true if EITHER the service is currently bound (authoritative proof of
-        // enablement — initService only runs when accessibility is granted) OR the
-        // secure ENABLED_ACCESSIBILITY_SERVICES string lists us.
-        boolean granted = serviceConnected || isAccessibilityEnabled(this);
-
-        if (!intent) {
-            cancelNoShowWatchdog();
-            cancelInitRetry();
-            stopClicking();
-            removeOverlayViewsOnly();
-            setEffective(false);
-            lastFailure = FAILURE_NONE;
-            persistFailure();
-            return;
-        }
-        if (!granted || !serviceConnected) {
-            // Not ready yet — usually transient (service still binding, or the user just
-            // toggled the switch). The watchdog records a definitive error code if it
-            // persists, so the user never sees an endless "please report" placeholder.
-            stopClicking();
-            removeOverlayViewsOnly();
-            setEffective(false);
-            armNoShowWatchdog();
-            return;
-        }
-        if (!overlayReady) {
-            if (!addOverlayAtomically()) {
-                // addOverlayAtomically already persisted the specific failure code (1/2/3/4/6).
-                stopClicking();
-                setEffective(false);
-                return;
-            }
-        }
-        cancelNoShowWatchdog();
-        cancelInitRetry();
-        clearFailureIfRecovered();
-        setEffective(true);
-    }
-
-    // Writes auto_clicker_intent (user wish). Called by the UI on toggle and by onScreenOff.
-    private void setUserIntent(boolean on) {
-        if (preferences == null) return;
-        boolean cur = Preferences.AutoClicker.intent.getPreference(preferences);
-        if (cur != on) {
-            preferences.edit().putBoolean(Preferences.AutoClicker.intent.getKey(), on).apply();
-        }
-    }
-
-    // Writes auto_clicker_enabled (actual effective state). This service is the ONLY writer.
-    private void setEffective(boolean on) {
-        if (preferences == null) return;
-        boolean cur = Preferences.AutoClicker.enabled.getPreference(preferences);
-        if (cur != on) {
-            preferences.edit().putBoolean(Preferences.AutoClicker.enabled.getKey(), on).apply();
-        }
-    }
-
-    private void persistFailure() {
-        if (preferences == null) return;
-        String code = String.valueOf(lastFailure);
-        String cur = Preferences.AutoClicker.lastFailure.getPreference(preferences);
-        if (!cur.equals(code)) {
-            preferences.edit().putString(Preferences.AutoClicker.lastFailure.getKey(), code).apply();
-        }
-    }
-
-    // Idempotent, flag-aware receiver registration. On API 33+ the system requires
-    // an explicit export flag; we use RECEIVER_NOT_EXPORTED because these receivers
-    // handle only our own broadcasts (notification stop / UI reconcile / screen-off),
-    // never external senders. On older APIs the two-arg form is retained to avoid
-    // NoSuchMethodError at runtime.
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private void registerReceiverSafe(BroadcastReceiver receiver, IntentFilter filter) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -566,44 +481,867 @@ public class AutoClickerService extends AccessibilityService implements SharedPr
         }
     }
 
-    // Safe unregistration: tolerates an already-removed receiver so repeated
-    // destroy/register cycles can never crash the service.
     private void unregisterReceiverSafe(BroadcastReceiver receiver) {
         if (receiver == null) return;
         try {
             unregisterReceiver(receiver);
-        } catch (IllegalArgumentException ignored) {
-            // Already removed by the system, or was never registered — idempotent.
         } catch (Exception ignored) {
         }
     }
 
-    // Records a failure code + a short, non-sensitive diagnosis. Used instead of
-    // scattering `lastFailure = X` assignments so every failure is logged once
-    // and the UI / diagnostic snapshot stay consistent.
-    private void markFailure(int code, Throwable error) {
-        lastFailure = code;
-        persistFailure();
-        sLastErrorType = error != null ? error.getClass().getSimpleName()
-                : ("failure code " + code);
-        if (BuildConfig.DEBUG) {
-            Log.e(TAG, "markFailure code=" + code, error);
-        } else {
-            Log.w(TAG, "markFailure code=" + code + " type=" + sLastErrorType);
+    private void onScreenOff() {
+        handler.removeCallbacks(noShowRunnable);
+        handler.removeCallbacks(overlayAttachVerifyRunnable);
+        cancelInitRetry();
+        stopClickingInternal(false);
+        removeOverlayViewsOnly();
+        setUserIntent(false);
+        setEffective(false);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (Preferences.AutoClicker.intent.getKey().equals(key)) {
+            reconcileState();
+        } else if (Preferences.AutoClicker.interval.getKey().equals(key)
+                || Preferences.AutoClicker.duration.getKey().equals(key)) {
+            refreshParamsCache();
         }
     }
 
-    // Clears the persisted failure once the circles are actually up, so the
-    // diagnostics panel hides itself.
-    private void clearFailureIfRecovered() {
-        if (overlayReady && lastFailure != FAILURE_NONE) {
+    private void refreshParamsCache() {
+        if (preferences == null) return;
+        currentIntervalMs = Math.max(MIN_INTERVAL_MS,
+                parsePref(Preferences.AutoClicker.interval.getPreference(preferences),
+                        DEFAULT_INTERVAL_MS));
+        currentDurationSec = Math.max(1,
+                parsePref(Preferences.AutoClicker.duration.getPreference(preferences),
+                        DEFAULT_DURATION_SEC));
+    }
+
+    private int parsePref(String raw, int fallback) {
+        try {
+            return Integer.parseInt(raw.trim());
+        } catch (Exception ignored) {
+            return fallback;
+        }
+    }
+
+    /**
+     * Refresh the REAL default-display bounds. getResources().getDisplayMetrics() can remain
+     * tied to the old app configuration while a landscape full-screen game is foregrounded;
+     * getRealMetrics() is refreshed from WindowManager each time and avoids the "left half of
+     * the screen only" drag limit.
+     *
+     * @return true when width/height changed.
+     */
+    @SuppressWarnings("deprecation")
+    private boolean refreshDisplayBounds() {
+        int width = 0;
+        int height = 0;
+        try {
+            if (windowManager == null) {
+                windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+            }
+            if (windowManager != null) {
+                Display display = windowManager.getDefaultDisplay();
+                if (display != null) {
+                    DisplayMetrics dm = new DisplayMetrics();
+                    display.getRealMetrics(dm);
+                    width = dm.widthPixels;
+                    height = dm.heightPixels;
+                }
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "Unable to read real display metrics", t);
+        }
+        if (width <= 0 || height <= 0) {
+            DisplayMetrics dm = getResources().getDisplayMetrics();
+            width = dm.widthPixels;
+            height = dm.heightPixels;
+        }
+
+        width = Math.max(circleSizePx, width);
+        height = Math.max(circleSizePx, height);
+        boolean changed = width != screenW || height != screenH;
+        screenW = width;
+        screenH = height;
+        return changed;
+    }
+
+    private void reconcileState() {
+        if (preferences == null) return;
+        refreshDisplayBounds();
+
+        boolean intent = Preferences.AutoClicker.intent.getPreference(preferences);
+        if (!intent) {
+            handler.removeCallbacks(noShowRunnable);
+            handler.removeCallbacks(overlayAttachVerifyRunnable);
+            cancelInitRetry();
+            stopClickingInternal(false);
+            removeOverlayViewsOnly();
+            setEffective(false);
             lastFailure = FAILURE_NONE;
             persistFailure();
+            return;
+        }
+
+        // Being inside this bound AccessibilityService is authoritative. Settings.Secure may
+        // briefly lag behind on some OEM ROMs, so using it as a second gate can deadlock the
+        // UI in "enabled but no circles" until a reboot/re-toggle.
+        if (!serviceConnected) {
+            stopClickingInternal(false);
+            removeOverlayViewsOnly();
+            setEffective(false);
+            armNoShowWatchdog();
+            return;
+        }
+
+        // addView() can be accepted before isAttachedToWindow() becomes true. This pending state
+        // must be authoritative even if an accessibility/configuration callback already reset
+        // overlayReady=false; otherwise that callback can tear down the brand-new windows before
+        // the OEM WindowManager finishes its first attach pass.
+        if (overlayAttachPending) {
+            if (!isOverlayActuallyReady()) {
+                return;
+            }
+            overlayAttachPending = false;
+            handler.removeCallbacks(overlayAttachVerifyRunnable);
+        }
+
+        if (overlayReady && !isOverlayActuallyReady()) {
+            Log.w(TAG, "Overlay flag was stale; rebuilding detached views");
+            overlayReady = false;
+            removeOverlayViewsOnly();
+        }
+
+        if (!isOverlayActuallyReady() && !addOverlayAtomically()) {
+            setEffective(false);
+            armNoShowWatchdog();
+            return;
+        }
+
+        overlayReady = true;
+        handler.removeCallbacks(noShowRunnable);
+        cancelInitRetry();
+        clearFailureIfRecovered();
+        setEffective(true);
+    }
+
+    private void armNoShowWatchdog() {
+        handler.removeCallbacks(noShowRunnable);
+        handler.postDelayed(noShowRunnable, NO_SHOW_WATCHDOG_MS);
+    }
+
+    private boolean isOverlayActuallyReady() {
+        if (windowManager == null) return false;
+        for (int i = 0; i < overlayViews.length; i++) {
+            View view = overlayViews[i];
+            if (!viewAdded[i] || view == null || paramsArr[i] == null
+                    || !view.isAttachedToWindow()) {
+                return false;
+            }
+        }
+        return floatingButton != null && floatingParams != null
+                && floatingButton.isAttachedToWindow();
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private boolean addOverlayAtomically() {
+        if (isOverlayActuallyReady()) {
+            overlayAttachPending = false;
+            overlayReady = true;
+            return true;
+        }
+        removeOverlayViewsOnly();
+        try {
+            createAndAddOverlay(0);
+            createAndAddOverlay(1);
+            createAndAddFloatingButton();
+
+            // Do not require isAttachedToWindow() synchronously here. On some OEM builds,
+            // WindowManager.addView() returns before the first attach/layout traversal. Treat
+            // successful addView() calls as provisionally accepted and verify attachment after
+            // a short grace period. This prevents false FAILURE_UNKNOWN/code 4 loops.
+            overlayAttachPending = true;
+            overlayReady = true;
+            handler.removeCallbacks(overlayAttachVerifyRunnable);
+            handler.postDelayed(overlayAttachVerifyRunnable, OVERLAY_ATTACH_VERIFY_MS);
+            lastFailure = FAILURE_NONE;
+            sLastErrorType = "";
+            persistFailure();
+            return true;
+        } catch (SecurityException e) {
+            markFailure(FAILURE_OVERLAY_PERMISSION, e);
+        } catch (WindowManager.BadTokenException e) {
+            markFailure(FAILURE_BAD_TOKEN, e);
+        } catch (WindowManager.InvalidDisplayException e) {
+            markFailure(FAILURE_INVALID_DISPLAY, e);
+        } catch (RuntimeException e) {
+            markFailure(FAILURE_UNKNOWN, e);
+        }
+        removeOverlayViewsOnly();
+        return false;
+    }
+
+    private void createAndAddOverlay(int index) {
+        View view = inflater.inflate(R.layout.auto_clicker_circle, null);
+        ImageView reticle = view.findViewById(R.id.auto_clicker_reticle);
+        if (reticle != null) {
+            reticle.setImageResource(index == 0
+                    ? R.drawable.ic_reticle_red : R.drawable.ic_reticle_blue);
+        }
+
+        WindowManager.LayoutParams params = baseParams(overlayType);
+        params.width = circleSizePx;
+        params.height = circleSizePx;
+        int baseY = Math.max(0, screenH - Math.max(circleSizePx, 400));
+        params.x = index == 0 ? Math.min(100, maxCircleX())
+                : Math.max(0, screenW - circleSizePx - 100);
+        params.y = Math.min(baseY, maxCircleY());
+
+        overlayViews[index] = view;
+        paramsArr[index] = params;
+        applySavedCirclePosition(index);
+        view.setOnTouchListener(makeCircleTouchListener(index));
+        windowManager.addView(view, params);
+        viewAdded[index] = true;
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void createAndAddFloatingButton() {
+        TextView button = new TextView(this);
+        button.setText("● 待命");
+        button.setTextColor(0xFFFFFFFF);
+        button.setTextSize(14);
+        button.setMinWidth(dp(100));
+        button.setPadding(dp(14), dp(7), dp(14), dp(7));
+        button.setGravity(Gravity.CENTER);
+        button.setBackground(makeIndicatorBackground(false));
+
+        WindowManager.LayoutParams params = baseParams(overlayType);
+        params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        params.x = Math.min(dp(12), Math.max(0, screenW - dp(100)));
+        params.y = Math.min(dp(70), Math.max(0, screenH - dp(48)));
+
+        floatingButton = button;
+        floatingParams = params;
+        applySavedFloatingPosition(false);
+        button.setOnTouchListener(makeFloatingTouchListener());
+        windowManager.addView(button, params);
+
+        // WRAP_CONTENT has no final width until after addView(). Apply the saved normalized
+        // position again once measured, so right-edge positions are exact.
+        button.post(new Runnable() {
+            @Override
+            public void run() {
+                applySavedFloatingPosition(true);
+            }
+        });
+        updateFloatingButtonState();
+    }
+
+    private GradientDrawable makeIndicatorBackground(boolean running) {
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(running ? 0xFF2E7D32 : 0xDD1B1B1B);
+        bg.setCornerRadius(dp(24));
+        return bg;
+    }
+
+    private int dp(int value) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.max(1, (int) (value * density + 0.5f));
+    }
+
+    private WindowManager.LayoutParams baseParams(int type) {
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                type,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+        params.gravity = Gravity.TOP | Gravity.START;
+        return params;
+    }
+
+    private View.OnTouchListener makeCircleTouchListener(final int index) {
+        return new View.OnTouchListener() {
+            private int initialX;
+            private int initialY;
+            private float initialTouchX;
+            private float initialTouchY;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (paramsArr[index] == null) return true;
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        refreshDisplayBounds();
+                        initialX = paramsArr[index].x;
+                        initialY = paramsArr[index].y;
+                        initialTouchX = event.getRawX();
+                        initialTouchY = event.getRawY();
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        refreshDisplayBounds();
+                        paramsArr[index].x = clamp(
+                                initialX + Math.round(event.getRawX() - initialTouchX),
+                                0, maxCircleX());
+                        paramsArr[index].y = clamp(
+                                initialY + Math.round(event.getRawY() - initialTouchY),
+                                0, maxCircleY());
+                        safeUpdateViewLayout(overlayViews[index], paramsArr[index]);
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        saveCirclePositions();
+                        return true;
+
+                    default:
+                        return true;
+                }
+            }
+        };
+    }
+
+    private View.OnTouchListener makeFloatingTouchListener() {
+        return new View.OnTouchListener() {
+            private int initialX;
+            private int initialY;
+            private float initialTouchX;
+            private float initialTouchY;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (floatingParams == null) return true;
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        refreshDisplayBounds();
+                        initialX = floatingParams.x;
+                        initialY = floatingParams.y;
+                        initialTouchX = event.getRawX();
+                        initialTouchY = event.getRawY();
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        refreshDisplayBounds();
+                        floatingParams.x = clamp(
+                                initialX + Math.round(event.getRawX() - initialTouchX),
+                                0, maxFloatingX());
+                        floatingParams.y = clamp(
+                                initialY + Math.round(event.getRawY() - initialTouchY),
+                                0, maxFloatingY());
+                        safeUpdateViewLayout(floatingButton, floatingParams);
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        saveFloatingPosition();
+                        return true;
+
+                    default:
+                        return true;
+                }
+            }
+        };
+    }
+
+    private void safeUpdateViewLayout(View view, WindowManager.LayoutParams params) {
+        if (windowManager == null || view == null || params == null || !view.isAttachedToWindow()) {
+            return;
+        }
+        try {
+            windowManager.updateViewLayout(view, params);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "updateViewLayout failed; scheduling overlay repair", e);
+            overlayReady = false;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    reconcileState();
+                }
+            });
         }
     }
 
-    // Non-private diagnostic snapshot for the UI's "copy diagnostic" action (last
-    // resort only). Contains NO credentials, media, other-app input, or raw stack.
+    private int maxCircleX() {
+        return Math.max(0, screenW - circleSizePx);
+    }
+
+    private int maxCircleY() {
+        return Math.max(0, screenH - circleSizePx);
+    }
+
+    private int maxFloatingX() {
+        int width = floatingButton != null && floatingButton.getWidth() > 0
+                ? floatingButton.getWidth() : dp(100);
+        return Math.max(0, screenW - width);
+    }
+
+    private int maxFloatingY() {
+        int height = floatingButton != null && floatingButton.getHeight() > 0
+                ? floatingButton.getHeight() : dp(44);
+        return Math.max(0, screenH - height);
+    }
+
+    private int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(value, max));
+    }
+
+    private void saveCirclePositions() {
+        if (preferences == null) return;
+        StringBuilder value = new StringBuilder();
+        for (int i = 0; i < paramsArr.length; i++) {
+            WindowManager.LayoutParams params = paramsArr[i];
+            float xr = params == null || maxCircleX() == 0 ? 0f
+                    : clamp01((float) params.x / (float) maxCircleX());
+            float yr = params == null || maxCircleY() == 0 ? 0f
+                    : clamp01((float) params.y / (float) maxCircleY());
+            if (i > 0) value.append(';');
+            value.append("r:")
+                    .append(String.format(Locale.US, "%.6f", xr))
+                    .append(',')
+                    .append(String.format(Locale.US, "%.6f", yr));
+        }
+        preferences.edit()
+                .putString(Preferences.AutoClicker.positions.getKey(), value.toString())
+                .apply();
+    }
+
+    private void applySavedCirclePosition(int index) {
+        if (preferences == null || paramsArr[index] == null) return;
+        String raw = Preferences.AutoClicker.positions.getPreference(preferences);
+        if (TextUtils.isEmpty(raw)) return;
+        String[] parts = raw.split(";");
+        if (index >= parts.length) return;
+        applyPositionPart(parts[index], paramsArr[index], maxCircleX(), maxCircleY());
+    }
+
+    private void saveFloatingPosition() {
+        if (preferences == null || floatingParams == null) return;
+        float xr = maxFloatingX() == 0 ? 0f
+                : clamp01((float) floatingParams.x / (float) maxFloatingX());
+        float yr = maxFloatingY() == 0 ? 0f
+                : clamp01((float) floatingParams.y / (float) maxFloatingY());
+        String value = "r:" + String.format(Locale.US, "%.6f", xr)
+                + "," + String.format(Locale.US, "%.6f", yr);
+        preferences.edit()
+                .putString(Preferences.AutoClicker.floatingPosition.getKey(), value)
+                .apply();
+    }
+
+    private void applySavedFloatingPosition(boolean updateWindow) {
+        if (preferences == null || floatingParams == null) return;
+        String raw = Preferences.AutoClicker.floatingPosition.getPreference(preferences);
+        if (!TextUtils.isEmpty(raw)) {
+            applyPositionPart(raw, floatingParams, maxFloatingX(), maxFloatingY());
+        }
+        if (updateWindow) safeUpdateViewLayout(floatingButton, floatingParams);
+    }
+
+    /**
+     * New format: r:xRatio,yRatio. Legacy absolute x,y is still accepted so existing users
+     * do not lose their saved positions on upgrade.
+     */
+    private void applyPositionPart(String raw, WindowManager.LayoutParams params,
+                                   int maxX, int maxY) {
+        if (raw == null) return;
+        String value = raw.trim();
+        boolean ratio = value.startsWith("r:");
+        if (ratio) value = value.substring(2);
+        String[] xy = value.split(",");
+        if (xy.length != 2) return;
+        try {
+            if (ratio) {
+                float xr = clamp01(Float.parseFloat(xy[0].trim()));
+                float yr = clamp01(Float.parseFloat(xy[1].trim()));
+                params.x = clamp(Math.round(xr * maxX), 0, maxX);
+                params.y = clamp(Math.round(yr * maxY), 0, maxY);
+            } else {
+                int x = Integer.parseInt(xy[0].trim());
+                int y = Integer.parseInt(xy[1].trim());
+                params.x = clamp(x, 0, maxX);
+                params.y = clamp(y, 0, maxY);
+            }
+        } catch (NumberFormatException ignored) {
+        }
+    }
+
+    private float clamp01(float value) {
+        return Math.max(0f, Math.min(value, 1f));
+    }
+
+    private void repositionVisibleOverlays() {
+        refreshDisplayBounds();
+        for (int i = 0; i < paramsArr.length; i++) {
+            if (paramsArr[i] == null || overlayViews[i] == null) continue;
+            applySavedCirclePosition(i);
+            paramsArr[i].x = clamp(paramsArr[i].x, 0, maxCircleX());
+            paramsArr[i].y = clamp(paramsArr[i].y, 0, maxCircleY());
+            safeUpdateViewLayout(overlayViews[i], paramsArr[i]);
+        }
+        applySavedFloatingPosition(true);
+    }
+
+    private void removeOverlayViewsOnly() {
+        handler.removeCallbacks(overlayAttachVerifyRunnable);
+        overlayAttachPending = false;
+        if (windowManager != null) {
+            for (int i = 0; i < overlayViews.length; i++) {
+                View view = overlayViews[i];
+                if (view != null) {
+                    try {
+                        windowManager.removeViewImmediate(view);
+                    } catch (RuntimeException ignored) {
+                    }
+                }
+                overlayViews[i] = null;
+                paramsArr[i] = null;
+                viewAdded[i] = false;
+            }
+            if (floatingButton != null) {
+                try {
+                    windowManager.removeViewImmediate(floatingButton);
+                } catch (RuntimeException ignored) {
+                }
+            }
+        }
+        floatingButton = null;
+        floatingParams = null;
+        overlayReady = false;
+    }
+
+    private void setUserIntent(boolean enabled) {
+        if (preferences == null) return;
+        if (Preferences.AutoClicker.intent.getPreference(preferences) != enabled) {
+            preferences.edit()
+                    .putBoolean(Preferences.AutoClicker.intent.getKey(), enabled)
+                    .apply();
+        }
+    }
+
+    private void setEffective(boolean enabled) {
+        if (preferences == null) return;
+        if (Preferences.AutoClicker.enabled.getPreference(preferences) != enabled) {
+            preferences.edit()
+                    .putBoolean(Preferences.AutoClicker.enabled.getKey(), enabled)
+                    .apply();
+        }
+    }
+
+    private void persistFailure() {
+        if (preferences == null) return;
+        String code = String.valueOf(lastFailure);
+        String existing = Preferences.AutoClicker.lastFailure.getPreference(preferences);
+        if (!TextUtils.equals(code, existing)) {
+            preferences.edit()
+                    .putString(Preferences.AutoClicker.lastFailure.getKey(), code)
+                    .apply();
+        }
+    }
+
+    private void markFailure(int code, Throwable error) {
+        lastFailure = code;
+        sLastErrorType = error == null ? "failure code " + code
+                : error.getClass().getSimpleName();
+        persistFailure();
+        if (BuildConfig.DEBUG) {
+            Log.e(TAG, "Autoclicker failure " + code, error);
+        } else {
+            Log.w(TAG, "Autoclicker failure " + code + ": " + sLastErrorType);
+        }
+    }
+
+    private void clearFailureIfRecovered() {
+        if (!isOverlayActuallyReady()) return;
+        lastFailure = FAILURE_NONE;
+        sLastErrorType = "";
+        persistFailure();
+    }
+
+    private void startClicking() {
+        if (isClicking) return;
+
+        refreshDisplayBounds();
+        if (!isOverlayActuallyReady()) {
+            overlayReady = false;
+            reconcileState();
+        }
+        if (!isOverlayActuallyReady()) return;
+
+        refreshParamsCache();
+        clickGeneration++;
+        isClicking = true;
+        isGesturePending = false;
+        pendingGestureSerial = 0L;
+        consecutiveCancelCount = 0;
+        targetIndex = 0;
+        clickStartTime = System.currentTimeMillis();
+
+        // Reticles are placement handles while idle and passively mark the click locations
+        // while running. The status indicator remains draggable at all times.
+        for (int i = 0; i < paramsArr.length; i++) {
+            if (paramsArr[i] == null || overlayViews[i] == null) continue;
+            paramsArr[i].flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+            safeUpdateViewLayout(overlayViews[i], paramsArr[i]);
+        }
+
+        handler.removeCallbacks(clickRunnable);
+        handler.post(clickRunnable);
+        showStatusNotification();
+        updateFloatingButtonState();
+        Toast.makeText(this,
+                "连点已开启 · 音量-停止 · 间隔 " + currentIntervalMs + "ms",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void stopClicking() {
+        stopClickingInternal(true);
+    }
+
+    private void stopClickingInternal(boolean showToast) {
+        boolean wasClicking = isClicking;
+        isClicking = false;
+        clickGeneration++;
+        clearPendingGesture();
+        handler.removeCallbacks(clickRunnable);
+        cancelStatusNotification();
+
+        for (int i = 0; i < paramsArr.length; i++) {
+            if (paramsArr[i] == null) continue;
+            paramsArr[i].flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+            if (overlayViews[i] != null) {
+                safeUpdateViewLayout(overlayViews[i], paramsArr[i]);
+            }
+        }
+        updateFloatingButtonState();
+        if (showToast && wasClicking) {
+            Toast.makeText(this, "连点已停止", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void clearPendingGesture() {
+        isGesturePending = false;
+        pendingGestureSerial = 0L;
+        if (pendingGestureTimeout != null) {
+            handler.removeCallbacks(pendingGestureTimeout);
+            pendingGestureTimeout = null;
+        }
+    }
+
+    private void updateFloatingButtonState() {
+        if (!(floatingButton instanceof TextView)) return;
+        final TextView button = (TextView) floatingButton;
+        button.clearAnimation();
+        if (isClicking) {
+            button.setText("● 连点中");
+            button.setBackground(makeIndicatorBackground(true));
+            android.view.animation.AlphaAnimation pulse =
+                    new android.view.animation.AlphaAnimation(0.60f, 1.0f);
+            pulse.setDuration(700L);
+            pulse.setRepeatCount(android.view.animation.Animation.INFINITE);
+            pulse.setRepeatMode(android.view.animation.Animation.REVERSE);
+            button.startAnimation(pulse);
+        } else {
+            button.setText("● 待命");
+            button.setBackground(makeIndicatorBackground(false));
+        }
+        // Text width can change between idle/running. Re-apply the stored normalized position
+        // after the next layout pass so a right-edge indicator never ends up partly off-screen.
+        button.post(new Runnable() {
+            @Override
+            public void run() {
+                applySavedFloatingPosition(true);
+            }
+        });
+    }
+
+    /**
+     * Hardware controls are deliberately asymmetric and deterministic:
+     * VOLUME_UP = start, VOLUME_DOWN = stop. Neither reticle nor status indicator can toggle.
+     */
+    @Override
+    public boolean onKeyEvent(KeyEvent event) {
+        if (preferences == null
+                || !Preferences.AutoClicker.intent.getPreference(preferences)) {
+            return false;
+        }
+
+        int keyCode = event.getKeyCode();
+        if (keyCode != KeyEvent.KEYCODE_VOLUME_UP
+                && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) {
+            return false;
+        }
+
+        // Consume DOWN, UP and repeat events while the feature is enabled so changing the
+        // click state never also changes system media volume.
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+                startClicking();
+            } else {
+                stopClicking();
+            }
+        }
+        return true;
+    }
+
+    private void scheduleNextClick() {
+        if (!isClicking) return;
+        handler.removeCallbacks(clickRunnable);
+        handler.postDelayed(clickRunnable, currentIntervalMs);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void dispatchClick(final int x, final int y) {
+        if (!isClicking || isGesturePending) return;
+
+        final long runGeneration = clickGeneration;
+        final long serial = ++gestureSerial;
+        pendingGestureSerial = serial;
+        isGesturePending = true;
+
+        Path path = new Path();
+        path.moveTo(x, y);
+        path.lineTo(x + 1, y + 1);
+        GestureDescription.Builder builder = new GestureDescription.Builder();
+        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 10));
+
+        pendingGestureTimeout = new Runnable() {
+            @Override
+            public void run() {
+                if (runGeneration != clickGeneration
+                        || serial != pendingGestureSerial
+                        || !isGesturePending) {
+                    return;
+                }
+                isGesturePending = false;
+                pendingGestureSerial = 0L;
+                pendingGestureTimeout = null;
+                if (isClicking) scheduleNextClick();
+            }
+        };
+        handler.postDelayed(pendingGestureTimeout, GESTURE_TIMEOUT_MS);
+
+        boolean accepted = dispatchGesture(builder.build(), new GestureResultCallback() {
+            @Override
+            public void onCompleted(GestureDescription gestureDescription) {
+                super.onCompleted(gestureDescription);
+                if (!finishGestureIfCurrent(runGeneration, serial)) return;
+                consecutiveCancelCount = 0;
+                if (isClicking) scheduleNextClick();
+            }
+
+            @Override
+            public void onCancelled(GestureDescription gestureDescription) {
+                super.onCancelled(gestureDescription);
+                if (!finishGestureIfCurrent(runGeneration, serial)) return;
+                consecutiveCancelCount++;
+                Log.w(TAG, "Gesture cancelled (" + consecutiveCancelCount + "/"
+                        + MAX_CONSECUTIVE_CANCELS + ")");
+                if (consecutiveCancelCount >= MAX_CONSECUTIVE_CANCELS) {
+                    stopClickingInternal(false);
+                    Toast.makeText(AutoClickerService.this,
+                            "目标应用连续拦截无障碍手势，连点已停止",
+                            Toast.LENGTH_LONG).show();
+                } else if (isClicking) {
+                    scheduleNextClick();
+                }
+            }
+        }, null);
+
+        if (!accepted && finishGestureIfCurrent(runGeneration, serial)) {
+            consecutiveCancelCount++;
+            if (consecutiveCancelCount >= MAX_CONSECUTIVE_CANCELS) {
+                stopClickingInternal(false);
+            } else if (isClicking) {
+                scheduleNextClick();
+            }
+        }
+    }
+
+    private boolean finishGestureIfCurrent(long runGeneration, long serial) {
+        if (runGeneration != clickGeneration || serial != pendingGestureSerial) {
+            return false;
+        }
+        if (pendingGestureTimeout != null) {
+            handler.removeCallbacks(pendingGestureTimeout);
+            pendingGestureTimeout = null;
+        }
+        isGesturePending = false;
+        pendingGestureSerial = 0L;
+        return true;
+    }
+
+    private void showStatusNotification() {
+        try {
+            NotificationManager manager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager == null) return;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                    && manager.getNotificationChannel(NOTIF_CHANNEL_ID) == null) {
+                NotificationChannel channel = new NotificationChannel(
+                        NOTIF_CHANNEL_ID, "连点服务", NotificationManager.IMPORTANCE_LOW);
+                channel.setDescription("连点运行时状态提醒");
+                manager.createNotificationChannel(channel);
+            }
+
+            Intent contentIntent = new Intent(
+                    this, org.solovyev.android.calculator.CalculatorActivity.class);
+            contentIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent contentPi = PendingIntent.getActivity(
+                    this, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE);
+
+            Notification notification = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
+                    .setContentTitle("连点运行中")
+                    .setContentText("音量-停止 · 音量+开始")
+                    .setSmallIcon(R.drawable.ic_launcher)
+                    .setOngoing(true)
+                    .setContentIntent(contentPi)
+                    .build();
+            manager.notify(CLICK_NOTIFICATION_TAG, CLICK_NOTIFICATION_ID, notification);
+        } catch (SecurityException e) {
+            // Notification permission is optional to the click engine. Do not crash the
+            // accessibility service merely because Android 13+ notification permission is off.
+            Log.w(TAG, "Notification permission denied; autoclick continues", e);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Unable to show autoclick status notification", e);
+        }
+    }
+
+    private void cancelStatusNotification() {
+        try {
+            NotificationManager manager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager != null) {
+                manager.cancel(CLICK_NOTIFICATION_TAG, CLICK_NOTIFICATION_ID);
+            }
+        } catch (RuntimeException ignored) {
+        }
+    }
+
+    public static boolean isAccessibilityEnabled(Context context) {
+        try {
+            String value = Settings.Secure.getString(context.getContentResolver(),
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            if (TextUtils.isEmpty(value)) return false;
+            ComponentName target = new ComponentName(context, AutoClickerService.class);
+            for (String item : value.split(":")) {
+                item = item.trim();
+                if (item.isEmpty()) continue;
+                if (target.flattenToString().equalsIgnoreCase(item)) return true;
+                ComponentName component = ComponentName.unflattenFromString(item);
+                if (target.equals(component)) return true;
+            }
+            return false;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
     public static String getDiagnosticSnapshot(Context context, int code) {
         boolean granted = isAccessibilityEnabled(context);
         boolean effective = Preferences.AutoClicker.enabled.getPreference(
@@ -618,9 +1356,6 @@ public class AutoClickerService extends AccessibilityService implements SharedPr
                 + "重试次数: " + sLastRetryCount;
     }
 
-    // Maps a failure code to a human-readable, actionable Chinese message from
-    // resources. Every message describes the concrete next step — none say
-    // "contact the developer" or "send me a logcat".
     public static String getFailureMessage(Context context, int code) {
         int resId;
         switch (code) {
@@ -650,598 +1385,4 @@ public class AutoClickerService extends AccessibilityService implements SharedPr
         }
         return context.getString(resId);
     }
-
-    // Precise accessibility grant check: the system value is a colon-separated list of
-    // flattened ComponentNames, so match by ComponentName instead of naive contains().
-    public static boolean isAccessibilityEnabled(Context context) {
-        try {
-            String value = Settings.Secure.getString(context.getContentResolver(),
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-            if (TextUtils.isEmpty(value)) return false;
-            final ComponentName target = new ComponentName(context, AutoClickerService.class);
-            for (String item : value.split(":")) {
-                item = item.trim();
-                if (item.isEmpty()) continue;
-                // Match both the flattened form (pkg/pkg.Class, used by the Settings UI) and
-                // the shorthand form (pkg/.Class, sometimes written by `settings put`).
-                if (target.flattenToString().equalsIgnoreCase(item)) return true;
-                try {
-                    final ComponentName cn = ComponentName.unflattenFromString(item);
-                    if (cn != null && cn.equals(target)) return true;
-                } catch (Exception ignored) {
-                    // fall through to string compare above
-                }
-            }
-            return false;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    // Atomically adds both circles. On any failure it rolls back whatever was added so we
-    // never end up with a single half-mounted circle, and reports the failure reason
-    // instead of swallowing the exception.
-    @SuppressLint("ClickableViewAccessibility")
-    private boolean addOverlayAtomically() {
-        if (overlayReady) return true;
-        removeOverlayViewsOnly();
-        try {
-            createAndAddOverlay(0);
-            createAndAddOverlay(1);
-            createAndAddFloatingButton();
-            overlayReady = true;
-            lastFailure = FAILURE_NONE;
-            persistFailure();
-            return true;
-        } catch (SecurityException e) {
-            // Most likely missing SYSTEM_ALERT_WINDOW / overlay permission.
-            markFailure(FAILURE_OVERLAY_PERMISSION, e);
-        } catch (WindowManager.BadTokenException e) {
-            markFailure(FAILURE_BAD_TOKEN, e);
-        } catch (WindowManager.InvalidDisplayException e) {
-            markFailure(FAILURE_INVALID_DISPLAY, e);
-        } catch (RuntimeException e) {
-            markFailure(FAILURE_UNKNOWN, e);
-        }
-        removeOverlayViewsOnly();
-        persistFailure();
-        return false;
-    }
-
-    private void createAndAddOverlay(int index) {
-        if (overlayViews[index] != null) return;
-        overlayViews[index] = inflater.inflate(R.layout.auto_clicker_circle, null);
-        ImageView reticle = overlayViews[index].findViewById(R.id.auto_clicker_reticle);
-        if (reticle != null) {
-            if (index == 1) {
-                reticle.setImageResource(R.drawable.ic_reticle_blue);   // blue ring + blue dot
-            } else {
-                reticle.setImageResource(R.drawable.ic_reticle_red);    // red ring + red dot
-            }
-        }
-        paramsArr[index] = baseParams(overlayType);
-        paramsArr[index].width = circleSizePx;
-        paramsArr[index].height = circleSizePx;
-        int baseY = Math.max(100, screenH - 400);
-        if (index == 0) {
-            paramsArr[index].x = 100;
-            paramsArr[index].y = baseY;
-        } else {
-            paramsArr[index].x = Math.max(100, screenW - 200);
-            paramsArr[index].y = baseY;
-        }
-        applySavedPosition(index);
-        overlayViews[index].setOnTouchListener(makeTouchListener(index));
-        windowManager.addView(overlayViews[index], paramsArr[index]);
-        viewAdded[index] = true;
-    }
-
-    // Adds a small floating toggle button (distinct from the two reticle circles). It is
-    // shown whenever the circles are up so the user can START/STOP clicking with a normal
-    // touch — essential inside third-party apps where EMUI withholds the volume-key dispatch.
-    // Unlike the reticle circles it never receives FLAG_NOT_TOUCHABLE, so it stays tappable
-    // even while clicking. It is DRAGGABLE (reposition + persisted) and toggles only on a
-    // DOUBLE tap, so repositioning drags never accidentally start/stop clicking. Defaults to
-    // the top-LEFT, away from the calculator's top-right 3-dot menu; restores the last dragged
-    // position if one was persisted.
-    @SuppressLint("ClickableViewAccessibility")
-    private void createAndAddFloatingButton() {
-        if (floatingButton != null) return;
-        TextView btn = new TextView(this);
-        btn.setText("⏯ 连点");
-        btn.setTextColor(0xFFFFFFFF);
-        btn.setTextSize(14);
-        btn.setPadding(28, 14, 28, 14);
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0xDD1B1B1B);
-        bg.setCornerRadius(48f);
-        btn.setBackground(bg);
-        btn.setGravity(Gravity.CENTER);
-        floatingButton = btn;
-        floatingParams = baseParams(overlayType);
-        floatingParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        floatingParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        // Default to the top-LEFT, away from the calculator's top-right 3-dot menu.
-        // If the user has dragged it before, restore that position instead.
-        int defX = 24;
-        int defY = 140;
-        if (preferences != null) {
-            String raw = Preferences.AutoClicker.floatingPosition.getPreference(preferences);
-            if (!TextUtils.isEmpty(raw)) {
-                String[] xy = raw.split(",");
-                if (xy.length == 2) {
-                    try {
-                        int px = Integer.parseInt(xy[0].trim());
-                        int py = Integer.parseInt(xy[1].trim());
-                        if (px >= 0 && py >= 0) {
-                            defX = px;
-                            defY = py;
-                        }
-                    } catch (NumberFormatException ignored) {
-                    }
-                }
-            }
-        }
-        floatingParams.x = defX;
-        floatingParams.y = defY;
-        btn.setOnTouchListener(new View.OnTouchListener() {
-            private int initialX;
-            private int initialY;
-            private float initialTouchX;
-            private float initialTouchY;
-            private long downTime;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        initialX = floatingParams.x;
-                        initialY = floatingParams.y;
-                        initialTouchX = event.getRawX();
-                        initialTouchY = event.getRawY();
-                        downTime = System.currentTimeMillis();
-                        return true;
-                    case MotionEvent.ACTION_MOVE: {
-                        int nx = initialX + (int) (event.getRawX() - initialTouchX);
-                        int ny = initialY + (int) (event.getRawY() - initialTouchY);
-                        int w = floatingButton.getWidth();
-                        int h = floatingButton.getHeight();
-                        int maxX = screenW - (w > 0 ? w : 160);
-                        int maxY = screenH - (h > 0 ? h : 80);
-                        nx = Math.max(0, Math.min(nx, maxX));
-                        ny = Math.max(0, Math.min(ny, maxY));
-                        floatingParams.x = nx;
-                        floatingParams.y = ny;
-                        try {
-                            windowManager.updateViewLayout(floatingButton, floatingParams);
-                        } catch (Exception ignored) {
-                        }
-                        return true;
-                    }
-                    case MotionEvent.ACTION_UP: {
-                        long elapsed = System.currentTimeMillis() - downTime;
-                        float dx = event.getRawX() - initialTouchX;
-                        float dy = event.getRawY() - initialTouchY;
-                        float distance = (float) Math.sqrt(dx * dx + dy * dy);
-                        if (elapsed < CLICK_TIME_THRESHOLD_MS && distance < CLICK_DISTANCE_THRESHOLD_PX) {
-                            // Clean tap — require a second tap within DOUBLE_TAP_MS to toggle,
-                            // so repositioning drags never accidentally start/stop clicking.
-                            long now = System.currentTimeMillis();
-                            if (now - lastBtnTapTime <= DOUBLE_TAP_MS) {
-                                lastBtnTapTime = 0;
-                                toggleClicking();
-                            } else {
-                                lastBtnTapTime = now;
-                            }
-                        } else {
-                            // A real drag happened — persist the new position.
-                            saveFloatingPosition();
-                        }
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
-        windowManager.addView(floatingButton, floatingParams);
-    }
-
-    // Persists the floating button's current position as "x,y".
-    private void saveFloatingPosition() {
-        if (preferences == null || floatingParams == null) return;
-        preferences.edit().putString(Preferences.AutoClicker.floatingPosition.getKey(),
-                floatingParams.x + "," + floatingParams.y).apply();
-    }
-
-    // Reflects the current clicking state on the floating button so the user always knows
-    // whether clicking is active, even inside third-party apps where background toasts are
-    // suppressed (Android 11+). The button is our own overlay window, immune to toast
-    // restrictions and app occlusion, so it is the reliable state indicator. startClicking /
-    // stopClicking are the single source of truth for isClicking and are reached by ALL three
-    // triggers (floating button, volume key, settings toggle), so the button stays in sync.
-    private void updateFloatingButtonState() {
-        if (floatingButton == null) return;
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (!(floatingButton instanceof TextView)) return;
-                TextView tv = (TextView) floatingButton;
-                GradientDrawable bg = new GradientDrawable();
-                bg.setCornerRadius(48f);
-                if (isClicking) {
-                    tv.setText("⏹ 连点中");
-                    bg.setColor(0xFF2E7D32); // green = running
-                    tv.setBackground(bg);
-                    // Gentle pulsing to draw the eye while clicking.
-                    android.view.animation.AlphaAnimation pulse =
-                            new android.view.animation.AlphaAnimation(0.55f, 1.0f);
-                    pulse.setDuration(700);
-                    pulse.setRepeatCount(android.view.animation.Animation.INFINITE);
-                    pulse.setRepeatMode(android.view.animation.Animation.REVERSE);
-                    tv.startAnimation(pulse);
-                } else {
-                    tv.setText("⏯ 连点");
-                    bg.setColor(0xDD1B1B1B); // dark idle
-                    tv.setBackground(bg);
-                    tv.clearAnimation();
-                }
-            }
-        });
-    }
-
-    // Reads the persisted positions ("x0,y0;x1,y1") and applies this circle's saved x/y,
-    // clamped on-screen. Called right after the default position is set in createAndAddOverlay.
-    private void applySavedPosition(int index) {
-        if (preferences == null || paramsArr[index] == null) return;
-        String raw = Preferences.AutoClicker.positions.getPreference(preferences);
-        if (TextUtils.isEmpty(raw)) return;
-        String[] parts = raw.split(";");
-        if (index >= parts.length) return;
-        String[] xy = parts[index].split(",");
-        if (xy.length != 2) return;
-        try {
-            int x = Integer.parseInt(xy[0].trim());
-            int y = Integer.parseInt(xy[1].trim());
-            if (x >= 0 && y >= 0) {
-                paramsArr[index].x = Math.max(0, Math.min(x, screenW - circleSizePx));
-                paramsArr[index].y = Math.max(0, Math.min(y, screenH - circleSizePx));
-            }
-        } catch (NumberFormatException ignored) {
-        }
-    }
-
-    // Persists both circles' current on-screen positions as "x0,y0;x1,y1".
-    private void savePositions() {
-        if (preferences == null) return;
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < overlayViews.length; i++) {
-            if (paramsArr[i] != null) {
-                sb.append(paramsArr[i].x).append(',').append(paramsArr[i].y);
-            } else {
-                sb.append("0,0");
-            }
-            if (i < overlayViews.length - 1) sb.append(';');
-        }
-        preferences.edit().putString(Preferences.AutoClicker.positions.getKey(), sb.toString()).apply();
-    }
-
-    // Removes only the window views and resets the in-memory overlay state. It NEVER writes
-    // the user intent or the effective flag — those are owned by their respective writers.
-    private void removeOverlayViewsOnly() {
-        if (windowManager != null) {
-            for (int i = 0; i < overlayViews.length; i++) {
-                final View v = overlayViews[i];
-                if (v != null) {
-                    try {
-                        windowManager.removeViewImmediate(v);
-                    } catch (IllegalArgumentException ignored) {
-                        // View may already have been removed by the system.
-                    } catch (RuntimeException e) {
-                        Log.w(TAG, "remove overlay view failed", e);
-                    }
-                }
-                overlayViews[i] = null;
-                paramsArr[i] = null;
-                viewAdded[i] = false;
-            }
-        }
-        if (floatingButton != null) {
-            try {
-                windowManager.removeViewImmediate(floatingButton);
-            } catch (IllegalArgumentException ignored) {
-                // View may already have been removed by the system.
-            } catch (RuntimeException e) {
-                Log.w(TAG, "remove floating button failed", e);
-            }
-            floatingButton = null;
-            floatingParams = null;
-        }
-        overlayReady = false;
-    }
-
-    private WindowManager.LayoutParams baseParams(int type) {
-        WindowManager.LayoutParams p = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                type,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT);
-        p.gravity = Gravity.TOP | Gravity.START;
-        return p;
-    }
-
-    private View.OnTouchListener makeTouchListener(final int index) {
-        return new View.OnTouchListener() {
-            private int initialX;
-            private int initialY;
-            private float initialTouchX;
-            private float initialTouchY;
-            private long downTime;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        initialX = paramsArr[index].x;
-                        initialY = paramsArr[index].y;
-                        initialTouchX = event.getRawX();
-                        initialTouchY = event.getRawY();
-                        downTime = System.currentTimeMillis();
-                        return true;
-                    case MotionEvent.ACTION_MOVE: {
-                        // Bug 4: clamp so the circle can never go off-screen (avoids dead clicks).
-                        int nx = initialX + (int) (event.getRawX() - initialTouchX);
-                        int ny = initialY + (int) (event.getRawY() - initialTouchY);
-                        nx = Math.max(0, Math.min(nx, screenW - circleSizePx));
-                        ny = Math.max(0, Math.min(ny, screenH - circleSizePx));
-                        paramsArr[index].x = nx;
-                        paramsArr[index].y = ny;
-                        try {
-                            windowManager.updateViewLayout(overlayViews[index], paramsArr[index]);
-                        } catch (Exception ignored) {
-                        }
-                        return true;
-                    }
-                    case MotionEvent.ACTION_UP:
-                        long elapsed = System.currentTimeMillis() - downTime;
-                        float dx = event.getRawX() - initialTouchX;
-                        float dy = event.getRawY() - initialTouchY;
-                        float distance = (float) Math.sqrt(dx * dx + dy * dy);
-                        if (elapsed < CLICK_TIME_THRESHOLD_MS && distance < CLICK_DISTANCE_THRESHOLD_PX) {
-                            // Clean tap (not a drag). Require a second tap within DOUBLE_TAP_MS
-                            // to actually toggle — this prevents accidental toggles while the
-                            // user is repositioning the circle.
-                            long now = System.currentTimeMillis();
-                            if (now - lastCircleTapTime <= DOUBLE_TAP_MS) {
-                                lastCircleTapTime = 0;
-                                toggleClicking();
-                            } else {
-                                lastCircleTapTime = now;
-                            }
-                        } else {
-                            // A real drag happened — persist the new position.
-                            savePositions();
-                        }
-                        return true;
-                }
-                return false;
-            }
-        };
-    }
-    private void toggleClicking() {
-        long now = System.currentTimeMillis();
-        if (now - lastToggleTime < TOGGLE_DEBOUNCE_MS) return;
-        lastToggleTime = now;
-
-        if (isClicking) {
-            stopClicking();
-        } else {
-            startClicking();
-        }
-    }
-
-    private void startClicking() {
-        if (isClicking) return;
-        if (!overlayReady) return;
-        isClicking = true;
-        isGesturePending = false;
-        consecutiveCancelCount = 0;
-        // Re-read params in case they changed since the listener last fired.
-        refreshParamsCache();
-        clickStartTime = System.currentTimeMillis();
-        Toast.makeText(this,
-                "⚡ 连点已开启 · 间隔 " + currentIntervalMs + "ms / 时长 " + currentDurationSec + "s",
-                Toast.LENGTH_SHORT).show();
-
-        for (int i = 0; i < overlayViews.length; i++) {
-            if (paramsArr[i] != null) {
-                paramsArr[i].flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-                try {
-                    windowManager.updateViewLayout(overlayViews[i], paramsArr[i]);
-                } catch (Exception ignored) {
-                }
-            }
-        }
-        handler.post(clickRunnable);
-        showStatusNotification();
-        updateFloatingButtonState();
-    }
-
-    private void stopClicking() {
-        if (!isClicking) return;
-        isClicking = false;
-        isGesturePending = false;
-        handler.removeCallbacks(gestureTimeoutRunnable);
-        handler.removeCallbacks(clickRunnable);
-        cancelStatusNotification();
-        Toast.makeText(this, "🛑 连点已停止", Toast.LENGTH_SHORT).show();
-        updateFloatingButtonState();
-
-        for (int i = 0; i < overlayViews.length; i++) {
-            if (paramsArr[i] != null) {
-                paramsArr[i].flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-                if (overlayViews[i] != null) {
-                    try {
-                        windowManager.updateViewLayout(overlayViews[i], paramsArr[i]);
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
-        }
-    }
-
-    // Volume keys are the user's quick toggle for the autoclicker: a single press starts
-    // it (if stopped) or stops it (if running). We only intercept while the feature is
-    // enabled, so normal hardware-volume adjustment keeps working once the user turns the
-    // autoclicker off. Returning true consumes the key so the system volume does not also
-    // move on each toggle.
-    @Override
-    public boolean onKeyEvent(KeyEvent event) {
-        if (preferences == null) return false;
-        // Gate on the user's enable intent (auto_clicker_intent), not the effective state, so
-        // the volume key can start clicking the moment the feature is switched on — without
-        // depending on whether the circles have finished reconciling yet. startClicking()
-        // itself guards on overlayReady, so nothing happens if the circles aren't up yet.
-        if (!Preferences.AutoClicker.intent.getPreference(preferences)) return false;
-        int keyCode = event.getKeyCode();
-        if (keyCode != KeyEvent.KEYCODE_VOLUME_DOWN
-                && keyCode != KeyEvent.KEYCODE_VOLUME_UP) {
-            return false;
-        }
-        // Act only on a fresh press, never on auto-repeat, so holding the key
-        // does not flip the state repeatedly.
-        if (event.getAction() != KeyEvent.ACTION_DOWN || event.getRepeatCount() > 0) {
-            return false;
-        }
-        toggleClicking();
-        return true;
-    }
-
-    // Shows a persistent status notification WHILE CLICKING, as a reminder that the autoclicker
-    // is active. It intentionally carries NO action button — start/stop is done via the volume
-    // key (see onKeyEvent), and start/stop are also announced with a Toast. Channel created O+.
-    private void showStatusNotification() {
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nm == null) return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (nm.getNotificationChannel(NOTIF_CHANNEL_ID) == null) {
-                NotificationChannel channel = new NotificationChannel(
-                        NOTIF_CHANNEL_ID, "连点服务", NotificationManager.IMPORTANCE_LOW);
-                channel.setDescription("连点运行时显示状态提醒");
-                nm.createNotificationChannel(channel);
-            }
-        }
-        Intent contentIntent = new Intent(this, org.solovyev.android.calculator.CalculatorActivity.class);
-        contentIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent contentPi = PendingIntent.getActivity(
-                this, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE);
-        Notification notification = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
-                .setContentTitle("连点运行中")
-                .setContentText("音量键或悬浮按钮可停止连点")
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setOngoing(true)
-                .setContentIntent(contentPi)
-                .build();
-        nm.notify(CLICK_NOTIFICATION_TAG, CLICK_NOTIFICATION_ID, notification);
-    }
-
-    private void cancelStatusNotification() {
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nm != null) nm.cancel(CLICK_NOTIFICATION_TAG, CLICK_NOTIFICATION_ID);
-    }
-
-    private final Runnable clickRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (!isClicking) return;
-
-            long durationMs = currentDurationSec * 1000L;
-            if (System.currentTimeMillis() - clickStartTime > durationMs) {
-                stopClicking();
-                return;
-            }
-
-            if (isGesturePending) {
-                // Previous gesture is still processing in the OS; do not inject another
-                return;
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                final View overlay = overlayViews[targetIndex];
-                if (overlayReady && overlay != null && overlay.isAttachedToWindow()) {
-                    final int width = overlay.getWidth();
-                    final int height = overlay.getHeight();
-                    if (width > 0 && height > 0) {
-                        final int[] location = new int[2];
-                        overlay.getLocationOnScreen(location);
-                        final int cx = location[0] + width / 2;
-                        final int cy = location[1] + height / 2;
-                        if (BuildConfig.DEBUG) {
-                            Log.d(TAG, "click center idx=" + targetIndex + " (" + cx + "," + cy + ")");
-                        }
-                        dispatchClick(cx, cy);
-                    } else {
-                        scheduleNextClick();
-                    }
-                } else {
-                    scheduleNextClick();
-                }
-                targetIndex = (targetIndex + 1) % overlayViews.length;
-            } else {
-                scheduleNextClick();
-            }
-        }
-    };
-
-    private void scheduleNextClick() {
-        if (!isClicking) return;
-        handler.removeCallbacks(clickRunnable);
-        handler.postDelayed(clickRunnable, Math.max(MIN_INTERVAL_MS, currentIntervalMs));
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    private void dispatchClick(int x, int y) {
-        Path path = new Path();
-        path.moveTo(x, y);
-        // Real (tiny) stroke instead of a zero-length single-point path. A zero-length path
-        // can leave the gesture "in progress" on some ROMs (e.g. EMUI), stalling the
-        // InputDispatcher and freezing volume keys / app switching, and it also fails to
-        // register an actual tap. A 1px line completes cleanly and clicks reliably.
-        path.lineTo(x + 1, y + 1);
-        GestureDescription.Builder builder = new GestureDescription.Builder();
-        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 10));
-
-        isGesturePending = true;
-        handler.removeCallbacks(gestureTimeoutRunnable);
-        handler.postDelayed(gestureTimeoutRunnable, GESTURE_TIMEOUT_MS);
-        dispatchGesture(builder.build(), new GestureResultCallback() {
-            @Override
-            public void onCompleted(GestureDescription gestureDescription) {
-                super.onCompleted(gestureDescription);
-                handler.removeCallbacks(gestureTimeoutRunnable);
-                isGesturePending = false;
-                consecutiveCancelCount = 0;
-                if (isClicking) {
-                    scheduleNextClick();
-    }
 }
-
-            @Override
-            public void onCancelled(GestureDescription gestureDescription) {
-                super.onCancelled(gestureDescription);
-                handler.removeCallbacks(gestureTimeoutRunnable);
-                isGesturePending = false;
-                consecutiveCancelCount++;
-                Log.w(TAG, "Gesture cancelled by OS/app (" + consecutiveCancelCount + "/" + MAX_CONSECUTIVE_CANCELS + ")");
-                if (consecutiveCancelCount >= MAX_CONSECUTIVE_CANCELS) {
-                    stopClicking();
-                    Toast.makeText(AutoClickerService.this, "⚠️ 目标应用限制或拦截无障碍手势，已自动停止", Toast.LENGTH_LONG).show();
-                } else if (isClicking) {
-                    scheduleNextClick();
-                }
-            }
-        }, null);
-    }
-
-}
-

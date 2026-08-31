@@ -95,11 +95,11 @@
     <string name="cpp_number_format_eng">Engineering</string>
     <string name="cpp_number_format_sci">Scientific</string>
 
-    <string name="auto_clicker_service_description">连点辅助功能，允许拦截音量键并在屏幕中心模拟点击。</string>
+    <string name="auto_clicker_service_description">连点辅助功能，允许拦截音量键并在两个目标位置模拟点击。</string>
     <string name="pref_auto_clicker_category">连点辅助</string>
     <string name="pref_auto_clicker_enable_title">开启连点辅助</string>
-    <string name="pref_auto_clicker_enable_summary">开启后需要无障碍权限。连点中双击左上角「⏯ 连点」悬浮按钮，或按音量上/下键（仅计算器前台有效）可随时开/关；悬浮按钮与两个圆圈均可拖动。</string>
-    <string name="pref_auto_clicker_hint">开启连点后：双击左上角「⏯ 连点」悬浮按钮或两个圆圈可开/关连点；也可按音量上/下键开关（仅在计算器前台有效，此时不再调系统音量）。悬浮按钮和圆圈都能拖动到任意位置。关闭连点开关后，音量键恢复调系统音量。</string>
+    <string name="pref_auto_clicker_enable_summary">开启后需要无障碍权限。音量+开始连点，音量-停止；悬浮状态指示和两个圆圈只用于显示与拖动，点击或双击不会启动连点。关闭连点辅助后音量键恢复系统音量。</string>
+    <string name="pref_auto_clicker_hint">先把两个圆圈拖到需要点击的位置：音量+开始连点，音量-停止。悬浮状态指示和两个圆圈都可拖动并会记住上次位置；点击或双击它们不会启动/停止连点。关闭连点辅助后，音量键恢复调系统音量。</string>
     <string name="pref_auto_clicker_interval_title">时间间隔 (毫秒)</string>
     <string name="pref_auto_clicker_interval_summary">默认 30 毫秒</string>
     <string name="pref_auto_clicker_duration_title">连点时长 (秒)</string>
