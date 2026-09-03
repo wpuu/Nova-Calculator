@@ -1,0 +1,243 @@
+(function (root) {
+  'use strict';
+
+  const norm = (value) => (value ?? '').toString().toLowerCase().replace(/[\s\u00a0]+/g, ' ').trim();
+  const tokenise = (value) => norm(value).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const uniq = (arr) => [...new Set(arr.filter(Boolean).map(norm))];
+
+  const ACTION_PACKS = {
+    'shopify.export_orders': {
+      hostSuffixes: ['shopify.com'],
+      targetNames: [
+        'export orders', 'export order data', 'export',
+        '导出订单', '导出', 'exportieren', 'bestellungen exportieren',
+        'exporter les commandes', 'exporter',
+      ],
+      menuNames: [
+        'more actions', 'actions', '更多操作', '更多', 'mehr aktionen', 'aktionen',
+        "plus d'actions", 'actions supplémentaires',
+      ],
+      contextNames: ['orders', '订单', 'bestellungen', 'commandes'],
+      targetRoles: ['button', 'menuitem'],
+    },
+  };
+
+  function inferredRole(el) {
+    const explicit = norm(el.getAttribute?.('role'));
+    if (explicit) return explicit;
+    const tag = norm(el.tagName);
+    if (tag === 'button') return 'button';
+    if (tag === 'a' && el.hasAttribute('href')) return 'link';
+    if (tag === 'input') return ['submit', 'button'].includes(norm(el.type)) ? 'button' : 'textbox';
+    if (tag === 'select') return 'combobox';
+    if (tag === 'textarea') return 'textbox';
+    return '';
+  }
+
+  function accessibleNames(el) {
+    const names = [];
+    names.push(el.getAttribute?.('aria-label'));
+    names.push(el.getAttribute?.('title'));
+    names.push(el.getAttribute?.('alt'));
+    if ('value' in el && ['button', 'submit'].includes(norm(el.type))) names.push(el.value);
+    names.push(el.textContent);
+    if (el.labels) for (const label of el.labels) names.push(label.textContent);
+    return uniq(names);
+  }
+
+  function nearestContext(el) {
+    const out = [];
+    let current = el;
+    for (let depth = 0; current && depth < 6; depth += 1, current = current.parentElement) {
+      const label = current.getAttribute?.('aria-label');
+      if (label) out.push(label);
+      const heading = current.querySelector?.(':scope > h1, :scope > h2, :scope > h3, :scope > [role="heading"]');
+      if (heading) out.push(heading.textContent);
+      if (['MAIN', 'SECTION', 'FORM', 'NAV'].includes(current.tagName)) out.push(current.getAttribute?.('data-section'));
+    }
+    return uniq(out);
+  }
+
+  function stableAttrs(el) {
+    const allow = ['data-testid', 'data-test', 'data-action', 'name', 'type', 'aria-controls', 'aria-haspopup'];
+    const attrs = {};
+    for (const key of allow) {
+      const value = el.getAttribute?.(key);
+      if (value && value.length < 120) attrs[key] = norm(value);
+    }
+    const id = el.getAttribute?.('id');
+    if (id && !/[0-9a-f]{8,}|\d{5,}/i.test(id)) attrs.id = norm(id);
+    return attrs;
+  }
+
+  function isVisible(el) {
+    const style = root.getComputedStyle ? root.getComputedStyle(el) : null;
+    if (style && (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0')) return false;
+    if (el.hidden) return false;
+    const rect = el.getBoundingClientRect?.();
+    return !rect || (rect.width > 0 && rect.height > 0);
+  }
+
+  function isEnabled(el) {
+    return !el.disabled && el.getAttribute?.('aria-disabled') !== 'true';
+  }
+
+  function dangerScore(el) {
+    const text = norm(accessibleNames(el).join(' '));
+    const destructive = [
+      'delete', 'remove account', 'pay now', 'purchase', 'confirm payment',
+      '删除', '付款', '支付', 'supprimer', 'löschen',
+    ];
+    return destructive.some((word) => text.includes(word)) ? 1 : 0;
+  }
+
+  function fingerprint(el, semanticActionId = null) {
+    return {
+      semanticActionId,
+      role: inferredRole(el),
+      names: accessibleNames(el),
+      context: nearestContext(el),
+      attrs: stableAttrs(el),
+      tag: norm(el.tagName),
+      dangerous: dangerScore(el) > 0,
+    };
+  }
+
+  function overlap(a = [], b = []) {
+    const A = new Set(a.map(norm));
+    return b.map(norm).some((value) => A.has(value));
+  }
+
+  function fuzzyNameScore(expected, actual) {
+    const expectedNorm = uniq(expected);
+    const actualNorm = uniq(actual);
+    if (overlap(expectedNorm, actualNorm)) return 34;
+    let best = 0;
+    for (const a of expectedNorm) {
+      const aTokens = new Set(tokenise(a));
+      for (const b of actualNorm) {
+        const bTokens = new Set(tokenise(b));
+        const intersection = [...aTokens].filter((token) => bTokens.has(token)).length;
+        const union = new Set([...aTokens, ...bTokens]).size || 1;
+        best = Math.max(best, intersection / union);
+      }
+    }
+    if (best >= 0.66) return 22;
+    if (best >= 0.5) return 12;
+    return 0;
+  }
+
+  function attrScore(expected = {}, actual = {}) {
+    let matches = 0;
+    for (const [key, value] of Object.entries(expected)) {
+      if (norm(actual[key]) === norm(value)) matches += 1;
+    }
+    return Math.min(30, matches * 15);
+  }
+
+  function candidateRecord(el) {
+    return {
+      el,
+      role: inferredRole(el),
+      names: accessibleNames(el),
+      context: nearestContext(el),
+      attrs: stableAttrs(el),
+      tag: norm(el.tagName),
+      visible: isVisible(el),
+      enabled: isEnabled(el),
+      dangerous: dangerScore(el) > 0,
+    };
+  }
+
+  function score(fp, candidate, pack = null) {
+    let value = 0;
+    const expectedNames = pack ? uniq([...fp.names, ...(pack.targetNames || [])]) : fp.names;
+    const expectedContext = pack ? uniq([...fp.context, ...(pack.contextNames || [])]) : fp.context;
+    const targetRoles = pack?.targetRoles || [fp.role];
+    if (targetRoles.includes(candidate.role)) value += 16;
+    value += fuzzyNameScore(expectedNames, candidate.names);
+    value += attrScore(fp.attrs, candidate.attrs);
+    if (overlap(expectedContext, candidate.context)) value += 14;
+    if (fp.tag && fp.tag === candidate.tag) value += 6;
+    if (!candidate.visible) value -= 50;
+    if (!candidate.enabled) value -= 30;
+    if (candidate.dangerous) value -= 200;
+    return value;
+  }
+
+  function interactiveElements(doc) {
+    return [...doc.querySelectorAll(
+      'button,a[href],input,select,textarea,[role="button"],[role="menuitem"],[role="link"],[aria-haspopup="menu"]',
+    )];
+  }
+
+  function recognizeSemanticAction(hostname, fp) {
+    const host = norm(hostname);
+    for (const [id, pack] of Object.entries(ACTION_PACKS)) {
+      if (!(pack.hostSuffixes || []).some((suffix) => host === suffix || host.endsWith(`.${suffix}`))) continue;
+      const nameHit = fuzzyNameScore(pack.targetNames || [], fp.names || []) >= 22;
+      const contextHit = overlap(pack.contextNames || [], fp.context || []);
+      if (nameHit && contextHit) return id;
+    }
+    return null;
+  }
+
+  function decide(doc, fp, { useAdapter = true } = {}) {
+    const pack = useAdapter && fp.semanticActionId ? ACTION_PACKS[fp.semanticActionId] : null;
+    const ranked = interactiveElements(doc)
+      .map(candidateRecord)
+      .map((candidate) => ({ ...candidate, score: score(fp, candidate, pack) }))
+      .filter((candidate) => !candidate.dangerous)
+      .sort((a, b) => b.score - a.score);
+
+    const viable = ranked.filter((candidate) => candidate.visible && candidate.enabled);
+    const top = viable[0];
+    const second = viable[1] || { score: -999 };
+    if (!top || top.score < 55) return { decision: 'ABSTAIN', ranked };
+    if (top.score >= 62 && top.score - second.score >= 10) {
+      return { decision: 'AUTO', target: top.el, ranked };
+    }
+    return { decision: 'AI_REVIEW', ranked };
+  }
+
+  function menuCandidates(doc, fp) {
+    const pack = fp.semanticActionId ? ACTION_PACKS[fp.semanticActionId] : null;
+    if (!pack) return [];
+    return interactiveElements(doc)
+      .map(candidateRecord)
+      .filter((candidate) => candidate.visible && candidate.enabled && !candidate.dangerous)
+      .filter((candidate) => candidate.attrs['aria-haspopup'] === 'menu' || candidate.role === 'button')
+      .map((candidate) => {
+        const nameScore = fuzzyNameScore(pack.menuNames, candidate.names);
+        const contextScore = overlap(pack.contextNames, candidate.context) ? 20 : 0;
+        return { ...candidate, score: nameScore + contextScore };
+      })
+      .filter((candidate) => candidate.score >= 30)
+      .sort((a, b) => b.score - a.score);
+  }
+
+  async function resolveWithSafeMenu(doc, fp, { useAdapter = true } = {}) {
+    let result = decide(doc, fp, { useAdapter });
+    if (result.decision !== 'ABSTAIN' || !useAdapter || !fp.semanticActionId) return result;
+
+    const menus = menuCandidates(doc, fp);
+    if (!menus.length) return result;
+    if (menus.length > 1 && menus[0].score - menus[1].score < 8) {
+      return { decision: 'AI_REVIEW', ranked: result.ranked, menus };
+    }
+
+    menus[0].el.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    result = decide(doc, fp, { useAdapter });
+    return { ...result, menuExpanded: true };
+  }
+
+  root.NovaSemanticMatcher = {
+    ACTION_PACKS,
+    fingerprint,
+    recognizeSemanticAction,
+    candidateRecord,
+    decide,
+    resolveWithSafeMenu,
+  };
+})(globalThis);
