@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Nova Macro Semantic POC",
+  "version": "0.0.1",
+  "description": "Local-first semantic browser macro proof of concept.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": {
+    "default_title": "Nova Macro POC",
+    "default_popup": "popup.html"
+  }
+}
