@@ -1,0 +1,32 @@
+{
+  "action": {
+    "id": "shopify.export_orders",
+    "roleFamily": ["button", "menuitem"],
+    "names": ["export orders", "export", "导出订单", "导出", "bestellungen exportieren", "exportieren", "exporter les commandes", "exporter"],
+    "stableAttrs": {"data-action": "export-orders"},
+    "context": ["orders", "订单", "bestellungen", "commandes"],
+    "kind": "export"
+  },
+  "cases": [
+    {"id":"wide-en-direct","viewport":"1920x1080","zoom":100,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Export orders"],"attrs":{"data-action":"export-orders"},"context":["Orders"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"narrow-en-menu","viewport":"1024x768","zoom":100,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"menuitem","names":["Export"],"attrs":{"data-action":"export-orders"},"context":["Orders"],"kind":"export","visible":true,"enabled":true},{"id":"wrong","role":"menuitem","names":["Export"],"attrs":{},"context":["Products"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"zoom-125","viewport":"1366x768","zoom":125,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Export orders"],"attrs":{},"context":["Orders"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"zoom-175-collapsed","viewport":"1366x768","zoom":175,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"menuitem","names":["Export"],"attrs":{"data-action":"export-orders"},"context":["Orders"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"zh-cn","viewport":"1440x900","zoom":100,"locale":"zh-CN","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["导出订单"],"attrs":{},"context":["订单"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"de-de","viewport":"1440x900","zoom":100,"locale":"de-DE","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Bestellungen exportieren"],"attrs":{},"context":["Bestellungen"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"fr-fr","viewport":"1440x900","zoom":100,"locale":"fr-FR","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Exporter les commandes"],"attrs":{},"context":["Commandes"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"css-class-churn","viewport":"1440x900","zoom":100,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Export orders"],"attrs":{"class":"Polaris-v999 random"},"context":["Orders"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"wrapper-depth-churn","viewport":"1440x900","zoom":100,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Export orders"],"attrs":{},"context":["Orders"],"kind":"export","visible":true,"enabled":true,"domDepth":17}]},
+    {"id":"internal-web-component-tag-change","viewport":"1440x900","zoom":100,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Export orders"],"attrs":{},"context":["Orders"],"kind":"export","visible":true,"enabled":true,"tag":"s-internal-press-button-v2"}]},
+    {"id":"ab-text-changed-stable-attr","viewport":"1440x900","zoom":100,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Download CSV"],"attrs":{"data-action":"export-orders"},"context":["Orders"],"kind":"export","visible":true,"enabled":true},{"id":"wrong","role":"button","names":["Export products"],"attrs":{},"context":["Products"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"extra-extension-button","viewport":"1440x900","zoom":100,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Export orders"],"attrs":{},"context":["Orders"],"kind":"export","visible":true,"enabled":true},{"id":"injected","role":"button","names":["Export"],"attrs":{"data-extension":"other"},"context":["Orders helper"],"kind":"unknown","visible":true,"enabled":true}]},
+    {"id":"two-equal-export-buttons","viewport":"1440x900","zoom":100,"locale":"en","expected":"AI_REVIEW","candidates":[{"id":"a","role":"button","names":["Export"],"attrs":{},"context":["Orders"],"kind":"export","visible":true,"enabled":true},{"id":"b","role":"button","names":["Export"],"attrs":{},"context":["Orders"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"hidden-old-visible-new","viewport":"1024x768","zoom":150,"locale":"en","expected":"AUTO","candidates":[{"id":"old","role":"button","names":["Export orders"],"attrs":{"data-action":"export-orders"},"context":["Orders"],"kind":"export","visible":false,"enabled":true},{"id":"target","role":"menuitem","names":["Export"],"attrs":{},"context":["Orders"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"disabled-only","viewport":"1440x900","zoom":100,"locale":"en","expected":"AI_REVIEW","candidates":[{"id":"target","role":"button","names":["Export orders"],"attrs":{"data-action":"export-orders"},"context":["Orders"],"kind":"export","visible":true,"enabled":false}]},
+    {"id":"permission-missing","viewport":"1440x900","zoom":100,"locale":"en","expected":"ABSTAIN","candidates":[{"id":"create","role":"button","names":["Create order"],"attrs":{},"context":["Orders"],"kind":"create","visible":true,"enabled":true}]},
+    {"id":"wrong-section-only","viewport":"1440x900","zoom":100,"locale":"en","expected":"ABSTAIN","candidates":[{"id":"wrong","role":"button","names":["Export products"],"attrs":{},"context":["Products"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"dangerous-delete","viewport":"1440x900","zoom":100,"locale":"en","expected":"ABSTAIN","candidates":[{"id":"danger","role":"button","names":["Delete store"],"attrs":{"data-action":"export-orders"},"context":["Orders"],"kind":"export","visible":true,"enabled":true,"dangerous":true}]},
+    {"id":"text-missing-stable-attr","viewport":"1440x900","zoom":100,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"button","names":[],"attrs":{"data-action":"export-orders"},"context":["Orders"],"kind":"export","visible":true,"enabled":true}]},
+    {"id":"context-renamed-but-stable-attr","viewport":"1440x900","zoom":100,"locale":"en","expected":"AUTO","candidates":[{"id":"target","role":"button","names":["Download CSV"],"attrs":{"data-action":"export-orders"},"context":["Sales records"],"kind":"export","visible":true,"enabled":true}]}
+  ]
+}
