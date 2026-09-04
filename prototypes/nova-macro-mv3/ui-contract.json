@@ -1,8 +1,9 @@
 {
-  "version": 1,
+  "version": 2,
   "states": [
     "IDLE",
     "RECORDING",
+    "SITE_ACCESS_REQUIRED",
     "SAVED",
     "REPLAYING",
     "COMPLETED",
@@ -15,6 +16,7 @@
   "commands": [
     "START_RECORDING",
     "STOP_RECORDING",
+    "ALLOW_CURRENT_SITE_AND_RESUME",
     "SAVE_MACRO",
     "REPLAY_MACRO",
     "CANCEL_REPLAY",
@@ -25,6 +27,9 @@
     "ABSTAIN_REPAIR"
   ],
   "uiRules": {
+    "requestSiteAccessOnlyFromExplicitUserGesture": true,
+    "doNotRequestAllUrlsAtInstall": true,
+    "showWhySiteAccessIsNeededBeforeRequest": true,
     "aiCannotGenerateExecutableSelector": true,
     "aiCandidatesMustComeFromCore": true,
     "dangerousActionsRequireExplicitConfirmation": true,
@@ -33,6 +38,9 @@
     "disableAllAgnesEntrypointsDuringRequest": true,
     "defaultDangerousDecision": "reject",
     "defaultAmbiguousRepairDecision": "abstain"
+  },
+  "derivedPresentation": {
+    "SITE_ACCESS_REQUIRED": "session.mode is RECORDING or REPLAYING and session.needsSiteAccess is true"
   },
   "surfaces": {
     "extension": [
