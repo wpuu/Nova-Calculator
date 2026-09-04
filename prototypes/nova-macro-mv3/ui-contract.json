@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "states": [
+    "IDLE",
+    "RECORDING",
+    "SAVED",
+    "REPLAYING",
+    "COMPLETED",
+    "AI_REVIEW",
+    "REQUIRES_CONFIRMATION",
+    "ABSTAIN",
+    "BLOCKED_SENSITIVE_INPUT",
+    "ERROR"
+  ],
+  "commands": [
+    "START_RECORDING",
+    "STOP_RECORDING",
+    "SAVE_MACRO",
+    "REPLAY_MACRO",
+    "CANCEL_REPLAY",
+    "REQUEST_AI_REVIEW",
+    "CONFIRM_DANGEROUS_STEP",
+    "REJECT_DANGEROUS_STEP",
+    "SELECT_REPAIR_CANDIDATE",
+    "ABSTAIN_REPAIR"
+  ],
+  "uiRules": {
+    "aiCannotGenerateExecutableSelector": true,
+    "aiCandidatesMustComeFromCore": true,
+    "dangerousActionsRequireExplicitConfirmation": true,
+    "passwordAndOtpMustNeverBePersisted": true,
+    "singleAgnesFlight": true,
+    "disableAllAgnesEntrypointsDuringRequest": true,
+    "defaultDangerousDecision": "reject",
+    "defaultAmbiguousRepairDecision": "abstain"
+  },
+  "surfaces": {
+    "extension": [
+      "side_panel",
+      "popup"
+    ],
+    "web": [
+      "landing_pages",
+      "macro_detail_pages",
+      "seo_tools"
+    ],
+    "deferred": [
+      "creator_marketplace",
+      "payments",
+      "cloud_execution"
+    ]
+  }
+}
