@@ -8,7 +8,6 @@
 
   const state = {
     recording: false,
-    steps: [],
     listeners: [],
   };
 
@@ -29,12 +28,20 @@
     return fp;
   };
 
+  const emitStep = (step) => {
+    // Dispatch immediately from the capture phase so a following navigation does
+    // not erase the in-page recorder state before the background owns the step.
+    chrome.runtime.sendMessage({ type: 'NOVA_RECORD_STEP', step }).catch(() => {});
+  };
+
   const recordClick = (event) => {
     if (!state.recording || event.button !== 0) return;
-    const el = event.target?.closest?.('button,a[href],input,[role="button"],[role="menuitem"],[role="link"],[aria-haspopup="menu"]');
+    const el = event.target?.closest?.(
+      'button,a[href],input,[role="button"],[role="menuitem"],[role="link"],[aria-haspopup="menu"]',
+    );
     if (!el) return;
     const fp = semanticFingerprint(el);
-    state.steps.push({
+    emitStep({
       type: 'click',
       fingerprint: fp,
       requiresConfirmation: !!fp.dangerous,
@@ -47,10 +54,10 @@
     const el = event.target;
     if (!el || !['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return;
     if (blockedInput(el)) {
-      state.steps.push({ type: 'blocked_sensitive_input', recordedAt: Date.now() });
+      emitStep({ type: 'blocked_sensitive_input', recordedAt: Date.now() });
       return;
     }
-    state.steps.push({
+    emitStep({
       type: 'input',
       fingerprint: semanticFingerprint(el),
       value: el.value,
@@ -58,20 +65,16 @@
     });
   };
 
-  async function startRecording() {
-    if (state.recording) return { ok: true, alreadyRecording: true, steps: state.steps.length };
-    state.recording = true;
-    state.steps = [];
-    register(document, 'click', recordClick, true);
-    register(document, 'change', recordChange, true);
-    return { ok: true, recording: true };
-  }
-
-  async function stopRecording() {
-    state.recording = false;
-    state.listeners.splice(0).forEach((remove) => remove());
-    await chrome.storage.local.set({ novaMacroPocLast: state.steps });
-    return { ok: true, recording: false, steps: state.steps };
+  function setRecording(recording) {
+    if (recording === state.recording) return { ok: true, recording };
+    state.recording = recording;
+    if (recording) {
+      register(document, 'click', recordClick, true);
+      register(document, 'change', recordChange, true);
+    } else {
+      state.listeners.splice(0).forEach((remove) => remove());
+    }
+    return { ok: true, recording };
   }
 
   async function replayStep(step, index) {
@@ -96,8 +99,20 @@
     target.scrollIntoView?.({ block: 'center', inline: 'center' });
 
     if (step.type === 'click') {
-      target.click();
-      return { ok: true, status: 'CLICKED', index, menuExpanded: !!resolved.menuExpanded };
+      const mayNavigate =
+        target.tagName === 'A' && !!target.getAttribute('href') ||
+        !!target.getAttribute?.('formaction');
+
+      // Reply to the service worker before a real navigation can destroy this
+      // document/context. The action runs on the next task.
+      setTimeout(() => target.click(), 0);
+      return {
+        ok: true,
+        status: 'CLICKED',
+        index,
+        menuExpanded: !!resolved.menuExpanded,
+        mayNavigate: !!mayNavigate,
+      };
     }
 
     if (step.type === 'input') {
@@ -106,33 +121,33 @@
       target.value = step.value;
       target.dispatchEvent(new Event('input', { bubbles: true }));
       target.dispatchEvent(new Event('change', { bubbles: true }));
-      return { ok: true, status: 'INPUT_SET', index };
+      return { ok: true, status: 'INPUT_SET', index, mayNavigate: false };
     }
 
     return { ok: false, status: 'UNKNOWN_STEP', index };
   }
 
-  async function replayLast() {
-    const stored = await chrome.storage.local.get('novaMacroPocLast');
-    const steps = stored.novaMacroPocLast || [];
-    const results = [];
-    for (let index = 0; index < steps.length; index += 1) {
-      const result = await replayStep(steps[index], index);
-      results.push(result);
-      if (!result.ok) return { ok: false, stoppedAt: index, results };
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-    return { ok: true, results };
-  }
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    (async () => {
+      if (message?.type === 'NOVA_SET_RECORDING') {
+        return setRecording(!!message.recording);
+      }
+      if (message?.type === 'NOVA_EXECUTE_STEP') {
+        return replayStep(message.step, message.index);
+      }
+      if (message?.type === 'NOVA_CONTENT_STATE') {
+        return { ok: true, recording: state.recording };
+      }
+      return { ok: false, error: 'UNKNOWN_CONTENT_MESSAGE' };
+    })().then(sendResponse).catch((error) => {
+      sendResponse({ ok: false, error: error?.message || String(error) });
+    });
+    return true;
+  });
 
-  async function getState() {
-    const stored = await chrome.storage.local.get('novaMacroPocLast');
-    return {
-      recording: state.recording,
-      inMemorySteps: state.steps.length,
-      savedSteps: (stored.novaMacroPocLast || []).length,
-    };
-  }
-
-  root.NovaMacroPoc = { startRecording, stopRecording, replayLast, getState };
+  root.NovaMacroPoc = {
+    setRecording,
+    replayStep,
+    getState: () => ({ recording: state.recording }),
+  };
 })(globalThis);
