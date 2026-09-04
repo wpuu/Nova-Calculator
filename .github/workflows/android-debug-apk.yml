@@ -77,6 +77,9 @@ jobs:
       - name: Verify commercial source guard
         run: bash scripts/verify-commercial-source.sh
 
+      - name: Verify Chrome macro POC contracts
+        run: node tools/verify-macro-poc.mjs
+
       - name: Test gateway capacity core
         run: cd gateway && npm test
 
