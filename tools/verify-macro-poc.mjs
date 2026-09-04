@@ -122,6 +122,8 @@ for (const marker of [
   'resolveWithWait',
   'setNativeValue',
   'HTMLInputElement.prototype',
+  'urlBefore',
+  "type: 'NOVA_CONTENT_STATE'",
 ]) {
   if (!content.includes(marker)) fail(`content safety/orchestration marker missing: ${marker}`);
 }
@@ -133,8 +135,16 @@ for (const marker of [
   'stepWriteQueue',
   'NOVA_RESUME_CURRENT',
   'needsSiteAccess',
+  'replayWaitingForDocument',
+  'waitingFromUrl',
+  'probeNavigationProgress',
+  "if (!session.replayWaitingForDocument && !session.needsSiteAccess) return session;",
 ]) {
   if (!background.includes(marker)) fail(`background navigation/orchestration marker missing: ${marker}`);
+}
+
+if (!fs.existsSync(path.join(root, 'tools', 'macro-background-state-eval.mjs'))) {
+  fail('service-worker state-machine evaluation missing');
 }
 
 if (!process.exitCode) {
