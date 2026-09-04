@@ -140,8 +140,6 @@ async function runReplayStep() {
   });
 
   if (result.mayNavigate) {
-    // Same-document/SPAs may not emit a full load. Try again shortly; if the old
-    // document disappeared, sendToTab will fail safely and onUpdated resumes it.
     setTimeout(() => {
       runReplayStep().catch(() => {});
     }, 700);
@@ -170,17 +168,16 @@ async function startReplay({ tabId }) {
 
 async function resumeAfterNavigation(tabId) {
   const session = await getSession();
-  if (session.tabId !== tabId) return;
+  if (session.tabId !== tabId) return session;
 
   if (session.mode === 'RECORDING') {
     try {
       await injectRuntime(tabId);
       await sendToTab(tabId, { type: 'NOVA_SET_RECORDING', recording: true });
-      await patchSession({ error: null });
+      return patchSession({ error: null });
     } catch (error) {
-      await patchSession({ error: error?.message || String(error) });
+      return patchSession({ error: error?.message || String(error) });
     }
-    return;
   }
 
   if (session.mode === 'REPLAYING') {
@@ -188,14 +185,26 @@ async function resumeAfterNavigation(tabId) {
     try {
       await injectRuntime(tabId);
       await runReplayStep();
+      return getSession();
     } catch (error) {
-      await patchSession({
+      return patchSession({
         replayInFlight: false,
         replayWaitingForDocument: true,
         error: error?.message || String(error),
       });
     }
   }
+
+  return session;
+}
+
+async function resumeCurrent({ tabId, originPattern }) {
+  const session = await getSession();
+  if (!['RECORDING', 'REPLAYING'].includes(session.mode)) {
+    return { ok: false, error: 'NO_ACTIVE_MACRO_SESSION' };
+  }
+  await patchSession({ tabId, originPattern, error: null });
+  return resumeAfterNavigation(tabId);
 }
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
@@ -214,6 +223,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return stopRecording();
       case 'NOVA_START_REPLAY':
         return startReplay(message);
+      case 'NOVA_RESUME_CURRENT':
+        return resumeCurrent(message);
       case 'NOVA_GET_SESSION':
         return getSession();
       case 'NOVA_CLEAR_SESSION':
