@@ -139,6 +139,7 @@ for (const marker of [
   'waitingFromUrl',
   'probeNavigationProgress',
   "if (!session.replayWaitingForDocument && !session.needsSiteAccess) return session;",
+  'Delivery here is deliberately at-most-once',
 ]) {
   if (!background.includes(marker)) fail(`background navigation/orchestration marker missing: ${marker}`);
 }
