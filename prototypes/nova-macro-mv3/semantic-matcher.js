@@ -101,7 +101,9 @@
     const raw = el.getAttribute?.('href');
     if (!raw) return '';
     try {
-      return new URL(raw, root.location?.href || 'https://example.invalid/').pathname.toLowerCase();
+      const current = root.location?.href || '';
+      const base = /^https?:/i.test(current) ? current : 'https://example.invalid/';
+      return new URL(raw, base).pathname.toLowerCase();
     } catch {
       return '';
     }
@@ -132,6 +134,8 @@
   }
 
   function dangerScore(el) {
+    const role = inferredRole(el);
+    if (!['button', 'menuitem'].includes(role)) return 0;
     const text = norm(accessibleNames(el).join(' '));
     const destructive = [
       'delete', 'remove account', 'pay now', 'purchase', 'confirm payment',
@@ -265,8 +269,6 @@
     if (top.score >= 62 && top.score - second.score >= 10) {
       return { decision: 'AUTO', target: top.el, ranked };
     }
-    // A strong structural/context candidate with changed copy should be reviewed, not auto-clicked
-    // and not discarded. This is the main bridge to the one-call Agnes repair path.
     if (pack && top.score >= 50) return { decision: 'AI_REVIEW', ranked };
     if (top.score < 55) return { decision: 'ABSTAIN', ranked };
     return { decision: 'AI_REVIEW', ranked };
