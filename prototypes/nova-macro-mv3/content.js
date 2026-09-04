@@ -138,6 +138,7 @@
       const mayNavigate =
         (target.tagName === 'A' && !!target.getAttribute('href')) ||
         !!target.getAttribute?.('formaction');
+      const urlBefore = location.href;
 
       setTimeout(() => target.click(), 0);
       return {
@@ -147,6 +148,7 @@
         waitedMs: resolved.waitedMs,
         menuExpanded: !!resolved.menuExpanded,
         mayNavigate: !!mayNavigate,
+        urlBefore,
       };
     }
 
@@ -177,7 +179,7 @@
         return replayStep(message.step, message.index);
       }
       if (message?.type === 'NOVA_CONTENT_STATE') {
-        return { ok: true, recording: state.recording };
+        return { ok: true, recording: state.recording, url: location.href };
       }
       return { ok: false, error: 'UNKNOWN_CONTENT_MESSAGE' };
     })().then(sendResponse).catch((error) => {
@@ -190,6 +192,6 @@
     setRecording,
     resolveWithWait,
     replayStep,
-    getState: () => ({ recording: state.recording }),
+    getState: () => ({ recording: state.recording, url: location.href }),
   };
 })(globalThis);
