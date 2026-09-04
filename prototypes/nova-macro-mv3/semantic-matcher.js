@@ -11,6 +11,7 @@
       targetNames: ['orders', 'view orders', '订单', 'bestellungen', 'commandes'],
       contextNames: ['navigation', 'admin', 'main menu', '主导航', '导航'],
       targetRoles: ['link', 'button'],
+      hrefPathSuffixes: ['/orders'],
     },
     'shopify.search_orders': {
       hostSuffixes: ['shopify.com'],
@@ -96,6 +97,16 @@
     return uniq(out);
   }
 
+  function hrefPath(el) {
+    const raw = el.getAttribute?.('href');
+    if (!raw) return '';
+    try {
+      return new URL(raw, root.location?.href || 'https://example.invalid/').pathname.toLowerCase();
+    } catch {
+      return '';
+    }
+  }
+
   function stableAttrs(el) {
     const allow = ['data-testid', 'data-test', 'data-action', 'name', 'type', 'aria-controls', 'aria-haspopup'];
     const attrs = {};
@@ -136,6 +147,7 @@
       names: accessibleNames(el),
       context: nearestContext(el),
       attrs: stableAttrs(el),
+      hrefPath: hrefPath(el),
       tag: norm(el.tagName),
       dangerous: dangerScore(el) > 0,
     };
@@ -180,11 +192,17 @@
       names: accessibleNames(el),
       context: nearestContext(el),
       attrs: stableAttrs(el),
+      hrefPath: hrefPath(el),
       tag: norm(el.tagName),
       visible: isVisible(el),
       enabled: isEnabled(el),
       dangerous: dangerScore(el) > 0,
     };
+  }
+
+  function pathScore(pack, candidate) {
+    if (!pack?.hrefPathSuffixes?.length || !candidate.hrefPath) return 0;
+    return pack.hrefPathSuffixes.some((suffix) => candidate.hrefPath.endsWith(norm(suffix))) ? 24 : 0;
   }
 
   function score(fp, candidate, pack = null) {
@@ -195,6 +213,7 @@
     if (targetRoles.includes(candidate.role)) value += 16;
     value += fuzzyNameScore(expectedNames, candidate.names);
     value += attrScore(fp.attrs, candidate.attrs);
+    value += pathScore(pack, candidate);
     if (overlap(expectedContext, candidate.context)) value += 14;
     if (fp.tag && fp.tag === candidate.tag) value += 6;
     if (!candidate.visible) value -= 50;
@@ -217,8 +236,12 @@
       const nameScore = fuzzyNameScore(pack.targetNames || [], fp.names || []);
       const contextHit = overlap(pack.contextNames || [], fp.context || []);
       const roleHit = (pack.targetRoles || []).includes(fp.role);
-      if (nameScore >= 22 && roleHit && (contextHit || id === 'shopify.open_orders')) {
-        matches.push({ id, score: nameScore + (contextHit ? 20 : 0) + (roleHit ? 10 : 0) });
+      const pathHit = pack.hrefPathSuffixes?.some((suffix) => fp.hrefPath?.endsWith(norm(suffix)));
+      if (roleHit && ((nameScore >= 22 && (contextHit || id === 'shopify.open_orders')) || pathHit)) {
+        matches.push({
+          id,
+          score: nameScore + (contextHit ? 20 : 0) + (roleHit ? 10 : 0) + (pathHit ? 24 : 0),
+        });
       }
     }
     matches.sort((a, b) => b.score - a.score);
@@ -238,10 +261,14 @@
     const viable = ranked.filter((candidate) => candidate.visible && candidate.enabled);
     const top = viable[0];
     const second = viable[1] || { score: -999 };
-    if (!top || top.score < 55) return { decision: 'ABSTAIN', ranked };
+    if (!top) return { decision: 'ABSTAIN', ranked };
     if (top.score >= 62 && top.score - second.score >= 10) {
       return { decision: 'AUTO', target: top.el, ranked };
     }
+    // A strong structural/context candidate with changed copy should be reviewed, not auto-clicked
+    // and not discarded. This is the main bridge to the one-call Agnes repair path.
+    if (pack && top.score >= 50) return { decision: 'AI_REVIEW', ranked };
+    if (top.score < 55) return { decision: 'ABSTAIN', ranked };
     return { decision: 'AI_REVIEW', ranked };
   }
 
