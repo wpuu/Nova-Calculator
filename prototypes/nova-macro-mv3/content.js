@@ -11,6 +11,8 @@
     listeners: [],
   };
 
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   const blockedInput = (el) => {
     const type = (el?.type || '').toLowerCase();
     const autocomplete = (el?.autocomplete || '').toLowerCase();
@@ -29,8 +31,6 @@
   };
 
   const emitStep = (step) => {
-    // Dispatch immediately from the capture phase so a following navigation does
-    // not erase the in-page recorder state before the background owns the step.
     chrome.runtime.sendMessage({ type: 'NOVA_RECORD_STEP', step }).catch(() => {});
   };
 
@@ -45,6 +45,7 @@
       type: 'click',
       fingerprint: fp,
       requiresConfirmation: !!fp.dangerous,
+      timeoutMs: 5000,
       recordedAt: Date.now(),
     });
   };
@@ -61,6 +62,7 @@
       type: 'input',
       fingerprint: semanticFingerprint(el),
       value: el.value,
+      timeoutMs: 5000,
       recordedAt: Date.now(),
     });
   };
@@ -77,6 +79,39 @@
     return { ok: true, recording };
   }
 
+  async function resolveWithWait(fingerprint, timeoutMs = 5000) {
+    const startedAt = Date.now();
+    let last = { decision: 'ABSTAIN', ranked: [] };
+    let menuExpanded = false;
+
+    while (Date.now() - startedAt <= timeoutMs) {
+      last = menuExpanded
+        ? matcher.decide(document, fingerprint, { useAdapter: true })
+        : await matcher.resolveWithSafeMenu(document, fingerprint, { useAdapter: true });
+
+      if (last.menuExpanded) menuExpanded = true;
+      if (last.decision === 'AUTO' && last.target) {
+        return { ...last, waitedMs: Date.now() - startedAt, menuExpanded };
+      }
+
+      await sleep(120);
+    }
+
+    return { ...last, waitedMs: Date.now() - startedAt, menuExpanded };
+  }
+
+  function setNativeValue(target, value) {
+    const tag = target.tagName;
+    const prototype = tag === 'TEXTAREA'
+      ? HTMLTextAreaElement.prototype
+      : tag === 'SELECT'
+        ? HTMLSelectElement.prototype
+        : HTMLInputElement.prototype;
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
+    if (descriptor?.set) descriptor.set.call(target, value);
+    else target.value = value;
+  }
+
   async function replayStep(step, index) {
     if (step.type === 'blocked_sensitive_input') {
       return { ok: false, status: 'BLOCKED_SENSITIVE_INPUT', index };
@@ -85,12 +120,13 @@
       return { ok: false, status: 'REQUIRES_CONFIRMATION', index };
     }
 
-    const resolved = await matcher.resolveWithSafeMenu(document, step.fingerprint, { useAdapter: true });
+    const resolved = await resolveWithWait(step.fingerprint, step.timeoutMs || 5000);
     if (resolved.decision !== 'AUTO' || !resolved.target) {
       return {
         ok: false,
         status: resolved.decision === 'AI_REVIEW' ? 'AI_REVIEW' : 'ABSTAIN',
         index,
+        waitedMs: resolved.waitedMs,
         topScores: (resolved.ranked || []).slice(0, 3).map((candidate) => candidate.score),
       };
     }
@@ -100,16 +136,15 @@
 
     if (step.type === 'click') {
       const mayNavigate =
-        target.tagName === 'A' && !!target.getAttribute('href') ||
+        (target.tagName === 'A' && !!target.getAttribute('href')) ||
         !!target.getAttribute?.('formaction');
 
-      // Reply to the service worker before a real navigation can destroy this
-      // document/context. The action runs on the next task.
       setTimeout(() => target.click(), 0);
       return {
         ok: true,
         status: 'CLICKED',
         index,
+        waitedMs: resolved.waitedMs,
         menuExpanded: !!resolved.menuExpanded,
         mayNavigate: !!mayNavigate,
       };
@@ -118,10 +153,16 @@
     if (step.type === 'input') {
       if (blockedInput(target)) return { ok: false, status: 'BLOCKED_SENSITIVE_INPUT', index };
       target.focus?.();
-      target.value = step.value;
-      target.dispatchEvent(new Event('input', { bubbles: true }));
-      target.dispatchEvent(new Event('change', { bubbles: true }));
-      return { ok: true, status: 'INPUT_SET', index, mayNavigate: false };
+      setNativeValue(target, step.value);
+      target.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+      target.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+      return {
+        ok: true,
+        status: 'INPUT_SET',
+        index,
+        waitedMs: resolved.waitedMs,
+        mayNavigate: false,
+      };
     }
 
     return { ok: false, status: 'UNKNOWN_STEP', index };
@@ -147,6 +188,7 @@
 
   root.NovaMacroPoc = {
     setRecording,
+    resolveWithWait,
     replayStep,
     getState: () => ({ recording: state.recording }),
   };
