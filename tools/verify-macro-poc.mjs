@@ -53,7 +53,6 @@ const javascriptFiles = ['background.js', 'semantic-matcher.js', 'content.js', '
 for (const file of javascriptFiles) {
   const source = read(file);
   try {
-    // Parse only. Do not execute extension code in Node.
     new Function(source);
   } catch (error) {
     fail(`${file} has invalid JavaScript: ${error.message}`);
@@ -116,12 +115,25 @@ const holdoutCount = (fixture.actions || [])
 if (holdoutCount < 4) fail(`holdout coverage too small: ${holdoutCount}`);
 
 const content = read('content.js');
-for (const marker of ['BLOCKED_SENSITIVE_INPUT', 'REQUIRES_CONFIRMATION', 'NOVA_RECORD_STEP']) {
+for (const marker of [
+  'BLOCKED_SENSITIVE_INPUT',
+  'REQUIRES_CONFIRMATION',
+  'NOVA_RECORD_STEP',
+  'resolveWithWait',
+  'setNativeValue',
+  'HTMLInputElement.prototype',
+]) {
   if (!content.includes(marker)) fail(`content safety/orchestration marker missing: ${marker}`);
 }
 
 const background = read('background.js');
-for (const marker of ['chrome.storage.session', 'chrome.tabs.onUpdated', 'stepWriteQueue', 'NOVA_RESUME_CURRENT']) {
+for (const marker of [
+  'chrome.storage.session',
+  'chrome.tabs.onUpdated',
+  'stepWriteQueue',
+  'NOVA_RESUME_CURRENT',
+  'needsSiteAccess',
+]) {
   if (!background.includes(marker)) fail(`background navigation/orchestration marker missing: ${marker}`);
 }
 
