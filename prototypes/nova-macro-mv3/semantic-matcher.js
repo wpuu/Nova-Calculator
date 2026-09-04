@@ -6,6 +6,35 @@
   const uniq = (arr) => [...new Set(arr.filter(Boolean).map(norm))];
 
   const ACTION_PACKS = {
+    'shopify.open_orders': {
+      hostSuffixes: ['shopify.com'],
+      targetNames: ['orders', 'view orders', '订单', 'bestellungen', 'commandes'],
+      contextNames: ['navigation', 'admin', 'main menu', '主导航', '导航'],
+      targetRoles: ['link', 'button'],
+    },
+    'shopify.search_orders': {
+      hostSuffixes: ['shopify.com'],
+      targetNames: [
+        'search orders', 'search by order number or customer', 'search',
+        '搜索订单', '搜索', 'bestellungen suchen', 'suchen',
+        'rechercher des commandes', 'rechercher',
+      ],
+      contextNames: ['orders', '订单', 'bestellungen', 'commandes'],
+      targetRoles: ['textbox', 'searchbox'],
+    },
+    'shopify.filter_orders': {
+      hostSuffixes: ['shopify.com'],
+      targetNames: [
+        'filter', 'filters', 'add filter', 'filter orders',
+        '筛选', '筛选订单', '过滤', 'filter hinzufügen', 'filtern',
+        'filtrer', 'ajouter un filtre',
+      ],
+      menuNames: [
+        'filter', 'filters', 'add filter', '筛选', '过滤', 'filtern', 'filtrer',
+      ],
+      contextNames: ['orders', '订单', 'bestellungen', 'commandes'],
+      targetRoles: ['button', 'menuitem'],
+    },
     'shopify.export_orders': {
       hostSuffixes: ['shopify.com'],
       targetNames: [
@@ -28,7 +57,12 @@
     const tag = norm(el.tagName);
     if (tag === 'button') return 'button';
     if (tag === 'a' && el.hasAttribute('href')) return 'link';
-    if (tag === 'input') return ['submit', 'button'].includes(norm(el.type)) ? 'button' : 'textbox';
+    if (tag === 'input') {
+      const type = norm(el.type);
+      if (['submit', 'button'].includes(type)) return 'button';
+      if (type === 'search') return 'searchbox';
+      return 'textbox';
+    }
     if (tag === 'select') return 'combobox';
     if (tag === 'textarea') return 'textbox';
     return '';
@@ -37,6 +71,7 @@
   function accessibleNames(el) {
     const names = [];
     names.push(el.getAttribute?.('aria-label'));
+    names.push(el.getAttribute?.('placeholder'));
     names.push(el.getAttribute?.('title'));
     names.push(el.getAttribute?.('alt'));
     if ('value' in el && ['button', 'submit'].includes(norm(el.type))) names.push(el.value);
@@ -48,12 +83,15 @@
   function nearestContext(el) {
     const out = [];
     let current = el;
-    for (let depth = 0; current && depth < 6; depth += 1, current = current.parentElement) {
+    for (let depth = 0; current && depth < 7; depth += 1, current = current.parentElement) {
       const label = current.getAttribute?.('aria-label');
       if (label) out.push(label);
       const heading = current.querySelector?.(':scope > h1, :scope > h2, :scope > h3, :scope > [role="heading"]');
       if (heading) out.push(heading.textContent);
-      if (['MAIN', 'SECTION', 'FORM', 'NAV'].includes(current.tagName)) out.push(current.getAttribute?.('data-section'));
+      if (['MAIN', 'SECTION', 'FORM', 'NAV'].includes(current.tagName)) {
+        out.push(current.getAttribute?.('data-section'));
+        if (current.tagName === 'NAV') out.push('navigation');
+      }
     }
     return uniq(out);
   }
@@ -167,19 +205,26 @@
 
   function interactiveElements(doc) {
     return [...doc.querySelectorAll(
-      'button,a[href],input,select,textarea,[role="button"],[role="menuitem"],[role="link"],[aria-haspopup="menu"]',
+      'button,a[href],input,select,textarea,[role="button"],[role="menuitem"],[role="link"],[role="textbox"],[role="searchbox"],[aria-haspopup="menu"]',
     )];
   }
 
   function recognizeSemanticAction(hostname, fp) {
     const host = norm(hostname);
+    const matches = [];
     for (const [id, pack] of Object.entries(ACTION_PACKS)) {
       if (!(pack.hostSuffixes || []).some((suffix) => host === suffix || host.endsWith(`.${suffix}`))) continue;
-      const nameHit = fuzzyNameScore(pack.targetNames || [], fp.names || []) >= 22;
+      const nameScore = fuzzyNameScore(pack.targetNames || [], fp.names || []);
       const contextHit = overlap(pack.contextNames || [], fp.context || []);
-      if (nameHit && contextHit) return id;
+      const roleHit = (pack.targetRoles || []).includes(fp.role);
+      if (nameScore >= 22 && roleHit && (contextHit || id === 'shopify.open_orders')) {
+        matches.push({ id, score: nameScore + (contextHit ? 20 : 0) + (roleHit ? 10 : 0) });
+      }
     }
-    return null;
+    matches.sort((a, b) => b.score - a.score);
+    if (!matches.length) return null;
+    if (matches[1] && matches[0].score - matches[1].score < 8) return null;
+    return matches[0].id;
   }
 
   function decide(doc, fp, { useAdapter = true } = {}) {
@@ -202,7 +247,7 @@
 
   function menuCandidates(doc, fp) {
     const pack = fp.semanticActionId ? ACTION_PACKS[fp.semanticActionId] : null;
-    if (!pack) return [];
+    if (!pack?.menuNames?.length) return [];
     return interactiveElements(doc)
       .map(candidateRecord)
       .filter((candidate) => candidate.visible && candidate.enabled && !candidate.dangerous)
