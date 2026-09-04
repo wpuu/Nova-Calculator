@@ -3,6 +3,7 @@
 const SESSION_KEY = 'novaMacroPocSession';
 const SAVED_MACRO_KEY = 'novaMacroPocLast';
 let stepWriteQueue = Promise.resolve();
+let navigationProbeTimer = null;
 
 const emptySession = () => ({
   mode: 'IDLE',
@@ -12,6 +13,7 @@ const emptySession = () => ({
   replayIndex: 0,
   replayInFlight: false,
   replayWaitingForDocument: false,
+  waitingFromUrl: null,
   needsSiteAccess: false,
   lastResult: null,
   error: null,
@@ -34,6 +36,13 @@ async function patchSession(patch) {
   return setSession({ ...current, ...patch });
 }
 
+function clearNavigationProbe() {
+  if (navigationProbeTimer != null) {
+    clearTimeout(navigationProbeTimer);
+    navigationProbeTimer = null;
+  }
+}
+
 async function injectRuntime(tabId) {
   await chrome.scripting.executeScript({
     target: { tabId },
@@ -51,6 +60,7 @@ async function sendToTab(tabId, message) {
 }
 
 async function startRecording({ tabId, originPattern }) {
+  clearNavigationProbe();
   stepWriteQueue = Promise.resolve();
   const session = await setSession({
     ...emptySession(),
@@ -77,6 +87,7 @@ function appendStep(step, sender) {
 }
 
 async function stopRecording() {
+  clearNavigationProbe();
   await stepWriteQueue;
   const session = await getSession();
   if (session.tabId != null) {
@@ -92,23 +103,68 @@ async function stopRecording() {
     replayIndex: 0,
     replayInFlight: false,
     replayWaitingForDocument: false,
+    waitingFromUrl: null,
     needsSiteAccess: false,
   });
 }
 
 async function finishReplay(status, lastResult = null) {
+  clearNavigationProbe();
   return patchSession({
     mode: status,
     replayInFlight: false,
     replayWaitingForDocument: false,
+    waitingFromUrl: null,
     needsSiteAccess: false,
     lastResult,
   });
 }
 
+function scheduleNavigationProbe(delayMs = 250) {
+  clearNavigationProbe();
+  navigationProbeTimer = setTimeout(() => {
+    navigationProbeTimer = null;
+    probeNavigationProgress().catch(() => {});
+  }, delayMs);
+}
+
+async function probeNavigationProgress() {
+  const session = await getSession();
+  if (
+    session.mode !== 'REPLAYING' ||
+    !session.replayWaitingForDocument ||
+    session.tabId == null
+  ) return;
+
+  try {
+    const state = await chrome.tabs.sendMessage(session.tabId, { type: 'NOVA_CONTENT_STATE' });
+    const currentUrl = state?.url || null;
+    if (currentUrl && session.waitingFromUrl && currentUrl !== session.waitingFromUrl) {
+      await patchSession({
+        replayWaitingForDocument: false,
+        waitingFromUrl: null,
+        replayInFlight: false,
+        error: null,
+      });
+      await runReplayStep();
+      return;
+    }
+  } catch {
+    // A full navigation often destroys the old content context. tabs.onUpdated
+    // will resume after the new document reaches complete.
+  }
+
+  scheduleNavigationProbe(250);
+}
+
 async function runReplayStep() {
   let session = await getSession();
-  if (session.mode !== 'REPLAYING' || session.replayInFlight || session.tabId == null) return;
+  if (
+    session.mode !== 'REPLAYING' ||
+    session.replayInFlight ||
+    session.replayWaitingForDocument ||
+    session.tabId == null
+  ) return;
 
   if (session.replayIndex >= (session.steps || []).length) {
     await finishReplay('COMPLETED', { ok: true, status: 'COMPLETED' });
@@ -119,7 +175,6 @@ async function runReplayStep() {
   const step = session.steps[index];
   session = await patchSession({
     replayInFlight: true,
-    replayWaitingForDocument: false,
     needsSiteAccess: false,
   });
 
@@ -133,7 +188,7 @@ async function runReplayStep() {
   } catch (error) {
     await patchSession({
       replayInFlight: false,
-      replayWaitingForDocument: true,
+      replayWaitingForDocument: false,
       needsSiteAccess: true,
       error: error?.message || String(error),
     });
@@ -146,10 +201,25 @@ async function runReplayStep() {
     return;
   }
 
+  if (result.mayNavigate) {
+    await patchSession({
+      replayIndex: index + 1,
+      replayInFlight: false,
+      replayWaitingForDocument: true,
+      waitingFromUrl: result.urlBefore || null,
+      needsSiteAccess: false,
+      lastResult: result,
+      error: null,
+    });
+    scheduleNavigationProbe(250);
+    return;
+  }
+
   await patchSession({
     replayIndex: index + 1,
     replayInFlight: false,
-    replayWaitingForDocument: !!result.mayNavigate,
+    replayWaitingForDocument: false,
+    waitingFromUrl: null,
     needsSiteAccess: false,
     lastResult: result,
     error: null,
@@ -157,10 +227,11 @@ async function runReplayStep() {
 
   setTimeout(() => {
     runReplayStep().catch(() => {});
-  }, result.mayNavigate ? 700 : 180);
+  }, 180);
 }
 
 async function startReplay({ tabId }) {
+  clearNavigationProbe();
   const stored = await chrome.storage.local.get(SAVED_MACRO_KEY);
   const steps = stored[SAVED_MACRO_KEY] || [];
   const session = await setSession({
@@ -193,19 +264,25 @@ async function resumeAfterNavigation(tabId) {
   }
 
   if (session.mode === 'REPLAYING') {
-    await patchSession({
-      replayInFlight: false,
-      replayWaitingForDocument: false,
-    });
+    // Ignore unrelated "complete" events while a normal step is still in-flight.
+    if (!session.replayWaitingForDocument && !session.needsSiteAccess) return session;
+
+    clearNavigationProbe();
     try {
       await injectRuntime(tabId);
-      await patchSession({ needsSiteAccess: false, error: null });
+      await patchSession({
+        replayInFlight: false,
+        replayWaitingForDocument: false,
+        waitingFromUrl: null,
+        needsSiteAccess: false,
+        error: null,
+      });
       await runReplayStep();
       return getSession();
     } catch (error) {
       return patchSession({
         replayInFlight: false,
-        replayWaitingForDocument: true,
+        replayWaitingForDocument: false,
         needsSiteAccess: true,
         error: error?.message || String(error),
       });
@@ -250,6 +327,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       case 'NOVA_GET_SESSION':
         return getSession();
       case 'NOVA_CLEAR_SESSION':
+        clearNavigationProbe();
         return setSession(emptySession());
       default:
         return { ok: false, error: 'UNKNOWN_MESSAGE' };
