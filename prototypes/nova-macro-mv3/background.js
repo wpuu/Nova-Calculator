@@ -297,11 +297,14 @@ async function resumeCurrent({ tabId, originPattern }) {
   if (!['RECORDING', 'REPLAYING'].includes(session.mode)) {
     return { ok: false, error: 'NO_ACTIVE_MACRO_SESSION' };
   }
+
+  // Keep needsSiteAccess=true until resumeAfterNavigation actually enters the
+  // replay recovery path. Clearing it here would make REPLAYING look idle and
+  // silently skip the user's explicit "Allow this site & resume" action.
   await patchSession({
     tabId,
     originPattern,
     error: null,
-    needsSiteAccess: false,
   });
   return resumeAfterNavigation(tabId);
 }
