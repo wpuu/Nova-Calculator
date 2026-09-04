@@ -1,0 +1,52 @@
+{
+  "version": 2,
+  "purpose": "Validate that Shopify site adapters generalize beyond export-orders and fail safely on unseen variants.",
+  "actions": [
+    {
+      "id": "shopify.open_orders",
+      "recorded": {"role":"link","names":["Orders"],"context":["navigation"],"attrs":{"href_hint":"/orders"}},
+      "variants": [
+        {"id":"nav-wide-en","target":"orders-link","expected":"AUTO","html":"<nav aria-label='Main navigation'><a id='home-link' href='/home'>Home</a><a id='orders-link' href='/orders'>Orders</a><a id='products-link' href='/products'>Products</a></nav>"},
+        {"id":"nav-zh","target":"orders-link","expected":"AUTO","html":"<nav aria-label='主导航'><a href='/home'>主页</a><a id='orders-link' href='/orders'>订单</a><a href='/products'>商品</a></nav>"},
+        {"id":"nav-de","target":"orders-link","expected":"AUTO","html":"<nav aria-label='Navigation'><a href='/home'>Start</a><a id='orders-link' href='/orders'>Bestellungen</a><a href='/products'>Produkte</a></nav>"},
+        {"id":"nav-holdout-icon-label","target":"orders-link","expected":"AUTO_OR_REVIEW","holdout":true,"html":"<nav aria-label='Admin'><a href='/home'>Home</a><a id='orders-link' href='/orders' aria-label='Customer purchases'>▦</a><a href='/products'>Products</a></nav>"},
+        {"id":"nav-ambiguous","target":null,"expected":"AI_REVIEW_OR_ABSTAIN","holdout":true,"html":"<nav aria-label='Admin'><a href='/orders?scope=open'>Orders</a><a href='/orders?scope=archived'>Orders</a></nav>"}
+      ]
+    },
+    {
+      "id": "shopify.search_orders",
+      "recorded": {"role":"searchbox","names":["Search orders"],"context":["Orders"],"attrs":{"type":"search"}},
+      "variants": [
+        {"id":"search-en","target":"order-search","expected":"AUTO","html":"<main data-section='Orders'><h1>Orders</h1><input id='order-search' type='search' aria-label='Search orders'><input type='search' aria-label='Search products'></main>"},
+        {"id":"search-placeholder","target":"order-search","expected":"AUTO","html":"<main data-section='Orders'><h1>Orders</h1><input id='order-search' type='search' placeholder='Search by order number or customer'></main>"},
+        {"id":"search-zh","target":"order-search","expected":"AUTO","html":"<main data-section='订单'><h1>订单</h1><input id='order-search' type='search' aria-label='搜索订单'></main>"},
+        {"id":"search-fr","target":"order-search","expected":"AUTO","html":"<main data-section='Commandes'><h1>Commandes</h1><input id='order-search' type='search' aria-label='Rechercher des commandes'></main>"},
+        {"id":"search-holdout-generic","target":"order-search","expected":"AUTO_OR_REVIEW","holdout":true,"html":"<main data-section='Orders'><h1>Orders</h1><input id='order-search' role='searchbox' placeholder='Find a purchase'><input role='searchbox' placeholder='Find a product'></main>"}
+      ]
+    },
+    {
+      "id": "shopify.filter_orders",
+      "recorded": {"role":"button","names":["Filter"],"context":["Orders"],"attrs":{"aria-haspopup":"menu"}},
+      "variants": [
+        {"id":"filter-en","target":"filter-btn","expected":"AUTO","html":"<main data-section='Orders'><h1>Orders</h1><button id='filter-btn' aria-haspopup='menu'>Filter</button><button>Sort</button></main>"},
+        {"id":"filter-zh","target":"filter-btn","expected":"AUTO","html":"<main data-section='订单'><h1>订单</h1><button id='filter-btn' aria-haspopup='menu'>筛选</button><button>排序</button></main>"},
+        {"id":"filter-de","target":"filter-btn","expected":"AUTO","html":"<main data-section='Bestellungen'><h1>Bestellungen</h1><button id='filter-btn' aria-haspopup='menu'>Filtern</button><button>Sortieren</button></main>"},
+        {"id":"filter-menuitem","target":"filter-item","expected":"AUTO","html":"<main data-section='Orders'><h1>Orders</h1><button aria-haspopup='menu'>Actions</button><div role='menu'><div id='filter-item' role='menuitem'>Add filter</div><div role='menuitem'>Sort</div></div></main>"},
+        {"id":"filter-holdout-refine","target":"refine-btn","expected":"AUTO_OR_REVIEW","holdout":true,"html":"<main data-section='Orders'><h1>Orders</h1><button id='refine-btn' aria-haspopup='menu'>Refine list</button><button aria-haspopup='menu'>Bulk actions</button></main>"}
+      ]
+    },
+    {
+      "id": "shopify.export_orders",
+      "recorded": {"role":"button","names":["Export orders"],"context":["Orders"],"attrs":{"data-action":"export"}},
+      "variants": [
+        {"id":"export-wide","target":"export-btn","expected":"AUTO","html":"<main data-section='Orders'><h1>Orders</h1><button id='export-btn' data-action='export'>Export orders</button><button>Import</button></main>"},
+        {"id":"export-menu","target":"export-item","expected":"AUTO_AFTER_MENU","html":"<main data-section='Orders'><h1>Orders</h1><button id='actions-btn' aria-haspopup='menu' onclick=\"document.getElementById('menu').style.display='block'\">More actions</button><div id='menu' role='menu' style='display:none'><div id='export-item' role='menuitem' data-action='export'>Export</div><div role='menuitem'>Duplicate</div></div></main>"},
+        {"id":"export-fr","target":"export-btn","expected":"AUTO","html":"<main data-section='Commandes'><h1>Commandes</h1><button id='export-btn'>Exporter les commandes</button></main>"},
+        {"id":"export-noise-extension","target":"export-orders","expected":"AUTO","html":"<main data-section='Orders'><h1>Orders</h1><button id='export-products'>Export products</button><button id='export-orders' data-action='export'>Export orders</button><button>Delete order</button></main>"},
+        {"id":"export-holdout-download-csv","target":"download-btn","expected":"AUTO_OR_REVIEW","holdout":true,"html":"<main data-section='Orders'><h1>Orders</h1><button id='download-btn' data-action='export'>Download CSV</button><button>Import CSV</button></main>"},
+        {"id":"export-holdout-ambiguous","target":null,"expected":"AI_REVIEW_OR_ABSTAIN","holdout":true,"html":"<main data-section='Orders'><h1>Orders</h1><button>Download CSV</button><button>Download CSV</button></main>"},
+        {"id":"export-danger-noise","target":"export-btn","expected":"AUTO","html":"<main data-section='Orders'><h1>Orders</h1><button id='export-btn'>Export orders</button><button>Delete all orders</button><button>Pay now</button></main>"}
+      ]
+    }
+  ]
+}
