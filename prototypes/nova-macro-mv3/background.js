@@ -51,12 +51,10 @@ async function injectRuntime(tabId) {
 }
 
 async function sendToTab(tabId, message) {
-  try {
-    return await chrome.tabs.sendMessage(tabId, message);
-  } catch (firstError) {
-    await injectRuntime(tabId);
-    return chrome.tabs.sendMessage(tabId, message);
-  }
+  // Never auto-retry a message that may have side effects. The caller must
+  // explicitly inject first and then send once. If delivery becomes uncertain,
+  // pause fail-closed instead of risking a duplicate click/input.
+  return chrome.tabs.sendMessage(tabId, message);
 }
 
 async function startRecording({ tabId, originPattern }) {
@@ -180,6 +178,8 @@ async function runReplayStep() {
 
   let result;
   try {
+    // Content runtime is injected at replay start and after each navigation.
+    // Delivery here is deliberately at-most-once.
     result = await sendToTab(session.tabId, {
       type: 'NOVA_EXECUTE_STEP',
       step,
@@ -264,7 +264,6 @@ async function resumeAfterNavigation(tabId) {
   }
 
   if (session.mode === 'REPLAYING') {
-    // Ignore unrelated "complete" events while a normal step is still in-flight.
     if (!session.replayWaitingForDocument && !session.needsSiteAccess) return session;
 
     clearNavigationProbe();
@@ -298,9 +297,6 @@ async function resumeCurrent({ tabId, originPattern }) {
     return { ok: false, error: 'NO_ACTIVE_MACRO_SESSION' };
   }
 
-  // Keep needsSiteAccess=true until resumeAfterNavigation actually enters the
-  // replay recovery path. Clearing it here would make REPLAYING look idle and
-  // silently skip the user's explicit "Allow this site & resume" action.
   await patchSession({
     tabId,
     originPattern,
