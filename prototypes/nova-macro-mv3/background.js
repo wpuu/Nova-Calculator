@@ -2,6 +2,7 @@
 
 const SESSION_KEY = 'novaMacroPocSession';
 const SAVED_MACRO_KEY = 'novaMacroPocLast';
+let stepWriteQueue = Promise.resolve();
 
 const emptySession = () => ({
   mode: 'IDLE',
@@ -11,6 +12,7 @@ const emptySession = () => ({
   replayIndex: 0,
   replayInFlight: false,
   replayWaitingForDocument: false,
+  needsSiteAccess: false,
   lastResult: null,
   error: null,
   updatedAt: Date.now(),
@@ -49,6 +51,7 @@ async function sendToTab(tabId, message) {
 }
 
 async function startRecording({ tabId, originPattern }) {
+  stepWriteQueue = Promise.resolve();
   const session = await setSession({
     ...emptySession(),
     mode: 'RECORDING',
@@ -60,16 +63,21 @@ async function startRecording({ tabId, originPattern }) {
   return session;
 }
 
-async function appendStep(step, sender) {
-  const session = await getSession();
-  if (session.mode !== 'RECORDING') return { ok: false, ignored: true };
-  if (sender?.tab?.id !== session.tabId) return { ok: false, ignored: true };
-  const steps = [...session.steps, step];
-  await patchSession({ steps });
-  return { ok: true, count: steps.length };
+function appendStep(step, sender) {
+  const operation = stepWriteQueue.then(async () => {
+    const session = await getSession();
+    if (session.mode !== 'RECORDING') return { ok: false, ignored: true };
+    if (sender?.tab?.id !== session.tabId) return { ok: false, ignored: true };
+    const steps = [...session.steps, step];
+    await patchSession({ steps, error: null });
+    return { ok: true, count: steps.length };
+  });
+  stepWriteQueue = operation.catch(() => {});
+  return operation;
 }
 
 async function stopRecording() {
+  await stepWriteQueue;
   const session = await getSession();
   if (session.tabId != null) {
     try {
@@ -84,6 +92,7 @@ async function stopRecording() {
     replayIndex: 0,
     replayInFlight: false,
     replayWaitingForDocument: false,
+    needsSiteAccess: false,
   });
 }
 
@@ -92,6 +101,7 @@ async function finishReplay(status, lastResult = null) {
     mode: status,
     replayInFlight: false,
     replayWaitingForDocument: false,
+    needsSiteAccess: false,
     lastResult,
   });
 }
@@ -107,7 +117,11 @@ async function runReplayStep() {
 
   const index = session.replayIndex;
   const step = session.steps[index];
-  session = await patchSession({ replayInFlight: true, replayWaitingForDocument: false });
+  session = await patchSession({
+    replayInFlight: true,
+    replayWaitingForDocument: false,
+    needsSiteAccess: false,
+  });
 
   let result;
   try {
@@ -120,6 +134,7 @@ async function runReplayStep() {
     await patchSession({
       replayInFlight: false,
       replayWaitingForDocument: true,
+      needsSiteAccess: true,
       error: error?.message || String(error),
     });
     return;
@@ -135,20 +150,14 @@ async function runReplayStep() {
     replayIndex: index + 1,
     replayInFlight: false,
     replayWaitingForDocument: !!result.mayNavigate,
+    needsSiteAccess: false,
     lastResult: result,
     error: null,
   });
 
-  if (result.mayNavigate) {
-    setTimeout(() => {
-      runReplayStep().catch(() => {});
-    }, 700);
-    return;
-  }
-
   setTimeout(() => {
     runReplayStep().catch(() => {});
-  }, 180);
+  }, result.mayNavigate ? 700 : 180);
 }
 
 async function startReplay({ tabId }) {
@@ -174,22 +183,30 @@ async function resumeAfterNavigation(tabId) {
     try {
       await injectRuntime(tabId);
       await sendToTab(tabId, { type: 'NOVA_SET_RECORDING', recording: true });
-      return patchSession({ error: null });
+      return patchSession({ error: null, needsSiteAccess: false });
     } catch (error) {
-      return patchSession({ error: error?.message || String(error) });
+      return patchSession({
+        error: error?.message || String(error),
+        needsSiteAccess: true,
+      });
     }
   }
 
   if (session.mode === 'REPLAYING') {
-    await patchSession({ replayInFlight: false, replayWaitingForDocument: false });
+    await patchSession({
+      replayInFlight: false,
+      replayWaitingForDocument: false,
+    });
     try {
       await injectRuntime(tabId);
+      await patchSession({ needsSiteAccess: false, error: null });
       await runReplayStep();
       return getSession();
     } catch (error) {
       return patchSession({
         replayInFlight: false,
         replayWaitingForDocument: true,
+        needsSiteAccess: true,
         error: error?.message || String(error),
       });
     }
@@ -203,7 +220,12 @@ async function resumeCurrent({ tabId, originPattern }) {
   if (!['RECORDING', 'REPLAYING'].includes(session.mode)) {
     return { ok: false, error: 'NO_ACTIVE_MACRO_SESSION' };
   }
-  await patchSession({ tabId, originPattern, error: null });
+  await patchSession({
+    tabId,
+    originPattern,
+    error: null,
+    needsSiteAccess: false,
+  });
   return resumeAfterNavigation(tabId);
 }
 
