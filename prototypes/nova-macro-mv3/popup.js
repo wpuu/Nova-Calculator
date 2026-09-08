@@ -48,11 +48,14 @@ async function withUiLock(task) {
 
 document.getElementById('start').addEventListener('click', () => withUiLock(async () => {
   const tab = await activeTab();
-  const originPattern = await ensureCurrentSitePermission(tab);
   return callBackground({
     type: 'NOVA_START_RECORDING',
     tabId: tab.id,
-    originPattern,
+    // Opening the extension popup grants activeTab for the current origin. That
+    // temporary grant survives same-origin navigation, so do not immediately
+    // ask the user for persistent host access. Persistent optional permission is
+    // requested only if the macro later crosses to a different origin.
+    originPattern: originPatternFor(tab.url),
   });
 }));
 
@@ -62,8 +65,11 @@ document.getElementById('stop').addEventListener('click', () => withUiLock(async
 
 document.getElementById('replay').addEventListener('click', () => withUiLock(async () => {
   const tab = await activeTab();
-  await ensureCurrentSitePermission(tab);
-  return callBackground({ type: 'NOVA_START_REPLAY', tabId: tab.id });
+  return callBackground({
+    type: 'NOVA_START_REPLAY',
+    tabId: tab.id,
+    originPattern: originPatternFor(tab.url),
+  });
 }));
 
 document.getElementById('grant').addEventListener('click', () => withUiLock(async () => {
