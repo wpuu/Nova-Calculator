@@ -68,19 +68,24 @@ async function waitForWorker(browser) {
   return { worker, extensionId: new URL(target.url()).host };
 }
 
-async function openPopup(browser, worker) {
-  const existing = new Set(
-    browser.targets()
-      .filter((target) => target.type() === 'page' && target.url().endsWith('/popup.html'))
-      .map((target) => target.url()),
-  );
-  await worker.evaluate(() => chrome.action.openPopup());
+async function findNovaExtension(browser, extensionId) {
+  const extensions = await browser.extensions();
+  const extension = extensions.get(extensionId);
+  assert(extension, `Nova Macro extension ${extensionId} not found in browser.extensions()`);
+  assert.equal(extension.name, 'Nova Macro Semantic POC');
+  assert.equal(extension.enabled, true);
+  return extension;
+}
+
+async function openPopup(browser, extension, page) {
+  // Puppeteer's triggerExtensionAction simulates a real toolbar click. That is
+  // important here because it grants activeTab exactly as a user invocation does.
+  await page.triggerExtensionAction(extension);
   const target = await browser.waitForTarget(
     (candidate) =>
       candidate.type() === 'page' &&
-      candidate.url().startsWith('chrome-extension://') &&
-      candidate.url().endsWith('/popup.html') &&
-      (!existing.has(candidate.url()) || candidate.url().endsWith('/popup.html')),
+      candidate.url().includes(extension.id) &&
+      candidate.url().endsWith('/popup.html'),
     { timeout: 10000 },
   );
   const popup = await target.asPage();
@@ -122,14 +127,13 @@ try {
   });
 
   const { worker, extensionId } = await waitForWorker(browser);
+  const extension = await findNovaExtension(browser, extensionId);
   console.log(`Loaded Nova Macro extension: ${extensionId}`);
 
   const page = await browser.newPage();
   await page.goto(`${origin}/start`, { waitUntil: 'domcontentloaded' });
 
-  // Opening the popup is an extension action and grants activeTab for the
-  // current origin. Same-origin navigation keeps that temporary access.
-  let popup = await openPopup(browser, worker);
+  let popup = await openPopup(browser, extension, page);
   const startOutput = await clickPopupAndWait(popup, '#start');
   assert.match(startOutput, /"mode":\s*"RECORDING"/);
 
@@ -144,7 +148,7 @@ try {
   await page.click('#export');
   await page.waitForFunction(() => document.body.dataset.exported === 'yes');
 
-  popup = await openPopup(browser, worker);
+  popup = await openPopup(browser, extension, page);
   const stopOutput = await clickPopupAndWait(popup, '#stop');
   assert.match(stopOutput, /"mode":\s*"SAVED"/);
 
@@ -159,14 +163,13 @@ try {
   // Replay the saved macro from a clean start page. It must navigate, resume in
   // the new document, restore the controlled input value, and click Export once.
   await page.goto(`${origin}/start`, { waitUntil: 'domcontentloaded' });
-  popup = await openPopup(browser, worker);
+  const replayNavigation = page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+  popup = await openPopup(browser, extension, page);
   const replayOutput = await clickPopupAndWait(popup, '#replay');
   assert.match(replayOutput, /"mode":\s*"REPLAYING"/);
+  await replayNavigation;
+  assert.equal(page.url(), `${origin}/orders`);
 
-  await page.waitForFunction(
-    () => location.pathname === '/orders',
-    { timeout: 12000 },
-  );
   await page.waitForFunction(
     () => document.querySelector('#search')?.value === '#1042',
     { timeout: 12000 },
