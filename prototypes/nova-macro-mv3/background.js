@@ -155,6 +155,39 @@ async function probeNavigationProgress() {
   scheduleNavigationProbe(250);
 }
 
+async function continueAfterSuccessfulStep(session, index, result) {
+  if (result.mayNavigate) {
+    await patchSession({
+      mode: 'REPLAYING',
+      replayIndex: index + 1,
+      replayInFlight: false,
+      replayWaitingForDocument: true,
+      waitingFromUrl: result.urlBefore || null,
+      needsSiteAccess: false,
+      lastResult: result,
+      error: null,
+    });
+    scheduleNavigationProbe(250);
+    return getSession();
+  }
+
+  await patchSession({
+    mode: 'REPLAYING',
+    replayIndex: index + 1,
+    replayInFlight: false,
+    replayWaitingForDocument: false,
+    waitingFromUrl: null,
+    needsSiteAccess: false,
+    lastResult: result,
+    error: null,
+  });
+
+  setTimeout(() => {
+    runReplayStep().catch(() => {});
+  }, 180);
+  return getSession();
+}
+
 async function runReplayStep() {
   let session = await getSession();
   if (
@@ -201,33 +234,7 @@ async function runReplayStep() {
     return;
   }
 
-  if (result.mayNavigate) {
-    await patchSession({
-      replayIndex: index + 1,
-      replayInFlight: false,
-      replayWaitingForDocument: true,
-      waitingFromUrl: result.urlBefore || null,
-      needsSiteAccess: false,
-      lastResult: result,
-      error: null,
-    });
-    scheduleNavigationProbe(250);
-    return;
-  }
-
-  await patchSession({
-    replayIndex: index + 1,
-    replayInFlight: false,
-    replayWaitingForDocument: false,
-    waitingFromUrl: null,
-    needsSiteAccess: false,
-    lastResult: result,
-    error: null,
-  });
-
-  setTimeout(() => {
-    runReplayStep().catch(() => {});
-  }, 180);
+  await continueAfterSuccessfulStep(session, index, result);
 }
 
 async function startReplay({ tabId }) {
@@ -305,6 +312,72 @@ async function resumeCurrent({ tabId, originPattern }) {
   return resumeAfterNavigation(tabId);
 }
 
+function reviewFromSession(session) {
+  return session?.lastResult?.status === 'AI_REVIEW'
+    ? session.lastResult.review || null
+    : null;
+}
+
+async function selectRepairCandidate({ reviewId, candidateId }) {
+  const session = await getSession();
+  const review = reviewFromSession(session);
+  if (session.mode !== 'AI_REVIEW' || !review) {
+    return { ok: false, error: 'NO_PENDING_AI_REVIEW' };
+  }
+  if (review.reviewId !== reviewId) {
+    return { ok: false, error: 'STALE_AI_REVIEW' };
+  }
+  if (!Array.isArray(review.allowedCandidateIds) || !review.allowedCandidateIds.includes(candidateId)) {
+    return { ok: false, error: 'INVALID_AI_CANDIDATE' };
+  }
+  if (session.tabId == null) return { ok: false, error: 'NO_ACTIVE_TAB' };
+
+  const index = session.replayIndex;
+  let result;
+  try {
+    // The model never supplies a selector. It may only echo a candidate ID that
+    // the local content runtime minted for the current document and review.
+    result = await sendToTab(session.tabId, {
+      type: 'NOVA_APPLY_REVIEW_CHOICE',
+      reviewId,
+      candidateId,
+    });
+  } catch (error) {
+    return finishReplay('ABSTAIN', {
+      ok: false,
+      status: 'STALE_AI_REVIEW',
+      index,
+      error: error?.message || String(error),
+    });
+  }
+
+  if (!result?.ok) {
+    const terminal = result?.status === 'REQUIRES_CONFIRMATION'
+      ? 'REQUIRES_CONFIRMATION'
+      : 'ABSTAIN';
+    return finishReplay(terminal, result || { ok: false, status: terminal, index });
+  }
+
+  return continueAfterSuccessfulStep(session, index, result);
+}
+
+async function abstainRepair({ reviewId }) {
+  const session = await getSession();
+  const review = reviewFromSession(session);
+  if (session.mode !== 'AI_REVIEW' || !review) {
+    return { ok: false, error: 'NO_PENDING_AI_REVIEW' };
+  }
+  if (review.reviewId !== reviewId) {
+    return { ok: false, error: 'STALE_AI_REVIEW' };
+  }
+  return finishReplay('ABSTAIN', {
+    ok: false,
+    status: 'ABSTAIN',
+    index: session.replayIndex,
+    reviewId,
+  });
+}
+
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo.status !== 'complete') return;
   resumeAfterNavigation(tabId).catch(() => {});
@@ -323,6 +396,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return startReplay(message);
       case 'NOVA_RESUME_CURRENT':
         return resumeCurrent(message);
+      case 'NOVA_SELECT_REPAIR_CANDIDATE':
+        return selectRepairCandidate(message);
+      case 'NOVA_ABSTAIN_REPAIR':
+        return abstainRepair(message);
       case 'NOVA_GET_SESSION':
         return getSession();
       case 'NOVA_CLEAR_SESSION':
