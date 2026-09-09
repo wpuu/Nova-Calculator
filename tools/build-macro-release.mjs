@@ -99,10 +99,23 @@ function normalizeGatewayOrigin(value) {
   if (url.pathname !== '/' && url.pathname !== '') {
     throw new Error('NOVA_MACRO_GATEWAY_ORIGIN must not contain a path');
   }
-  if (!url.hostname || url.hostname === 'localhost' || url.hostname.endsWith('.localhost')) {
-    throw new Error('NOVA_MACRO_GATEWAY_ORIGIN must use a routable HTTPS hostname');
+  if (!isExactDnsHostname(url.hostname)) {
+    throw new Error('NOVA_MACRO_GATEWAY_ORIGIN must use one exact routable DNS hostname');
   }
   return url.origin;
+}
+
+function isExactDnsHostname(hostname) {
+  const host = String(hostname ?? '').toLowerCase();
+  if (!host || host.length > 253 || host === 'localhost' || host.endsWith('.localhost')) return false;
+  if (host.includes('*') || !/^[a-z0-9.-]+$/.test(host)) return false;
+  const labels = host.split('.');
+  if (labels.length < 2) return false;
+  return labels.every((label) => (
+    label.length >= 1
+    && label.length <= 63
+    && /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label)
+  ));
 }
 
 function normalizeOauthClientId(value) {
