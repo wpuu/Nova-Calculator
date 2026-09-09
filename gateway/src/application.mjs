@@ -9,6 +9,10 @@ import {
   createBillingEntitlementFetchHandler,
 } from './billing-entitlement-service.mjs';
 import { createNovaFetchHandler } from './http-handler.mjs';
+import {
+  createMacroCandidateReviewFetchHandler,
+} from './macro-candidate-review-http-handler.mjs';
+import { MacroCandidateReviewService } from './macro-candidate-review-service.mjs';
 import { NovaAiService } from './nova-ai-service.mjs';
 import {
   ProductEventService,
@@ -60,6 +64,11 @@ export function createNovaGatewayApplication(options = {}) {
     quotaLedger,
     dispatcher: providerRuntime.dispatcher,
   });
+  const macroCandidateReviewService = new MacroCandidateReviewService({
+    authVerifier,
+    quotaLedger,
+    dispatcher: providerRuntime.macroCandidateReviewDispatcher,
+  });
   const anonymousSessionService = new AnonymousSessionService({
     tokenService: sessionTokens,
     installationProofVerifier: options.installationProofVerifier,
@@ -106,6 +115,9 @@ export function createNovaGatewayApplication(options = {}) {
 
   return Object.freeze({
     aiHandler: createNovaFetchHandler({ service: aiService }),
+    macroCandidateReviewHandler: createMacroCandidateReviewFetchHandler({
+      service: macroCandidateReviewService,
+    }),
     anonymousSessionHandler: createAnonymousSessionFetchHandler({ service: anonymousSessionService }),
     billingHandler,
     productEventHandler,
@@ -119,6 +131,7 @@ export function createNovaGatewayApplication(options = {}) {
       aiPlusRpmLimit: aiPlusLimits.rpmLimit,
       signedNovaSessions: true,
       proofGatedAnonymousSessions: true,
+      boundedMacroCandidateReview: true,
       serverVerifiedPlayBilling: Boolean(options.purchaseVerifier),
       privacySafeProductEvents: Boolean(options.productEventStore),
       serverAuthoritativePurchaseAnalytics: Boolean(options.purchaseVerifier && options.productEventStore),
