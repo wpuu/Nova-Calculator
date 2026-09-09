@@ -35,6 +35,7 @@ jobs:
           node tools/verify-macro-poc.mjs
           node tools/macro-background-state-eval.mjs
           node tools/macro-browser-session-eval.mjs
+          node tools/macro-release-config-eval.mjs
 
       - name: Verify bounded Agnes candidate output contract
         run: node tools/agnes-candidate-review-eval.mjs --contract-only
