@@ -68,6 +68,8 @@ for (const state of ['IDLE','RECORDING','SITE_ACCESS_REQUIRED','REPLAYING','AI_R
   if (!contract.states?.includes(state)) fail(`UI contract state missing: ${state}`);
 }
 if (!contract.commands?.includes('RESUME_CURRENT_SITE_ONCE')) fail('one-time cross-origin resume command missing');
+if (!contract.commands?.includes('SELECT_REPAIR_CANDIDATE')) fail('candidate-only repair command missing');
+if (!contract.commands?.includes('ABSTAIN_REPAIR')) fail('repair abstain command missing');
 
 const requiredUiRules = {
   requestSiteAccessOnlyFromExplicitUserGesture: true,
@@ -94,12 +96,23 @@ const holdoutCount = (fixture.actions || []).flatMap((action) => action.variants
 if (holdoutCount < 8) fail(`holdout coverage too small: ${holdoutCount}`);
 
 const content = read('content.js');
-for (const marker of ['BLOCKED_SENSITIVE_INPUT','REQUIRES_CONFIRMATION','NOVA_RECORD_STEP','resolveWithWait','setNativeValue','HTMLInputElement.prototype','urlBefore','NOVA_CONTENT_STATE']) {
+for (const marker of [
+  'BLOCKED_SENSITIVE_INPUT','REQUIRES_CONFIRMATION','NOVA_RECORD_STEP','resolveWithWait',
+  'setNativeValue','HTMLInputElement.prototype','urlBefore','NOVA_CONTENT_STATE',
+  'NOVA_APPLY_REVIEW_CHOICE','allowedCandidateIds','SELECT_LISTED_CANDIDATE_OR_ABSTAIN',
+  'INVALID_AI_CANDIDATE','STALE_AI_REVIEW',
+]) {
   if (!content.includes(marker)) fail(`content safety/orchestration marker missing: ${marker}`);
 }
 
 const background = read('background.js');
-for (const marker of ['chrome.storage.session','chrome.tabs.onUpdated','stepWriteQueue','NOVA_RESUME_CURRENT','needsSiteAccess','replayWaitingForDocument','waitingFromUrl','probeNavigationProgress',"if (!session.replayWaitingForDocument && !session.needsSiteAccess) return session;",'Delivery here is deliberately at-most-once']) {
+for (const marker of [
+  'chrome.storage.session','chrome.tabs.onUpdated','stepWriteQueue','NOVA_RESUME_CURRENT','needsSiteAccess',
+  'replayWaitingForDocument','waitingFromUrl','probeNavigationProgress',
+  "if (!session.replayWaitingForDocument && !session.needsSiteAccess) return session;",
+  'Delivery here is deliberately at-most-once','NOVA_SELECT_REPAIR_CANDIDATE','NOVA_ABSTAIN_REPAIR',
+  'INVALID_AI_CANDIDATE','NOVA_APPLY_REVIEW_CHOICE',
+]) {
   if (!background.includes(marker)) fail(`background navigation/orchestration marker missing: ${marker}`);
 }
 
@@ -107,10 +120,15 @@ const popup = read('popup.js');
 if (popup.includes('chrome.permissions.request')) fail('default popup must not request persistent host permission');
 if (!popup.includes("type: 'NOVA_RESUME_CURRENT'")) fail('popup one-time resume must route through background');
 
-for (const testFile of ['macro-background-state-eval.mjs','macro-cross-origin-e2e.mjs','macro-shopify-action-pack-e2e.mjs']) {
+for (const testFile of [
+  'macro-background-state-eval.mjs',
+  'macro-cross-origin-e2e.mjs',
+  'macro-shopify-action-pack-e2e.mjs',
+  'macro-ai-review-candidate-e2e.mjs',
+]) {
   if (!fs.existsSync(path.join(root, 'tools', testFile))) fail(`required Macro gate missing: ${testFile}`);
 }
 
 if (!process.exitCode) {
-  console.log(`Macro POC guard passed: ${requiredActions.length} actions, ${holdoutCount} holdouts, activeTab-first cross-origin architecture intact.`);
+  console.log(`Macro POC guard passed: ${requiredActions.length} actions, ${holdoutCount} holdouts, activeTab-first + candidate-only AI review architecture intact.`);
 }
