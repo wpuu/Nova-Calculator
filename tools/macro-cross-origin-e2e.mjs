@@ -99,6 +99,17 @@ async function clickPopupAndWait(popup, selector) {
   return popup.$eval('#output', (node) => node.textContent);
 }
 
+async function clickPermissionGrant(popup) {
+  // chrome.permissions.request can open browser-owned permission UI and close
+  // the extension popup. Once clicked, observe service-worker/permission state
+  // instead of assuming the popup frame survives.
+  try {
+    await popup.click('#grant');
+  } catch (error) {
+    if (!/detached|closed|Target/i.test(error?.message || '')) throw error;
+  }
+}
+
 async function getSession(worker) {
   return worker.evaluate(async () => {
     const stored = await chrome.storage.session.get('novaMacroPocSession');
@@ -139,7 +150,6 @@ try {
   const extension = await findExtension(browser, extensionId);
   const page = await browser.newPage();
 
-  // RECORD: activeTab starts on origin A, then must be revoked on cross-origin B.
   await page.goto(`${originA}/start`, { waitUntil: 'domcontentloaded' });
   let popup = await openPopup(browser, extension, page);
   const startOutput = await clickPopupAndWait(popup, '#start');
@@ -159,8 +169,7 @@ try {
   console.log('PASS recording pauses before any permission is granted on origin B');
 
   popup = await openPopup(browser, extension, page);
-  const grantRecordOutput = await clickPopupAndWait(popup, '#grant');
-  assert.match(grantRecordOutput, /"mode":\s*"RECORDING"/);
+  await clickPermissionGrant(popup);
   await waitForSession(worker, (session) => session.mode === 'RECORDING' && !session.needsSiteAccess);
 
   const permissionGranted = await worker.evaluate(async () =>
@@ -186,7 +195,6 @@ try {
   assert.equal(saved[1].value, '#2048');
   console.log('PASS explicit grant resumes recording and preserves all 3 steps');
 
-  // Remove B permission so replay must prove the same pause/grant flow again.
   const removed = await worker.evaluate(async () =>
     chrome.permissions.remove({ origins: ['http://localhost/*'] }),
   );
@@ -207,8 +215,8 @@ try {
   console.log('PASS replay pauses on origin B before executing protected steps');
 
   popup = await openPopup(browser, extension, page);
-  const grantReplayOutput = await clickPopupAndWait(popup, '#grant');
-  assert.match(grantReplayOutput, /"mode":\s*"REPLAYING"/);
+  await clickPermissionGrant(popup);
+  await waitForSession(worker, (session) => session.mode === 'REPLAYING' && !session.needsSiteAccess);
 
   await page.waitForFunction(() => document.querySelector('#search')?.value === '#2048', { timeout: 12000 });
   await page.waitForFunction(() => document.body.dataset.exported === 'yes', { timeout: 12000 });
