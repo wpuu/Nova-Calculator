@@ -59,6 +59,15 @@ document.getElementById('replay').addEventListener('click', () => withUiLock(asy
   });
 }));
 
+document.getElementById('ai-review').addEventListener('click', () => withUiLock(async () => {
+  const session = await callBackground({ type: 'NOVA_GET_SESSION' });
+  const reviewId = session?.lastResult?.review?.reviewId || null;
+  return callBackground({
+    type: 'NOVA_RUN_AI_REVIEW',
+    reviewId,
+  });
+}));
+
 document.getElementById('grant').addEventListener('click', () => withUiLock(async () => {
   // Triggering the extension action on this page already grants activeTab for
   // the current origin. Resume with that one-session capability instead of
