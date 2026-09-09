@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { createProductionNovaGatewayApplication } from '../src/production-application.mjs';
+import { createMacroProductionNovaGatewayApplication } from '../src/macro-production-application.mjs';
 import { REQUEST_PRIORITY } from '../src/provider-key-pool.mjs';
 
 const NOW = 1_800_000_000_000;
@@ -10,7 +10,6 @@ const CLIENT_ID = 'chrome-client.apps.googleusercontent.com';
 function env() {
   return {
     VERCEL_ENV: 'preview',
-    NOVA_ANDROID_PACKAGE_NAME: 'com.wpuu.novacalculator',
     NOVA_PROVIDER_BASE_URL: 'https://provider.invalid/v1',
     NOVA_PROVIDER_MODEL: 'runtime-model',
     NOVA_PROVIDER_KEYS: 'unit-key',
@@ -55,14 +54,46 @@ function reviewRequest() {
   };
 }
 
+test('Macro production composition requires no Android Play credentials', async () => {
+  const app = createMacroProductionNovaGatewayApplication({
+    env: env(),
+    now: () => NOW,
+    quotaStore: {
+      async reserve() { return { status: 'ALLOWED', reservationId: 'health-r1' }; },
+      async commit() {},
+      async release() {},
+    },
+    keyPoolFactory({ keys }) {
+      return {
+        async lease() { return { id: keys[0].id, secret: keys[0].secret }; },
+        async reportSuccess() {},
+        async reportRateLimit() {},
+        async reportFailure() {},
+        async setEnabled() {},
+      };
+    },
+    fetchImpl: async () => { throw new Error('health does not call upstream'); },
+  });
+  assert.equal(typeof app.browserSessionHandler, 'function');
+  assert.equal(typeof app.macroCandidateReviewHandler, 'function');
+  assert.equal(app.safeSummary.deploymentComposition, 'macro-production-v1');
+  assert.equal(Object.hasOwn(app.safeSummary, 'androidPackageName'), false);
+
+  const health = await app.macroHealthHandler(new Request('https://nova.example/api/macro-health', { method: 'GET' }));
+  assert.equal(health.status, 200);
+  assert.deepEqual(await health.json(), {
+    status: 'OK',
+    browserSessionConfigured: true,
+    candidateReviewConfigured: true,
+  });
+});
+
 test('browser identity exchanges to Nova session and reaches bounded Macro review as FREE principal', async () => {
   const quotaCalls = [];
   let providerCallCount = 0;
-  const app = createProductionNovaGatewayApplication({
+  const app = createMacroProductionNovaGatewayApplication({
     env: env(),
     now: () => NOW,
-    installationProofVerifier: { verify: async () => ({ accepted: true, bindingId: 'unused' }) },
-    productEventStore: null,
     quotaStore: {
       async reserve(input) {
         quotaCalls.push(input);
