@@ -45,6 +45,9 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --no-save puppeteer@25.10.0
 
+      - name: Verify stable development Extension ID in real Chrome
+        run: node tools/macro-stable-extension-id-e2e.mjs
+
       - name: Run Shopify five-action DOM gate
         run: node tools/macro-shopify-action-pack-e2e.mjs
 
