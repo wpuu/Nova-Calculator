@@ -2,6 +2,7 @@ import { BrowserSessionService, createBrowserSessionFetchHandler } from './brows
 import { googleBrowserAccessTokenVerifierFromEnv } from './google-browser-access-token-verifier.mjs';
 import { createMacroCandidateReviewFetchHandler } from './macro-candidate-review-http-handler.mjs';
 import { MacroCandidateReviewService } from './macro-candidate-review-service.mjs';
+import { createMacroPreviewSessionFetchHandler, MacroPreviewSessionService } from './macro-preview-session.mjs';
 import { DailyQuotaLedger } from './quota-ledger.mjs';
 import { quotaPolicyFromEnv } from './quota-policy.mjs';
 import { RedisProviderKeyPool } from './redis-provider-key-pool.mjs';
@@ -15,7 +16,7 @@ import { upstashRedisEvalClientFromEnv } from './upstash-redis-eval-client.mjs';
  *
  * This intentionally excludes Android Play Integrity, Google Play Billing, product analytics,
  * and calculator AI routes. A browser-only Preview must not require or receive Android production
- * credentials merely to verify Google OAuth -> Nova session -> candidate-only Macro review.
+ * credentials merely to verify browser identity/session -> candidate-only Macro review.
  */
 export function createMacroProductionNovaGatewayApplication(options = {}) {
   const env = options.env ?? process.env;
@@ -90,15 +91,28 @@ export function createMacroProductionNovaGatewayApplication(options = {}) {
     browserSessionHandler = createBrowserSessionFetchHandler({ service: browserSessionService });
   }
 
+  let previewSessionHandler = null;
+  if (String(env.VERCEL_ENV ?? '').trim().toLowerCase() === 'preview') {
+    const previewSessionService = new MacroPreviewSessionService({
+      tokenService: sessionTokens,
+      bootstrapSecret: env.NOVA_MACRO_PREVIEW_BOOTSTRAP_SECRET,
+      environment: env.VERCEL_ENV,
+      ttlMs: env.NOVA_MACRO_PREVIEW_SESSION_TTL_MS ?? 10 * 60 * 1000,
+    });
+    previewSessionHandler = createMacroPreviewSessionFetchHandler({ service: previewSessionService });
+  }
+
   return Object.freeze({
     browserSessionHandler,
+    previewSessionHandler,
     macroCandidateReviewHandler,
-    macroHealthHandler: createMacroHealthFetchHandler({ browserSessionHandler }),
+    macroHealthHandler: createMacroHealthFetchHandler({ browserSessionHandler, previewSessionHandler }),
     safeSummary: Object.freeze({
-      deploymentComposition: 'macro-production-v1',
+      deploymentComposition: 'macro-production-v2',
       signedNovaSessions: true,
       googleBrowserIdentityVerification: Boolean(browserIdentityVerifier),
       googleBrowserSessionExchange: Boolean(browserSessionHandler),
+      previewSmokeSession: Boolean(previewSessionHandler),
       boundedMacroCandidateReview: true,
       sharedQuotaStore: true,
       sharedProviderCapacity: true,
@@ -108,7 +122,7 @@ export function createMacroProductionNovaGatewayApplication(options = {}) {
   });
 }
 
-function createMacroHealthFetchHandler({ browserSessionHandler }) {
+function createMacroHealthFetchHandler({ browserSessionHandler, previewSessionHandler }) {
   return async function handle(request) {
     if (request?.method?.toUpperCase() !== 'GET') {
       return new Response(JSON.stringify({ status: 'METHOD_NOT_ALLOWED' }), {
@@ -119,6 +133,7 @@ function createMacroHealthFetchHandler({ browserSessionHandler }) {
     return new Response(JSON.stringify({
       status: 'OK',
       browserSessionConfigured: Boolean(browserSessionHandler),
+      previewSmokeSessionConfigured: Boolean(previewSessionHandler),
       candidateReviewConfigured: true,
     }), {
       status: 200,
