@@ -13,7 +13,7 @@ function env(overrides = {}) {
     NOVA_PROVIDER_BASE_URL: 'https://provider.invalid/v1',
     NOVA_PROVIDER_MODEL: 'runtime-model',
     NOVA_PROVIDER_KEYS: 'provider-key-a,provider-key-b',
-    NOVA_PROVIDER_RPM_PER_KEY: '20',
+    NOVA_PROVIDER_RPM_PER_KEY: '12',
     NOVA_SESSION_SIGNING_SECRETS: SIGNING,
     NOVA_SESSION_SUBJECT_SECRET: SUBJECT,
     NOVA_AI_FREE_DAILY_LIMIT: '3',
@@ -41,12 +41,8 @@ function quotaStore(calls) {
       calls.reserve.push(input);
       return { status: QUOTA_DECISION.ALLOWED, remainingRequestHint: 2 };
     },
-    async commit(id) {
-      calls.commit.push(id);
-    },
-    async release(id) {
-      calls.release.push(id);
-    },
+    async commit(id) { calls.commit.push(id); },
+    async release(id) { calls.release.push(id); },
   };
 }
 
@@ -75,10 +71,7 @@ async function issueAnonymousToken(app) {
 function aiRequest(token, bodyOverrides = {}) {
   return new Request('https://nova.invalid/ai', {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${token}`,
-    },
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
     body: JSON.stringify({
       requestId: 'req-1',
       operation: 'EXPLAIN_CALCULATION',
@@ -93,10 +86,7 @@ function aiRequest(token, bodyOverrides = {}) {
 function macroReviewRequest(token, bodyOverrides = {}) {
   return new Request('https://nova.invalid/api/macro-candidate-review', {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${token}`,
-    },
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
     body: JSON.stringify({
       requestId: 'macro-req-1',
       operation: 'MACRO_CANDIDATE_REVIEW',
@@ -124,24 +114,16 @@ function macroReviewRequest(token, bodyOverrides = {}) {
 test('proof-gated anonymous session can call AI only with server-assigned FREE priority', async () => {
   const calls = { reserve: [], commit: [], release: [], provider: [] };
   const app = createNovaGatewayApplication({
-    env: env(),
-    quotaStore: quotaStore(calls),
-    installationProofVerifier: proofVerifier(),
-    now: () => 1_800_000_000_000,
-    newReservationId: () => 'reservation-1',
-    fetchImpl: async (url, options) => {
-      calls.provider.push({ url, options });
-      return providerResponse();
-    },
+    env: env(), quotaStore: quotaStore(calls), installationProofVerifier: proofVerifier(),
+    now: () => 1_800_000_000_000, newReservationId: () => 'reservation-1',
+    fetchImpl: async (url, options) => { calls.provider.push({ url, options }); return providerResponse(); },
   });
-
   const token = await issueAnonymousToken(app);
   const response = await app.aiHandler(aiRequest(token));
   assert.equal(response.status, 200);
   const body = await response.json();
   assert.equal(body.status, 'SUCCESS');
   assert.equal(body.answer, '因为 2+2 等于 4。');
-
   assert.equal(calls.reserve.length, 1);
   assert.equal(calls.reserve[0].priority, REQUEST_PRIORITY.FREE);
   assert.equal(calls.reserve[0].dailyLimit, 3);
@@ -153,22 +135,15 @@ test('proof-gated anonymous session can call AI only with server-assigned FREE p
 test('proof-gated session can call bounded Macro candidate review through the same quota policy', async () => {
   const calls = { reserve: [], commit: [], release: [], provider: [] };
   const app = createNovaGatewayApplication({
-    env: env(),
-    quotaStore: quotaStore(calls),
-    installationProofVerifier: proofVerifier(),
-    now: () => 1_800_000_000_000,
-    newReservationId: () => 'macro-reservation-1',
+    env: env(), quotaStore: quotaStore(calls), installationProofVerifier: proofVerifier(),
+    now: () => 1_800_000_000_000, newReservationId: () => 'macro-reservation-1',
     fetchImpl: async (url, options) => {
       calls.provider.push({ url, options });
       return providerResponse(JSON.stringify({
-        decision: 'SELECT',
-        candidate_id: 'candidate_2',
-        confidence: 0.94,
-        reason: 'Unique export candidate.',
+        decision: 'SELECT', candidate_id: 'candidate_2', confidence: 0.94, reason: 'Unique export candidate.',
       }));
     },
   });
-
   const token = await issueAnonymousToken(app);
   const response = await app.macroCandidateReviewHandler(macroReviewRequest(token));
   assert.equal(response.status, 200);
@@ -191,19 +166,11 @@ test('proof-gated session can call bounded Macro candidate review through the sa
 test('client privilege claims cannot upgrade an anonymous session', async () => {
   const calls = { reserve: [], commit: [], release: [], provider: [] };
   const app = createNovaGatewayApplication({
-    env: env(),
-    quotaStore: quotaStore(calls),
-    installationProofVerifier: proofVerifier(),
-    now: () => 1_800_000_000_000,
-    newReservationId: () => 'reservation-2',
-    fetchImpl: async () => providerResponse(),
+    env: env(), quotaStore: quotaStore(calls), installationProofVerifier: proofVerifier(),
+    now: () => 1_800_000_000_000, newReservationId: () => 'reservation-2', fetchImpl: async () => providerResponse(),
   });
-
   const token = await issueAnonymousToken(app);
-  const response = await app.aiHandler(aiRequest(token, {
-    entitlements: ['AI_PLUS'],
-    priority: 'AI_PLUS',
-  }));
+  const response = await app.aiHandler(aiRequest(token, { entitlements: ['AI_PLUS'], priority: 'AI_PLUS' }));
   assert.equal(response.status, 200);
   assert.equal(calls.reserve[0].priority, REQUEST_PRIORITY.FREE);
   assert.equal(calls.reserve[0].dailyLimit, 3);
@@ -213,30 +180,15 @@ test('client privilege claims cannot upgrade an anonymous session', async () => 
 test('AI endpoint rejects missing or tampered Nova session before quota and provider usage', async () => {
   const calls = { reserve: [], commit: [], release: [], provider: [] };
   const app = createNovaGatewayApplication({
-    env: env(),
-    quotaStore: quotaStore(calls),
-    installationProofVerifier: proofVerifier(),
-    now: () => 1_800_000_000_000,
-    newReservationId: () => 'reservation-3',
-    fetchImpl: async () => {
-      calls.provider.push(true);
-      return providerResponse();
-    },
+    env: env(), quotaStore: quotaStore(calls), installationProofVerifier: proofVerifier(),
+    now: () => 1_800_000_000_000, newReservationId: () => 'reservation-3',
+    fetchImpl: async () => { calls.provider.push(true); return providerResponse(); },
   });
-
   const missing = await app.aiHandler(new Request('https://nova.invalid/ai', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      requestId: 'req-missing',
-      operation: 'EXPLAIN_CALCULATION',
-      expression: '2+2',
-      deterministicResult: '4',
-      localeTag: 'zh-CN',
-    }),
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ requestId: 'req-missing', operation: 'EXPLAIN_CALCULATION', expression: '2+2', deterministicResult: '4', localeTag: 'zh-CN' }),
   }));
   assert.equal(missing.status, 401);
-
   const token = await issueAnonymousToken(app);
   const tamperedToken = `${token.slice(0, -1)}${token.endsWith('A') ? 'B' : 'A'}`;
   const tampered = await app.aiHandler(aiRequest(tamperedToken));
@@ -248,13 +200,9 @@ test('AI endpoint rejects missing or tampered Nova session before quota and prov
 test('safe application summary exposes capacity and quota numbers but no provider identity or secrets', () => {
   const calls = { reserve: [], commit: [], release: [] };
   const app = createNovaGatewayApplication({
-    env: env(),
-    quotaStore: quotaStore(calls),
-    installationProofVerifier: proofVerifier(),
-    now: () => 1_800_000_000_000,
-    fetchImpl: async () => providerResponse(),
+    env: env(), quotaStore: quotaStore(calls), installationProofVerifier: proofVerifier(),
+    now: () => 1_800_000_000_000, fetchImpl: async () => providerResponse(),
   });
-
   assert.equal(app.safeSummary.providerKeyCount, 2);
   assert.equal(app.safeSummary.freeDailyLimit, 3);
   assert.equal(app.safeSummary.aiPlusDailyLimit, 200);
@@ -262,7 +210,6 @@ test('safe application summary exposes capacity and quota numbers but no provide
   assert.equal(app.safeSummary.proofGatedAnonymousSessions, true);
   assert.equal(app.safeSummary.boundedMacroCandidateReview, true);
   assert.equal(app.safeSummary.macroCandidateReviewSharesProviderCapacity, true);
-
   const serialized = JSON.stringify(app.safeSummary);
   assert.equal(serialized.includes('provider-key-a'), false);
   assert.equal(serialized.includes('runtime-model'), false);
@@ -273,19 +220,12 @@ test('safe application summary exposes capacity and quota numbers but no provide
 
 test('application construction fails closed when required shared deployment adapters are missing', () => {
   assert.throws(
-    () => createNovaGatewayApplication({
-      env: env(),
-      installationProofVerifier: proofVerifier(),
-      fetchImpl: async () => providerResponse(),
-    }),
+    () => createNovaGatewayApplication({ env: env(), installationProofVerifier: proofVerifier(), fetchImpl: async () => providerResponse() }),
     /DailyQuotaLedger requires atomic store/,
   );
-
   assert.throws(
     () => createNovaGatewayApplication({
-      env: env(),
-      quotaStore: quotaStore({ reserve: [], commit: [], release: [] }),
-      fetchImpl: async () => providerResponse(),
+      env: env(), quotaStore: quotaStore({ reserve: [], commit: [], release: [] }), fetchImpl: async () => providerResponse(),
     }),
     /AnonymousSessionService requires installationProofVerifier.verify/,
   );
