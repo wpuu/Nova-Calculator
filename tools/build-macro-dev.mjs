@@ -14,7 +14,8 @@ if (!oauthClientId) throw new Error('NOVA_MACRO_GOOGLE_OAUTH_CLIENT_ID is requir
 
 const args = process.argv.slice(2);
 const outIndex = args.indexOf('--out');
-const outputDir = outIndex >= 0 ? String(args[outIndex + 1] || '') : 'dist/nova-macro-dev';
+const requestedOutput = outIndex >= 0 ? String(args[outIndex + 1] || '') : 'dist/nova-macro-dev';
+const outputDir = path.resolve(root, requestedOutput);
 
 const result = spawnSync(process.execPath, [releaseBuilder, '--out', outputDir], {
   cwd: root,
@@ -34,7 +35,7 @@ if (result.status !== 0) {
   process.exit(result.status || 1);
 }
 
-const metadataPath = path.join(root, outputDir, 'release-metadata.json');
+const metadataPath = path.join(outputDir, 'release-metadata.json');
 const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
 metadata.identityPurpose = identity.purpose;
 metadata.developmentOnly = true;
