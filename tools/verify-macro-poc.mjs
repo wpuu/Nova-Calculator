@@ -54,7 +54,11 @@ for (const file of ['background.js', 'semantic-matcher.js', 'content.js', 'popup
 
 const matcher = read('semantic-matcher.js');
 const requiredActions = [
-  'shopify.open_orders', 'shopify.search_orders', 'shopify.filter_orders', 'shopify.export_orders',
+  'shopify.open_orders',
+  'shopify.open_order',
+  'shopify.search_orders',
+  'shopify.filter_orders',
+  'shopify.export_orders',
 ];
 for (const action of requiredActions) {
   if (!matcher.includes(`'${action}'`)) fail(`semantic action missing from matcher: ${action}`);
@@ -85,8 +89,9 @@ const fixtureActions = new Set((fixture.actions || []).map((action) => action.id
 for (const action of requiredActions) {
   if (!fixtureActions.has(action)) fail(`fixture coverage missing semantic action: ${action}`);
 }
+if ((fixture.actions || []).length !== 5) fail(`Shopify gate must cover exactly five actions; got ${(fixture.actions || []).length}`);
 const holdoutCount = (fixture.actions || []).flatMap((action) => action.variants || []).filter((variant) => variant.holdout).length;
-if (holdoutCount < 4) fail(`holdout coverage too small: ${holdoutCount}`);
+if (holdoutCount < 8) fail(`holdout coverage too small: ${holdoutCount}`);
 
 const content = read('content.js');
 for (const marker of ['BLOCKED_SENSITIVE_INPUT','REQUIRES_CONFIRMATION','NOVA_RECORD_STEP','resolveWithWait','setNativeValue','HTMLInputElement.prototype','urlBefore','NOVA_CONTENT_STATE']) {
@@ -102,8 +107,9 @@ const popup = read('popup.js');
 if (popup.includes('chrome.permissions.request')) fail('default popup must not request persistent host permission');
 if (!popup.includes("type: 'NOVA_RESUME_CURRENT'")) fail('popup one-time resume must route through background');
 
-if (!fs.existsSync(path.join(root, 'tools', 'macro-background-state-eval.mjs'))) fail('service-worker state-machine evaluation missing');
-if (!fs.existsSync(path.join(root, 'tools', 'macro-cross-origin-e2e.mjs'))) fail('cross-origin real-browser E2E missing');
+for (const testFile of ['macro-background-state-eval.mjs','macro-cross-origin-e2e.mjs','macro-shopify-action-pack-e2e.mjs']) {
+  if (!fs.existsSync(path.join(root, 'tools', testFile))) fail(`required Macro gate missing: ${testFile}`);
+}
 
 if (!process.exitCode) {
   console.log(`Macro POC guard passed: ${requiredActions.length} actions, ${holdoutCount} holdouts, activeTab-first cross-origin architecture intact.`);
