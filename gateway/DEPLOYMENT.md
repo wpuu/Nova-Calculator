@@ -5,6 +5,7 @@ The commercial gateway is designed to be deployed as a standalone Vercel project
 Routes:
 
 - `POST /api/session` — proof-gated anonymous Nova session for the Android client
+- `POST /api/browser-session` — optional Chrome Google identity → short-lived Nova browser session exchange
 - `POST /api/ai` — authenticated Nova calculation-explanation request
 - `POST /api/macro-candidate-review` — authenticated, candidate-only Macro AI review; response can only select one locally supplied candidate ID or abstain
 - `GET /api/health` — coarse configuration health only; never returns secrets or provider identity
@@ -39,6 +40,27 @@ Calculator explanation and Macro candidate review use different provider adapter
 - `NOVA_SESSION_SUBJECT_SECRET` — stable independent secret used to derive pseudonymous quota subject ids
 
 These secrets must be independent. Rotating the signing secret must not implicitly change quota identity.
+
+Optional browser-session TTL:
+
+- `NOVA_BROWSER_SESSION_TTL_MS` — default `3600000` (1 hour). Actual issued TTL is additionally capped below the verified Google token expiry with a safety margin.
+
+### Chrome Google identity verification — optional
+
+Chrome Macro authentication is deliberately optional at deployment composition time. If the following variable is absent, `/api/browser-session` remains unavailable while Android `/api/session`, `/api/ai` and Macro's authenticated candidate-review service continue to construct normally.
+
+- `NOVA_CHROME_OAUTH_CLIENT_IDS` — one or more allowed Google OAuth client IDs, separated by comma, semicolon or newline
+- `NOVA_CHROME_OAUTH_VERIFY_TIMEOUT_MS` — optional Google token-verification timeout; default `5000`
+
+Browser identity rules:
+
+1. The extension obtains a Google OAuth access token only from an explicit extension-UI user gesture.
+2. The extension sends that access token once to `/api/browser-session`; it never persists the Google token.
+3. Gateway verifies the token against Google's fixed token-information endpoint and requires an allowed `aud`, allowed `azp` when present, stable `sub`, `openid` scope and sufficient remaining expiry.
+4. Gateway ignores Google email/profile fields even if returned.
+5. Gateway derives Nova's pseudonymous account subject from `google:<sub>` using the server-only Nova subject secret.
+6. Gateway returns only a short-lived Nova session token and expiry. No Google token, email, raw Google subject or OAuth client ID is returned or written to Redis.
+7. Browser sessions start with an empty server-issued entitlement set. Client claims cannot upgrade them.
 
 ### Shared Redis
 
@@ -89,14 +111,24 @@ The Android app needs only public/routable configuration, not server credentials
 
 ## Chrome Macro public configuration
 
-The Macro extension must receive only:
+The Chrome extension needs only public configuration:
 
-- the public HTTPS route → `https://<gateway-domain>/api/macro-candidate-review`
-- a short-lived/revocable **Nova session token**, stored only in `chrome.storage.session`
+- one exact HTTPS Gateway origin
+- one Google Chrome-extension OAuth client ID
+- OAuth scope **exactly** `openid`
+- one exact HTTPS Gateway host permission after that origin is frozen
 
-The extension must never receive an upstream provider key, model id, provider URL, Redis secret or Nova signing secret. Current Android `/api/session` issuance is Play-Integrity-specific and is **not** a valid Chrome bootstrap mechanism; Chrome production authentication/session issuance remains a separate release gate.
+The extension must not request `identity.email`; it does not need Google email/profile scopes. The Google access token is ephemeral and is used only for the one-time `/api/browser-session` exchange. After exchange, the extension stores only:
 
-The Macro runtime also maintains a shared `chrome.storage.session` Agnes single-flight lock. During a live AI request, other Agnes-backed extension entrypoints must remain disabled/fail-closed rather than start another provider request.
+- the public `https://<gateway-domain>/api/macro-candidate-review` endpoint
+- the short-lived Nova session token
+- its expiry
+
+Those values live only in `chrome.storage.session`.
+
+The extension must never receive an upstream provider key, model id, provider URL, Redis secret or Nova signing secret. Android `/api/session` remains Play-Integrity-specific and is **not** reused for Chrome.
+
+The Macro runtime also maintains a shared `chrome.storage.session` Agnes single-flight lock. During Google/Nova bootstrap or a live AI request, other Agnes/API-backed extension entrypoints must remain disabled/fail-closed rather than start another request.
 
 The following must **never** ship in the APK or extension:
 
@@ -123,8 +155,11 @@ Before enabling production Macro AI review:
 
 1. Keep local Core candidate generation as the only source of executable DOM targets.
 2. Keep Gateway/provider output limited to listed candidate ID or ABSTAIN.
-3. Provide a browser-appropriate Nova session bootstrap; do not reuse the Android Play-Integrity issuance path as if Chrome could satisfy it.
-4. Pin the public Gateway origin/permission deliberately for the production extension build.
-5. Confirm the extension stores only the Nova session token in `chrome.storage.session` and does not persist upstream credentials.
-6. Confirm global Agnes single-flight and all-controls-disabled behavior under a real network request.
-7. Run the full owner-only ChatOps gate before release.
+3. Freeze the Chrome extension ID and create the corresponding Google Chrome-extension OAuth client.
+4. Put only that client ID plus `openid` into the production extension manifest; do not request email/profile scopes.
+5. Freeze the public Gateway HTTPS origin and grant only that exact origin as the extension's Gateway host permission.
+6. Configure `NOVA_CHROME_OAUTH_CLIENT_IDS` on the Gateway with the same allowed client ID.
+7. Confirm an explicit popup click obtains Google identity, exchanges it for a Nova browser session, and never writes the Google access token to Chrome storage.
+8. Confirm the Nova session can call `/api/macro-candidate-review`, while forged candidate IDs and stale reviews still fail closed.
+9. Confirm global Agnes single-flight and all-controls-disabled behavior under a real network request.
+10. Run the full owner-only ChatOps gate before release.
