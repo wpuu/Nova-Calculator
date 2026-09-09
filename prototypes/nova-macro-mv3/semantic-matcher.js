@@ -13,6 +13,15 @@
       targetRoles: ['link', 'button'],
       hrefPathSuffixes: ['/orders'],
     },
+    'shopify.open_order': {
+      hostSuffixes: ['shopify.com'],
+      // Order numbers are dynamic and remain in the recorded fingerprint. The
+      // shared adapter only recognizes the Orders-list -> order-detail route.
+      targetNames: [],
+      contextNames: ['orders', '订单', 'bestellungen', 'commandes'],
+      targetRoles: ['link'],
+      hrefPathRegexes: [/\/orders\/[^/?#]+\/?$/],
+    },
     'shopify.search_orders': {
       hostSuffixes: ['shopify.com'],
       targetNames: [
@@ -204,9 +213,15 @@
     };
   }
 
+  function pathMatches(pack, path) {
+    if (!pack || !path) return false;
+    const normalizedPath = norm(path);
+    if ((pack.hrefPathSuffixes || []).some((suffix) => normalizedPath.endsWith(norm(suffix)))) return true;
+    return (pack.hrefPathRegexes || []).some((pattern) => pattern.test(normalizedPath));
+  }
+
   function pathScore(pack, candidate) {
-    if (!pack?.hrefPathSuffixes?.length || !candidate.hrefPath) return 0;
-    return pack.hrefPathSuffixes.some((suffix) => candidate.hrefPath.endsWith(norm(suffix))) ? 24 : 0;
+    return pathMatches(pack, candidate.hrefPath) ? 24 : 0;
   }
 
   function score(fp, candidate, pack = null) {
@@ -240,7 +255,7 @@
       const nameScore = fuzzyNameScore(pack.targetNames || [], fp.names || []);
       const contextHit = overlap(pack.contextNames || [], fp.context || []);
       const roleHit = (pack.targetRoles || []).includes(fp.role);
-      const pathHit = pack.hrefPathSuffixes?.some((suffix) => fp.hrefPath?.endsWith(norm(suffix)));
+      const pathHit = pathMatches(pack, fp.hrefPath);
       if (roleHit && ((nameScore >= 22 && (contextHit || id === 'shopify.open_orders')) || pathHit)) {
         matches.push({
           id,
