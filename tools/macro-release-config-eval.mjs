@@ -6,7 +6,12 @@ import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
 const script = path.join(root, 'tools', 'build-macro-release.mjs');
-const extensionId = 'abcdefghijklmnopabcdefghijklmnop';
+const devIdentity = JSON.parse(fs.readFileSync(
+  path.join(root, 'tools', 'fixtures', 'macro-dev-extension-identity-v1.json'),
+  'utf8',
+));
+const extensionId = devIdentity.extensionId;
+const extensionPublicKey = devIdentity.publicKey;
 const gatewayOrigin = 'https://nova-gateway-preview.example.com';
 const oauthClientId = 'nova-macro-release.apps.googleusercontent.com';
 
@@ -16,6 +21,7 @@ function run(extraEnv = {}, outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nova
     env: {
       ...process.env,
       NOVA_MACRO_EXTENSION_ID: extensionId,
+      NOVA_MACRO_EXTENSION_PUBLIC_KEY: extensionPublicKey,
       NOVA_MACRO_GATEWAY_ORIGIN: gatewayOrigin,
       NOVA_MACRO_GOOGLE_OAUTH_CLIENT_ID: oauthClientId,
       ...extraEnv,
@@ -29,6 +35,7 @@ function run(extraEnv = {}, outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nova
   const result = run();
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const manifest = JSON.parse(fs.readFileSync(path.join(result.outDir, 'manifest.json'), 'utf8'));
+  assert.equal(manifest.key, extensionPublicKey);
   assert.equal(manifest.oauth2.client_id, oauthClientId);
   assert.deepEqual(manifest.oauth2.scopes, ['openid']);
   assert.deepEqual(manifest.host_permissions, [`${gatewayOrigin}/*`]);
@@ -40,13 +47,12 @@ function run(extraEnv = {}, outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nova
   assert.equal(aiClient.includes("const PUBLIC_GATEWAY_ORIGIN = '';"), false);
 
   const metadata = JSON.parse(fs.readFileSync(path.join(result.outDir, 'release-metadata.json'), 'utf8'));
-  assert.deepEqual(metadata, {
-    configVersion: 1,
-    extensionId,
-    gatewayOrigin,
-    googleOauthClientId: oauthClientId,
-    oauthScopes: ['openid'],
-  });
+  assert.equal(metadata.configVersion, 2);
+  assert.equal(metadata.extensionId, extensionId);
+  assert.equal(metadata.gatewayOrigin, gatewayOrigin);
+  assert.equal(metadata.googleOauthClientId, oauthClientId);
+  assert.deepEqual(metadata.oauthScopes, ['openid']);
+  assert.match(metadata.publicKeyFingerprint, /^[a-f0-9]{64}$/);
 }
 
 for (const [name, env] of [
@@ -54,10 +60,12 @@ for (const [name, env] of [
   ['Gateway path', { NOVA_MACRO_GATEWAY_ORIGIN: 'https://example.com/api' }],
   ['HTTP Gateway', { NOVA_MACRO_GATEWAY_ORIGIN: 'http://example.com' }],
   ['invalid extension id', { NOVA_MACRO_EXTENSION_ID: 'not-a-chrome-extension-id' }],
+  ['missing public key', { NOVA_MACRO_EXTENSION_PUBLIC_KEY: '' }],
+  ['mismatched public key and extension id', { NOVA_MACRO_EXTENSION_ID: 'abcdefghijklmnopabcdefghijklmnop' }],
   ['invalid OAuth client', { NOVA_MACRO_GOOGLE_OAUTH_CLIENT_ID: 'not-google-oauth' }],
 ]) {
   const result = run(env);
   assert.notEqual(result.status, 0, `${name} unexpectedly succeeded`);
 }
 
-console.log('Macro release config gate passed: one public config generates exact OAuth + host + Gateway routing and invalid configs fail closed.');
+console.log(`Macro release config gate passed: public key derives ${extensionId}, one public config generates exact OAuth + host + Gateway routing, and mismatches fail closed.`);
