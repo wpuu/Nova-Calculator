@@ -32,6 +32,9 @@ jobs:
           node tools/verify-macro-poc.mjs
           node tools/macro-background-state-eval.mjs
 
+      - name: Verify bounded Agnes candidate output contract
+        run: node tools/agnes-candidate-review-eval.mjs --contract-only
+
       - name: Install Puppeteer with Chrome for Testing
         run: |
           npm init -y >/dev/null 2>&1
