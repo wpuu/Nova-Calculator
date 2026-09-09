@@ -78,8 +78,6 @@ async function findNovaExtension(browser, extensionId) {
 }
 
 async function openPopup(browser, extension, page) {
-  // Puppeteer's triggerExtensionAction simulates a real toolbar click. That is
-  // important here because it grants activeTab exactly as a user invocation does.
   await page.triggerExtensionAction(extension);
   const target = await browser.waitForTarget(
     (candidate) =>
@@ -114,6 +112,15 @@ async function waitForSession(worker, predicate, timeoutMs = 12000) {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   throw new Error('Timed out waiting for extension session state');
+}
+
+async function waitForUrl(page, expectedUrl, timeoutMs = 12000) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    if (page.url() === expectedUrl) return;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  throw new Error(`Timed out waiting for URL ${expectedUrl}; current=${page.url()}`);
 }
 
 const { server, origin } = await startServer();
@@ -160,15 +167,15 @@ try {
   assert.deepEqual(saved.map((step) => step.type), ['click', 'input', 'click']);
   assert.equal(saved[1].value, '#1042');
 
-  // Replay the saved macro from a clean start page. It must navigate, resume in
-  // the new document, restore the controlled input value, and click Export once.
   await page.goto(`${origin}/start`, { waitUntil: 'domcontentloaded' });
-  const replayNavigation = page.waitForNavigation({ waitUntil: 'domcontentloaded' });
   popup = await openPopup(browser, extension, page);
   const replayOutput = await clickPopupAndWait(popup, '#replay');
   assert.match(replayOutput, /"mode":\s*"REPLAYING"/);
-  await replayNavigation;
-  assert.equal(page.url(), `${origin}/orders`);
+
+  // Do not use page.waitForNavigation here. The macro owns the navigation and
+  // Puppeteer's lifecycle watcher can be disposed while the extension action
+  // popup closes. URL polling is sufficient and does not bind to the old frame.
+  await waitForUrl(page, `${origin}/orders`);
 
   await page.waitForFunction(
     () => document.querySelector('#search')?.value === '#1042',
