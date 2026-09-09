@@ -90,6 +90,37 @@ function aiRequest(token, bodyOverrides = {}) {
   });
 }
 
+function macroReviewRequest(token, bodyOverrides = {}) {
+  return new Request('https://nova.invalid/api/macro-candidate-review', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      requestId: 'macro-req-1',
+      operation: 'MACRO_CANDIDATE_REVIEW',
+      review: {
+        reviewId: 'review-1',
+        index: 0,
+        stepType: 'click',
+        semanticActionId: 'shopify.export_orders',
+        original: {
+          semanticActionId: 'shopify.export_orders',
+          role: 'button', names: ['Export orders'], context: ['Orders'], attrs: {}, hrefPath: '', tag: 'button',
+        },
+        candidates: [
+          { id: 'candidate_1', role: 'button', names: ['Import'], context: ['Orders'], attrs: {}, hrefPath: '', tag: 'button', score: 50 },
+          { id: 'candidate_2', role: 'button', names: ['Export orders'], context: ['Orders'], attrs: {}, hrefPath: '', tag: 'button', score: 61 },
+        ],
+        allowedCandidateIds: ['candidate_1', 'candidate_2'],
+        policy: 'SELECT_LISTED_CANDIDATE_OR_ABSTAIN',
+      },
+      ...bodyOverrides,
+    }),
+  });
+}
+
 test('proof-gated anonymous session can call AI only with server-assigned FREE priority', async () => {
   const calls = { reserve: [], commit: [], release: [], provider: [] };
   const app = createNovaGatewayApplication({
@@ -117,6 +148,44 @@ test('proof-gated anonymous session can call AI only with server-assigned FREE p
   assert.equal(calls.reserve[0].rpmLimit, 1);
   assert.deepEqual(calls.commit, ['reservation-1']);
   assert.equal(calls.provider.length, 1);
+});
+
+test('proof-gated session can call bounded Macro candidate review through the same quota policy', async () => {
+  const calls = { reserve: [], commit: [], release: [], provider: [] };
+  const app = createNovaGatewayApplication({
+    env: env(),
+    quotaStore: quotaStore(calls),
+    installationProofVerifier: proofVerifier(),
+    now: () => 1_800_000_000_000,
+    newReservationId: () => 'macro-reservation-1',
+    fetchImpl: async (url, options) => {
+      calls.provider.push({ url, options });
+      return providerResponse(JSON.stringify({
+        decision: 'SELECT',
+        candidate_id: 'candidate_2',
+        confidence: 0.94,
+        reason: 'Unique export candidate.',
+      }));
+    },
+  });
+
+  const token = await issueAnonymousToken(app);
+  const response = await app.macroCandidateReviewHandler(macroReviewRequest(token));
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.status, 'SUCCESS');
+  assert.equal(body.decision, 'SELECT');
+  assert.equal(body.candidateId, 'candidate_2');
+  assert.equal(calls.reserve.length, 1);
+  assert.equal(calls.reserve[0].operation, 'MACRO_CANDIDATE_REVIEW');
+  assert.equal(calls.reserve[0].priority, REQUEST_PRIORITY.FREE);
+  assert.equal(calls.reserve[0].dailyLimit, 3);
+  assert.equal(calls.reserve[0].rpmLimit, 1);
+  assert.deepEqual(calls.commit, ['macro-reservation-1']);
+  assert.equal(calls.provider.length, 1);
+  const outbound = JSON.parse(calls.provider[0].options.body);
+  assert.equal(outbound.temperature, 0);
+  assert.equal(outbound.messages[0].content.includes('Nova Macro candidate reviewer'), true);
 });
 
 test('client privilege claims cannot upgrade an anonymous session', async () => {
@@ -191,6 +260,8 @@ test('safe application summary exposes capacity and quota numbers but no provide
   assert.equal(app.safeSummary.aiPlusDailyLimit, 200);
   assert.equal(app.safeSummary.signedNovaSessions, true);
   assert.equal(app.safeSummary.proofGatedAnonymousSessions, true);
+  assert.equal(app.safeSummary.boundedMacroCandidateReview, true);
+  assert.equal(app.safeSummary.macroCandidateReviewSharesProviderCapacity, true);
 
   const serialized = JSON.stringify(app.safeSummary);
   assert.equal(serialized.includes('provider-key-a'), false);
