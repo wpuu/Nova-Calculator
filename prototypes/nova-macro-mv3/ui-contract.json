@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "states": [
     "IDLE",
     "RECORDING",
@@ -16,7 +16,7 @@
   "commands": [
     "START_RECORDING",
     "STOP_RECORDING",
-    "ALLOW_CURRENT_SITE_AND_RESUME",
+    "RESUME_CURRENT_SITE_ONCE",
     "SAVE_MACRO",
     "REPLAY_MACRO",
     "CANCEL_REPLAY",
@@ -29,6 +29,8 @@
   "uiRules": {
     "requestSiteAccessOnlyFromExplicitUserGesture": true,
     "doNotRequestAllUrlsAtInstall": true,
+    "defaultCrossOriginResumeUsesActiveTabOnly": true,
+    "persistentHostPermissionIsDeferred": true,
     "showWhySiteAccessIsNeededBeforeRequest": true,
     "aiCannotGenerateExecutableSelector": true,
     "aiCandidatesMustComeFromCore": true,
@@ -53,6 +55,7 @@
       "seo_tools"
     ],
     "deferred": [
+      "persistent_cross_origin_permission",
       "creator_marketplace",
       "payments",
       "cloud_execution"
