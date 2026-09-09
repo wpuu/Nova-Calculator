@@ -4,6 +4,8 @@ import path from 'node:path';
 const root = process.cwd();
 const extDir = path.join(root, 'prototypes', 'nova-macro-mv3');
 const fixturePath = path.join(root, 'docs', 'growth', 'fixtures', 'macro-multi-action-variants-v2.json');
+const agnesFixturePath = path.join(root, 'docs', 'growth', 'fixtures', 'agnes-candidate-review-v1.json');
+const agnesRuntimeEvalPath = path.join(root, 'tools', 'agnes-candidate-review-eval.mjs');
 
 const fail = (message) => {
   console.error(`Macro POC guard failed: ${message}`);
@@ -125,10 +127,25 @@ for (const testFile of [
   'macro-cross-origin-e2e.mjs',
   'macro-shopify-action-pack-e2e.mjs',
   'macro-ai-review-candidate-e2e.mjs',
+  'agnes-candidate-review-eval.mjs',
 ]) {
   if (!fs.existsSync(path.join(root, 'tools', testFile))) fail(`required Macro gate missing: ${testFile}`);
 }
 
+if (!fs.existsSync(agnesFixturePath)) fail('bounded Agnes candidate-review fixture missing');
+if (fs.existsSync(agnesRuntimeEvalPath)) {
+  const agnesRuntimeEval = fs.readFileSync(agnesRuntimeEvalPath, 'utf8');
+  for (const marker of [
+    'SELECT_LOCAL_CANDIDATE_OR_ABSTAIN',
+    'candidate_not_allowed',
+    'forbidden_output_key',
+    'max_in_flight_per_session: 1',
+    '--contract-only',
+  ]) {
+    if (!agnesRuntimeEval.includes(marker)) fail(`bounded Agnes runtime evaluator marker missing: ${marker}`);
+  }
+}
+
 if (!process.exitCode) {
-  console.log(`Macro POC guard passed: ${requiredActions.length} actions, ${holdoutCount} holdouts, activeTab-first + candidate-only AI review architecture intact.`);
+  console.log(`Macro POC guard passed: ${requiredActions.length} actions, ${holdoutCount} holdouts, activeTab-first + candidate-only AI review + bounded Agnes output architecture intact.`);
 }
