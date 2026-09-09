@@ -14,6 +14,7 @@ app-old/
 # Build outputs (per-module, e.g. app/build/)
 **/build/
 **/bin/
+/dist/
 *.apk
 *.aar
 
