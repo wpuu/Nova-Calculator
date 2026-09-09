@@ -27,6 +27,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Test Nova Gateway core
+        run: cd gateway && npm test
+
       - name: Verify Macro contracts and state machine
         run: |
           node tools/verify-macro-poc.mjs
