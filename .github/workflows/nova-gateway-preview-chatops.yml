@@ -1,0 +1,174 @@
+name: Nova Gateway Preview ChatOps
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-preview:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.issue.number == 6 &&
+      github.event.comment.user.login == 'wpuu' &&
+      contains(github.event.comment.body, '/deploy-nova-gateway-preview')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERCEL_TOKEN: ${{ secrets.NOVA_VERCEL_TOKEN }}
+      NOVA_PROVIDER_BASE_URL: ${{ secrets.NOVA_PROVIDER_BASE_URL }}
+      NOVA_PROVIDER_MODEL: ${{ secrets.NOVA_PROVIDER_MODEL }}
+      NOVA_PROVIDER_KEYS: ${{ secrets.NOVA_PROVIDER_KEYS }}
+      NOVA_SESSION_SIGNING_SECRETS: ${{ secrets.NOVA_SESSION_SIGNING_SECRETS }}
+      NOVA_SESSION_SUBJECT_SECRET: ${{ secrets.NOVA_SESSION_SUBJECT_SECRET }}
+      NOVA_QUOTA_REDIS_REST_URL: ${{ secrets.NOVA_QUOTA_REDIS_REST_URL }}
+      NOVA_QUOTA_REDIS_REST_TOKEN: ${{ secrets.NOVA_QUOTA_REDIS_REST_TOKEN }}
+      NOVA_CHROME_OAUTH_CLIENT_IDS: ${{ secrets.NOVA_CHROME_OAUTH_CLIENT_IDS }}
+      VERCEL_TEAM_ID: team_jEy8Ex9vRDBdXj1cQPKF8sRd
+      VERCEL_SCOPE: rerisse7-1717s-projects
+      VERCEL_PROJECT_ID: prj_STwWaZRKDBQDWranhqhaGGYak4RA
+      VERCEL_PROJECT_NAME: a-preview-auth-probe
+
+    steps:
+      - name: Checkout PR #6 head
+        uses: actions/checkout@v5
+        with:
+          ref: refs/pull/6/head
+          persist-credentials: false
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Require Preview-only credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            VERCEL_TOKEN
+            NOVA_PROVIDER_BASE_URL
+            NOVA_PROVIDER_MODEL
+            NOVA_PROVIDER_KEYS
+            NOVA_SESSION_SIGNING_SECRETS
+            NOVA_SESSION_SUBJECT_SECRET
+            NOVA_QUOTA_REDIS_REST_URL
+            NOVA_QUOTA_REDIS_REST_TOKEN
+            NOVA_CHROME_OAUTH_CLIENT_IDS
+          )
+          missing=0
+          for name in "${required[@]}"; do
+            if [ -z "${!name:-}" ]; then
+              echo "Missing required GitHub secret: ${name}"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 2
+          fi
+
+      - name: Test Macro-only Gateway before any remote write
+        run: cd gateway && npm test
+
+      - name: Verify disposable project is past Vercel first-deployment bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const url = new URL('https://api.vercel.com/v6/deployments');
+          url.searchParams.set('teamId', process.env.VERCEL_TEAM_ID);
+          url.searchParams.set('projectId', process.env.VERCEL_PROJECT_ID);
+          url.searchParams.set('limit', '1');
+          const response = await fetch(url, {
+            headers: { authorization: `Bearer ${process.env.VERCEL_TOKEN}` },
+            redirect: 'error',
+          });
+          if (!response.ok) throw new Error(`Vercel deployment-history check failed: HTTP ${response.status}`);
+          const body = await response.json();
+          const deployments = Array.isArray(body.deployments) ? body.deployments : [];
+          if (deployments.length < 1) {
+            throw new Error('Refusing remote deploy: target project has zero deployment history, so Vercel may force the first deployment to Production.');
+          }
+          console.log(`Safe bootstrap precondition: ${deployments.length}+ historical deployment found.`);
+          NODE
+
+      - name: Install pinned Vercel CLI
+        run: npm install --global vercel@59.13.1
+
+      - name: Link only the disposable probe project
+        working-directory: gateway
+        run: >-
+          vercel link --yes
+          --project "$VERCEL_PROJECT_NAME"
+          --scope "$VERCEL_SCOPE"
+          --token "$VERCEL_TOKEN"
+
+      - name: Dry-run exact Gateway payload
+        working-directory: gateway
+        run: >-
+          vercel deploy --dry --format=json
+          --target=preview
+          --scope "$VERCEL_SCOPE"
+          --token "$VERCEL_TOKEN"
+          > /tmp/nova-gateway-dry-run.json
+
+      - name: Deploy Preview only
+        id: deploy
+        working-directory: gateway
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEPLOYMENT_URL="$(vercel deploy \
+            --yes \
+            --target=preview \
+            --scope "$VERCEL_SCOPE" \
+            --token "$VERCEL_TOKEN" \
+            --meta novaPurpose=macro-preview \
+            --env "NOVA_PROVIDER_BASE_URL=$NOVA_PROVIDER_BASE_URL" \
+            --env "NOVA_PROVIDER_MODEL=$NOVA_PROVIDER_MODEL" \
+            --env "NOVA_PROVIDER_KEYS=$NOVA_PROVIDER_KEYS" \
+            --env "NOVA_PROVIDER_RPM_PER_KEY=12" \
+            --env "NOVA_SESSION_SIGNING_SECRETS=$NOVA_SESSION_SIGNING_SECRETS" \
+            --env "NOVA_SESSION_SUBJECT_SECRET=$NOVA_SESSION_SUBJECT_SECRET" \
+            --env "NOVA_QUOTA_REDIS_REST_URL=$NOVA_QUOTA_REDIS_REST_URL" \
+            --env "NOVA_QUOTA_REDIS_REST_TOKEN=$NOVA_QUOTA_REDIS_REST_TOKEN" \
+            --env "NOVA_CHROME_OAUTH_CLIENT_IDS=$NOVA_CHROME_OAUTH_CLIENT_IDS")"
+          case "$DEPLOYMENT_URL" in
+            https://*.vercel.app) ;;
+            *) echo "Unexpected Vercel deployment URL"; exit 3 ;;
+          esac
+          echo "url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Fail closed unless Vercel classified deployment as Preview
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const hostname = new URL(process.env.DEPLOYMENT_URL).hostname;
+          const url = new URL(`https://api.vercel.com/v13/deployments/${encodeURIComponent(hostname)}`);
+          url.searchParams.set('teamId', process.env.VERCEL_TEAM_ID);
+          const response = await fetch(url, {
+            headers: { authorization: `Bearer ${process.env.VERCEL_TOKEN}` },
+            redirect: 'error',
+          });
+          if (!response.ok) throw new Error(`Vercel deployment inspection failed: HTTP ${response.status}`);
+          const deployment = await response.json();
+          if (deployment.target !== 'preview') {
+            throw new Error(`STOP: Vercel classified deployment as ${deployment.target || 'unknown'}, expected preview.`);
+          }
+          console.log('Verified Vercel deployment target=preview.');
+          NODE
+
+      - name: Verify protected Preview Macro health
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.url }}
+        working-directory: gateway
+        run: >-
+          vercel curl /api/macro-health
+          --deployment "$DEPLOYMENT_URL"
+          --scope "$VERCEL_SCOPE"
+          --token "$VERCEL_TOKEN"
