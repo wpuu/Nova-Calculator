@@ -66,12 +66,21 @@ export class MacroCandidateReviewService {
     try {
       const result = await this.dispatcher.dispatch(normalized, priority);
       await settleQuietly(this.quotaLedger, 'commit', quota.reservationId);
+
+      const allowed = new Set(normalized.review.allowedCandidateIds);
+      const candidateAllowed = result?.decision === 'SELECT'
+        && typeof result?.candidateId === 'string'
+        && allowed.has(result.candidateId);
+      const safeResult = result?.decision === 'SELECT' && !candidateAllowed
+        ? { decision: 'ABSTAIN', candidateId: null, confidence: 0, reason: 'SERVER_CANDIDATE_REJECTED' }
+        : result;
+
       return response(normalized.requestId, NOVA_GATEWAY_STATUS.SUCCESS, {
         ...quota,
-        decision: result?.decision,
-        candidateId: result?.candidateId,
-        confidence: result?.confidence,
-        reason: result?.reason,
+        decision: safeResult?.decision,
+        candidateId: safeResult?.candidateId,
+        confidence: safeResult?.confidence,
+        reason: safeResult?.reason,
       });
     } catch (error) {
       await settleQuietly(this.quotaLedger, 'release', quota.reservationId);
@@ -87,7 +96,6 @@ function response(requestId, status, options = {}) {
   const success = status === NOVA_GATEWAY_STATUS.SUCCESS;
   const decision = success && options.decision === 'SELECT' ? 'SELECT' : success ? 'ABSTAIN' : null;
   const candidateId = decision === 'SELECT' ? safeCandidateId(options.candidateId) : null;
-  // A supposedly successful SELECT without a valid candidate ID fails closed.
   const safeDecision = decision === 'SELECT' && !candidateId ? 'ABSTAIN' : decision;
   return Object.freeze({
     requestId: safeRequestId(requestId),
