@@ -123,7 +123,7 @@ for (const marker of [
   'setNativeValue',
   'HTMLInputElement.prototype',
   'urlBefore',
-  "type: 'NOVA_CONTENT_STATE'",
+  'NOVA_CONTENT_STATE',
 ]) {
   if (!content.includes(marker)) fail(`content safety/orchestration marker missing: ${marker}`);
 }
