@@ -22,20 +22,36 @@ const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
 if (manifest.manifest_version !== 3) fail('manifest_version must be 3');
 if (manifest.background?.service_worker !== 'background.js') fail('background service worker missing');
 
-const requiredPermissions = ['activeTab', 'scripting', 'storage'];
+const requiredPermissions = ['activeTab', 'identity', 'scripting', 'storage'];
 for (const permission of requiredPermissions) {
   if (!manifest.permissions?.includes(permission)) fail(`required permission missing: ${permission}`);
 }
 
-const forbiddenInstallPermissions = ['<all_urls>', 'tabs', 'debugger', 'webRequest', 'cookies'];
+const forbiddenInstallPermissions = ['<all_urls>', 'tabs', 'debugger', 'webRequest', 'cookies', 'identity.email'];
 for (const permission of forbiddenInstallPermissions) {
   if (manifest.permissions?.includes(permission)) fail(`forbidden install-time permission found: ${permission}`);
 }
 
-if (manifest.host_permissions?.length) fail('host_permissions must not be requested at install time');
+for (const host of manifest.host_permissions || []) {
+  if (host === '<all_urls>' || host.includes('*://') || host.includes('://*/') || host.includes('https://*')) {
+    fail(`Gateway host permission must be one exact HTTPS origin: ${host}`);
+  }
+  if (!/^https:\/\/[A-Za-z0-9.-]+(?::\d+)?\/\*$/.test(host)) {
+    fail(`invalid exact Gateway host permission: ${host}`);
+  }
+}
 const optionalHosts = new Set(manifest.optional_host_permissions || []);
 if (!optionalHosts.has('https://*/*') || !optionalHosts.has('http://*/*')) {
   fail('optional host permission pool must remain available for a future explicit persistent-access feature');
+}
+
+if (manifest.oauth2) {
+  const clientId = String(manifest.oauth2.client_id || '').trim();
+  const scopes = Array.isArray(manifest.oauth2.scopes) ? manifest.oauth2.scopes : [];
+  if (!clientId) fail('configured Chrome OAuth must contain client_id');
+  if (scopes.length !== 1 || scopes[0] !== 'openid') {
+    fail('Chrome OAuth scope must remain exactly openid; email/profile are not required');
+  }
 }
 
 const requiredFiles = [
@@ -115,6 +131,7 @@ for (const marker of [
   "if (!session.replayWaitingForDocument && !session.needsSiteAccess) return session;",
   'Delivery here is deliberately at-most-once','NOVA_SELECT_REPAIR_CANDIDATE','NOVA_ABSTAIN_REPAIR',
   'INVALID_AI_CANDIDATE','NOVA_APPLY_REVIEW_CHOICE','NOVA_RUN_AI_REVIEW','NOVA_SET_GATEWAY_SESSION',
+  'NOVA_CONNECT_GOOGLE',
 ]) {
   if (!background.includes(marker)) fail(`background navigation/orchestration marker missing: ${marker}`);
 }
@@ -130,6 +147,13 @@ for (const marker of [
   "authorization: `Bearer ${config.sessionToken}`",
   "endpoint.protocol !== 'https:'",
   "senderUrl.startsWith(`chrome-extension://${runtimeId}/`)",
+  'connectGoogle',
+  "getAuthToken({ interactive: true, scopes: ['openid'] })",
+  "`${origin}/api/browser-session`",
+  "`${origin}/api/macro-candidate-review`",
+  'removeCachedAuthToken',
+  'GATEWAY_ORIGIN_NOT_CONFIGURED',
+  'GOOGLE_OAUTH_NOT_CONFIGURED',
 ]) {
   if (!aiClient.includes(marker)) fail(`AI review client safety marker missing: ${marker}`);
 }
@@ -138,22 +162,29 @@ for (const forbidden of [
   /xpath\s*:/i,
   /NOVA_PROVIDER_KEYS/,
   /apiKey\s*:/,
+  /identity\.email/,
+  /scopes:\s*\[[^\]]*['"]email['"]/,
+  /scopes:\s*\[[^\]]*['"]profile['"]/,
+  /sessionToken:\s*googleToken/,
 ]) {
   if (forbidden.test(aiClient)) fail(`AI review client contains forbidden execution/secret marker: ${forbidden}`);
 }
 
 const popupHtml = read('popup.html');
 if (!popupHtml.includes('id="ai-review"')) fail('explicit AI review button missing from popup');
+if (!popupHtml.includes('id="connect-ai"')) fail('explicit Google/Nova connect button missing from popup');
 const popup = read('popup.js');
 if (popup.includes('chrome.permissions.request')) fail('default popup must not request persistent host permission');
 if (!popup.includes("type: 'NOVA_RESUME_CURRENT'")) fail('popup one-time resume must route through background');
 if (!popup.includes("type: 'NOVA_RUN_AI_REVIEW'")) fail('popup AI review must route through bounded background client');
+if (!popup.includes("type: 'NOVA_CONNECT_GOOGLE'")) fail('Google OAuth must start only from explicit popup user gesture');
 if (!popup.includes('buttons.forEach((button) => { button.disabled = true; })')) {
-  fail('popup must disable all controls during Agnes-backed requests');
+  fail('popup must disable all controls during Agnes/API-backed requests');
 }
 
 for (const testFile of [
   'macro-background-state-eval.mjs',
+  'macro-browser-session-eval.mjs',
   'macro-cross-origin-e2e.mjs',
   'macro-shopify-action-pack-e2e.mjs',
   'macro-ai-review-candidate-e2e.mjs',
@@ -177,5 +208,5 @@ if (fs.existsSync(agnesRuntimeEvalPath)) {
 }
 
 if (!process.exitCode) {
-  console.log(`Macro POC guard passed: ${requiredActions.length} actions, ${holdoutCount} holdouts, activeTab-first + Gateway-backed candidate-only AI review + global single-flight architecture intact.`);
+  console.log(`Macro POC guard passed: ${requiredActions.length} actions, ${holdoutCount} holdouts, activeTab-first + explicit Google/Nova browser session + Gateway-backed candidate-only AI review + global single-flight architecture intact.`);
 }
