@@ -4,6 +4,9 @@
   if (root.NovaMacroAiReview) return;
 
   const CONFIG_KEY = 'novaMacroGatewaySession';
+  // Public routing only. Keep blank until a real Preview/production Gateway origin
+  // is frozen; never place provider credentials or session material here.
+  const PUBLIC_GATEWAY_ORIGIN = '';
   // Shared name is deliberate: every Agnes-backed extension module must reuse
   // this chrome.storage.session lock instead of inventing per-feature concurrency.
   const LOCK_KEY = 'novaAgnesSingleFlight';
@@ -17,7 +20,7 @@
     const abstainRepair = options?.abstainRepair;
     const fetchImpl = options?.fetchImpl || root.fetch;
     const now = options?.now || (() => Date.now());
-    const runtimeConfig = options?.runtimeConfig || root.NovaMacroRuntimeConfig || {};
+    const runtimeConfig = options?.runtimeConfig || { gatewayOrigin: PUBLIC_GATEWAY_ORIGIN };
     const newRequestId = options?.newRequestId || (() => {
       const uuid = root.crypto?.randomUUID?.();
       return uuid ? `macro_${uuid}` : `macro_${now()}_${Math.random().toString(36).slice(2)}`;
