@@ -11,7 +11,10 @@ function originPatternFor(url) {
   if (!['http:', 'https:'].includes(parsed.protocol)) {
     throw new Error('Nova Macro can only run on http/https pages.');
   }
-  return `${parsed.origin}/*`;
+  // Chrome host permission match patterns do not include ports. Omitting the
+  // port also keeps local/dev and enterprise web apps on non-standard ports
+  // compatible with the same explicit host grant.
+  return `${parsed.protocol}//${parsed.hostname}/*`;
 }
 
 async function ensureCurrentSitePermission(tab) {
