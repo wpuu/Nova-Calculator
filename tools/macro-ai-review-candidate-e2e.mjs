@@ -153,7 +153,11 @@ try {
   const extension = await findExtension(browser, extensionId);
   const page = await browser.newPage();
 
-  // Record one unambiguous Export action.
+  // Record one unambiguous Export action. This harness intentionally runs on
+  // localhost, so host-gated Shopify recognition correctly returns null here.
+  // The independent five-action DOM gate already proves recognition on
+  // admin.shopify.com. Seed only that verified semantic ID so this test remains
+  // focused on the candidate-only runtime boundary rather than hostname setup.
   await page.goto(`${origin}/record`, { waitUntil: 'domcontentloaded' });
   let popup = await openPopup(browser, extension, page);
   await clickPopupAndWait(popup, '#start');
@@ -163,12 +167,22 @@ try {
   const stopOutput = await clickPopupAndWait(popup, '#stop');
   assert.match(stopOutput, /"mode":\s*"SAVED"/);
 
-  const saved = await worker.evaluate(async () => {
+  const seeded = await worker.evaluate(async () => {
     const data = await chrome.storage.local.get('novaMacroPocLast');
-    return data.novaMacroPocLast || [];
+    const steps = data.novaMacroPocLast || [];
+    if (steps.length !== 1) return { count: steps.length, before: null, after: null };
+    const before = steps[0].fingerprint?.semanticActionId ?? null;
+    steps[0].fingerprint.semanticActionId = 'shopify.export_orders';
+    await chrome.storage.local.set({ novaMacroPocLast: steps });
+    return {
+      count: steps.length,
+      before,
+      after: steps[0].fingerprint.semanticActionId,
+    };
   });
-  assert.equal(saved.length, 1, `expected one saved step, got ${saved.length}`);
-  assert.equal(saved[0].fingerprint?.semanticActionId, 'shopify.export_orders');
+  assert.equal(seeded.count, 1, `expected one saved step, got ${seeded.count}`);
+  assert.equal(seeded.before, null, 'localhost harness must not bypass Shopify hostname recognition gate');
+  assert.equal(seeded.after, 'shopify.export_orders');
 
   // Replay into an intentionally ambiguous DOM. Local core must stop in AI_REVIEW.
   let reviewSession = await startReplayToReview(browser, extension, page, worker, origin);
