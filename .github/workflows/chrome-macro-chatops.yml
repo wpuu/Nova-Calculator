@@ -37,6 +37,9 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --no-save puppeteer@25.10.0
 
+      - name: Run Shopify five-action DOM gate
+        run: node tools/macro-shopify-action-pack-e2e.mjs
+
       - name: Run same-origin real MV3 E2E
         run: node tools/macro-extension-e2e.mjs
 
