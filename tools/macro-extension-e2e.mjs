@@ -78,9 +78,11 @@ async function findNovaExtension(browser, extensionId) {
 }
 
 async function openPopup(browser, extension, page) {
+  const existingTargets = new Set(browser.targets());
   await page.triggerExtensionAction(extension);
   const target = await browser.waitForTarget(
     (candidate) =>
+      !existingTargets.has(candidate) &&
       candidate.type() === 'page' &&
       candidate.url().includes(extension.id) &&
       candidate.url().endsWith('/popup.html'),
@@ -172,9 +174,6 @@ try {
   const replayOutput = await clickPopupAndWait(popup, '#replay');
   assert.match(replayOutput, /"mode":\s*"REPLAYING"/);
 
-  // Do not use page.waitForNavigation here. The macro owns the navigation and
-  // Puppeteer's lifecycle watcher can be disposed while the extension action
-  // popup closes. URL polling is sufficient and does not bind to the old frame.
   await waitForUrl(page, `${origin}/orders`);
 
   await page.waitForFunction(
