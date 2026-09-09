@@ -14,7 +14,7 @@ function productionEnv(overrides = {}) {
     NOVA_PROVIDER_BASE_URL: 'https://provider.example/v1',
     NOVA_PROVIDER_MODEL: 'runtime-model',
     NOVA_PROVIDER_KEYS: 'provider-key-a,provider-key-b',
-    NOVA_PROVIDER_RPM_PER_KEY: '20',
+    NOVA_PROVIDER_RPM_PER_KEY: '12',
     NOVA_SESSION_SIGNING_SECRETS: SIGNING,
     NOVA_SESSION_SUBJECT_SECRET: SUBJECT,
     NOVA_AI_FREE_DAILY_LIMIT: '3',
@@ -44,7 +44,7 @@ test('production composition shares Redis quota and provider capacity while keep
     async eval(script, keys, args) {
       redisCalls.push({ script, keys, args });
       if (script.includes('local reservationKey = KEYS[3]')) return ['ALLOWED', 2];
-      if (script.includes('local bestIndex = 0')) return ['key-1', 15];
+      if (script.includes('local bestIndex = 0')) return ['key-1', 11];
       if (script.includes("return redis.call('DEL', KEYS[1])")) return 1;
       throw new Error('unexpected Redis script in integration test');
     },
@@ -103,6 +103,7 @@ test('production composition shares Redis quota and provider capacity while keep
   assert.equal(app.safeSummary.sharedQuotaStore, true);
   assert.equal(app.safeSummary.sharedProviderCapacity, true);
   assert.equal(app.safeSummary.androidPackageName, 'com.wpuu.novacalculator');
+  assert.equal(app.safeSummary.rpmPerKey, 12);
   assert.equal(JSON.stringify(app.safeSummary).includes('provider.example'), false);
   assert.equal(JSON.stringify(app.safeSummary).includes('provider-key-a'), false);
 });
@@ -121,6 +122,20 @@ test('production Vercel deployment refuses development Android identity', () => 
       installationProofVerifier: proofVerifier(),
     }),
     /refuses a \.dev Android package/,
+  );
+});
+
+test('production composition rejects provider RPM above Agnes hard ceiling', () => {
+  assert.throws(
+    () => createProductionNovaGatewayApplication({
+      env: productionEnv({ NOVA_PROVIDER_RPM_PER_KEY: '16' }),
+      quotaStore: { reserve() {}, commit() {}, release() {} },
+      keyPoolFactory: () => ({
+        lease() {}, reportSuccess() {}, reportRateLimit() {}, reportFailure() {}, setEnabled() {},
+      }),
+      installationProofVerifier: proofVerifier(),
+    }),
+    /between 1 and 15/,
   );
 });
 
