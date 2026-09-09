@@ -37,6 +37,12 @@ async function withUiLock(task) {
   }
 }
 
+document.getElementById('connect-ai').addEventListener('click', () => withUiLock(async () => {
+  // Interactive Google OAuth is deliberately reachable only from this explicit
+  // extension-UI user gesture. The background never prompts on startup.
+  return callBackground({ type: 'NOVA_CONNECT_GOOGLE' });
+}));
+
 document.getElementById('start').addEventListener('click', () => withUiLock(async () => {
   const tab = await activeTab();
   return callBackground({
