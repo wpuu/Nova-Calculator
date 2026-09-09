@@ -1,6 +1,6 @@
 'use strict';
 
-importScripts('runtime-config.js', 'ai-review-client.js');
+importScripts('ai-review-client.js');
 
 const SESSION_KEY = 'novaMacroPocSession';
 const SAVED_MACRO_KEY = 'novaMacroPocLast';
@@ -387,7 +387,6 @@ const aiReviewController = globalThis.NovaMacroAiReview.createController({
   reviewFromSession,
   selectRepairCandidate,
   abstainRepair,
-  runtimeConfig: globalThis.NovaMacroRuntimeConfig,
   fetchImpl: (...args) => fetch(...args),
 });
 
