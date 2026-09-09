@@ -14,50 +14,29 @@ function startServer() {
     const server = http.createServer((req, res) => {
       res.setHeader('content-type', 'text/html; charset=utf-8');
       if (req.url === '/orders') {
-        res.end(`<!doctype html>
-<html><head><meta charset="utf-8"><title>Partner Orders</title></head>
-<body>
-  <main aria-label="Orders">
-    <h1>Orders</h1>
-    <label>Search orders <input id="search" type="search" aria-label="Search orders"></label>
-    <button id="export" data-action="export">Export orders</button>
-    <output id="result">idle</output>
-  </main>
-  <script>
-    document.getElementById('export').addEventListener('click', () => {
-      document.body.dataset.exported = 'yes';
-      document.getElementById('result').textContent = 'exported';
-    });
-  </script>
+        res.end(`<!doctype html><html><head><meta charset="utf-8"><title>Partner Orders</title></head><body>
+<main aria-label="Orders"><h1>Orders</h1>
+<label>Search orders <input id="search" type="search" aria-label="Search orders"></label>
+<button id="export" data-action="export">Export orders</button><output id="result">idle</output></main>
+<script>document.getElementById('export').addEventListener('click',()=>{document.body.dataset.exported='yes';document.getElementById('result').textContent='exported';});</script>
 </body></html>`);
         return;
       }
-      res.end(`<!doctype html>
-<html><head><meta charset="utf-8"><title>Origin A</title></head>
-<body>
-  <nav aria-label="Main menu">
-    <a id="cross" href="http://localhost:${port}/orders">Open partner orders</a>
-  </nav>
+      res.end(`<!doctype html><html><head><meta charset="utf-8"><title>Origin A</title></head><body>
+<nav aria-label="Main menu"><a id="cross" href="http://localhost:${port}/orders">Open partner orders</a></nav>
 </body></html>`);
     });
     server.once('error', reject);
     server.listen(0, '127.0.0.1', () => {
       port = server.address().port;
-      resolve({
-        server,
-        originA: `http://127.0.0.1:${port}`,
-        originB: `http://localhost:${port}`,
-      });
+      resolve({ server, originA: `http://127.0.0.1:${port}`, originB: `http://localhost:${port}` });
     });
   });
 }
 
 async function waitForWorker(browser) {
   const target = await browser.waitForTarget(
-    (candidate) =>
-      candidate.type() === 'service_worker' &&
-      candidate.url().startsWith('chrome-extension://') &&
-      candidate.url().endsWith('/background.js'),
+    (candidate) => candidate.type() === 'service_worker' && candidate.url().endsWith('/background.js'),
     { timeout: 15000 },
   );
   const worker = await target.worker();
@@ -66,10 +45,8 @@ async function waitForWorker(browser) {
 }
 
 async function findExtension(browser, extensionId) {
-  const extensions = await browser.extensions();
-  const extension = extensions.get(extensionId);
-  assert(extension, 'Nova Macro extension missing');
-  assert.equal(extension.enabled, true);
+  const extension = (await browser.extensions()).get(extensionId);
+  assert(extension?.enabled, 'Nova Macro extension missing or disabled');
   return extension;
 }
 
@@ -77,11 +54,7 @@ async function openPopup(browser, extension, page) {
   const oldTargets = new Set(browser.targets());
   await page.triggerExtensionAction(extension);
   const target = await browser.waitForTarget(
-    (candidate) =>
-      !oldTargets.has(candidate) &&
-      candidate.type() === 'page' &&
-      candidate.url().includes(extension.id) &&
-      candidate.url().endsWith('/popup.html'),
+    (candidate) => !oldTargets.has(candidate) && candidate.type() === 'page' && candidate.url().includes(extension.id) && candidate.url().endsWith('/popup.html'),
     { timeout: 10000 },
   );
   const popup = await target.asPage();
@@ -99,22 +72,8 @@ async function clickPopupAndWait(popup, selector) {
   return popup.$eval('#output', (node) => node.textContent);
 }
 
-async function clickPermissionGrant(popup) {
-  // chrome.permissions.request can open browser-owned permission UI and close
-  // the extension popup. Once clicked, observe service-worker/permission state
-  // instead of assuming the popup frame survives.
-  try {
-    await popup.click('#grant');
-  } catch (error) {
-    if (!/detached|closed|Target/i.test(error?.message || '')) throw error;
-  }
-}
-
 async function getSession(worker) {
-  return worker.evaluate(async () => {
-    const stored = await chrome.storage.session.get('novaMacroPocSession');
-    return stored.novaMacroPocSession || null;
-  });
+  return worker.evaluate(async () => (await chrome.storage.session.get('novaMacroPocSession')).novaMacroPocSession || null);
 }
 
 async function waitForSession(worker, predicate, timeoutMs = 12000) {
@@ -140,9 +99,7 @@ const { server, originA, originB } = await startServer();
 let browser;
 try {
   browser = await puppeteer.launch({
-    headless: 'new',
-    pipe: true,
-    enableExtensions: [extensionPath],
+    headless: 'new', pipe: true, enableExtensions: [extensionPath],
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 
@@ -152,77 +109,60 @@ try {
 
   await page.goto(`${originA}/start`, { waitUntil: 'domcontentloaded' });
   let popup = await openPopup(browser, extension, page);
-  const startOutput = await clickPopupAndWait(popup, '#start');
-  assert.match(startOutput, /"mode":\s*"RECORDING"/);
+  assert.match(await clickPopupAndWait(popup, '#start'), /"mode":\s*"RECORDING"/);
 
-  await Promise.all([
-    page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
-    page.click('#cross'),
-  ]);
+  await Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded' }), page.click('#cross')]);
   assert.equal(page.url(), `${originB}/orders`);
+  const pausedRecord = await waitForSession(worker, (s) => s.mode === 'RECORDING' && s.needsSiteAccess === true);
+  assert.equal(pausedRecord.steps.length, 1);
+  console.log('PASS recording pauses on origin B before resume');
 
-  const pausedRecord = await waitForSession(
-    worker,
-    (session) => session.mode === 'RECORDING' && session.needsSiteAccess === true,
-  );
-  assert.equal(pausedRecord.steps.length, 1, 'cross-origin navigation click must already be recorded');
-  console.log('PASS recording pauses before any permission is granted on origin B');
-
+  // Opening the extension on B grants activeTab for B. Resume uses that
+  // temporary grant only; it must not persist a host permission.
   popup = await openPopup(browser, extension, page);
-  await clickPermissionGrant(popup);
-  await waitForSession(worker, (session) => session.mode === 'RECORDING' && !session.needsSiteAccess);
-
-  const permissionGranted = await worker.evaluate(async () =>
-    chrome.permissions.contains({ origins: ['http://localhost/*'] }),
+  assert.match(await clickPopupAndWait(popup, '#grant'), /"mode":\s*"RECORDING"/);
+  await waitForSession(worker, (s) => s.mode === 'RECORDING' && !s.needsSiteAccess);
+  assert.equal(
+    await worker.evaluate(async () => chrome.permissions.contains({ origins: ['http://localhost/*'] })),
+    false,
+    'Resume once must not persist origin B host permission',
   );
-  assert.equal(permissionGranted, true, 'origin B persistent permission should be explicitly granted');
 
   await page.type('#search', '#2048');
   await page.$eval('#search', (input) => input.blur());
   await page.click('#export');
   await page.waitForFunction(() => document.body.dataset.exported === 'yes');
-
   popup = await openPopup(browser, extension, page);
-  const stopOutput = await clickPopupAndWait(popup, '#stop');
-  assert.match(stopOutput, /"mode":\s*"SAVED"/);
+  assert.match(await clickPopupAndWait(popup, '#stop'), /"mode":\s*"SAVED"/);
 
-  const saved = await worker.evaluate(async () => {
-    const data = await chrome.storage.local.get('novaMacroPocLast');
-    return data.novaMacroPocLast || [];
-  });
+  const saved = await worker.evaluate(async () => (await chrome.storage.local.get('novaMacroPocLast')).novaMacroPocLast || []);
   assert.equal(saved.length, 3);
   assert.deepEqual(saved.map((step) => step.type), ['click', 'input', 'click']);
   assert.equal(saved[1].value, '#2048');
-  console.log('PASS explicit grant resumes recording and preserves all 3 steps');
+  console.log('PASS one-time activeTab resume preserves all 3 recorded steps');
 
-  const removed = await worker.evaluate(async () =>
-    chrome.permissions.remove({ origins: ['http://localhost/*'] }),
-  );
-  assert.equal(removed, true, 'origin B permission should be removable before replay');
-
+  // Because no persistent host permission was stored, replay must pause on B again.
   await page.goto(`${originA}/start`, { waitUntil: 'domcontentloaded' });
   popup = await openPopup(browser, extension, page);
-  const replayOutput = await clickPopupAndWait(popup, '#replay');
-  assert.match(replayOutput, /"mode":\s*"REPLAYING"/);
+  assert.match(await clickPopupAndWait(popup, '#replay'), /"mode":\s*"REPLAYING"/);
 
   await waitForUrl(page, `${originB}/orders`);
-  const pausedReplay = await waitForSession(
-    worker,
-    (session) => session.mode === 'REPLAYING' && session.needsSiteAccess === true,
-  );
-  assert.equal(pausedReplay.replayIndex, 1, 'navigation step should execute once before permission pause');
-  assert.equal(await page.$eval('#search', (input) => input.value), '', 'post-navigation input must not run before grant');
-  console.log('PASS replay pauses on origin B before executing protected steps');
+  const pausedReplay = await waitForSession(worker, (s) => s.mode === 'REPLAYING' && s.needsSiteAccess === true);
+  assert.equal(pausedReplay.replayIndex, 1);
+  assert.equal(await page.$eval('#search', (input) => input.value), '');
+  console.log('PASS replay pauses before protected B-site steps');
 
   popup = await openPopup(browser, extension, page);
-  await clickPermissionGrant(popup);
-  await waitForSession(worker, (session) => session.mode === 'REPLAYING' && !session.needsSiteAccess);
-
+  assert.match(await clickPopupAndWait(popup, '#grant'), /"mode":\s*"REPLAYING"/);
   await page.waitForFunction(() => document.querySelector('#search')?.value === '#2048', { timeout: 12000 });
   await page.waitForFunction(() => document.body.dataset.exported === 'yes', { timeout: 12000 });
-  const completed = await waitForSession(worker, (session) => session.mode === 'COMPLETED');
+  const completed = await waitForSession(worker, (s) => s.mode === 'COMPLETED');
   assert.equal(completed.replayIndex, 3);
-  console.log('PASS explicit grant resumes replay without duplicate navigation');
+  assert.equal(
+    await worker.evaluate(async () => chrome.permissions.contains({ origins: ['http://localhost/*'] })),
+    false,
+  );
+  console.log('PASS one-time resume completes replay without persistent host access');
   console.log('RESULT 4/4');
 } finally {
   if (browser) await browser.close();
