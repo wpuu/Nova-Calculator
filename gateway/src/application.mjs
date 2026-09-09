@@ -5,6 +5,10 @@ import {
   createAnonymousSessionFetchHandler,
 } from './anonymous-session.mjs';
 import {
+  BrowserSessionService,
+  createBrowserSessionFetchHandler,
+} from './browser-session.mjs';
+import {
   BillingEntitlementService,
   createBillingEntitlementFetchHandler,
 } from './billing-entitlement-service.mjs';
@@ -31,8 +35,8 @@ import { NOVA_SESSION_KIND, sessionTokenServiceFromEnv } from './session-token.m
  * - quotaStore: shared atomic persistent store implementing reserve/commit/release.
  * - installationProofVerifier: validates app/device proof before a free anonymous session is issued.
  *
- * Production may additionally inject keyPoolFactory so provider-key RPM/cooldown state is shared
- * across horizontally scaled gateway instances instead of remaining process-local.
+ * Browser identity is optional and isolated: if browserIdentityVerifier is absent the Chrome
+ * session route is unavailable, while Android sessions/AI/billing remain fully operational.
  */
 export function createNovaGatewayApplication(options = {}) {
   const env = options.env ?? process.env;
@@ -73,6 +77,17 @@ export function createNovaGatewayApplication(options = {}) {
     tokenService: sessionTokens,
     installationProofVerifier: options.installationProofVerifier,
   });
+
+  let browserSessionHandler = null;
+  if (options.browserIdentityVerifier) {
+    const browserSessionService = new BrowserSessionService({
+      tokenService: sessionTokens,
+      identityVerifier: options.browserIdentityVerifier,
+      now,
+      sessionTtlMs: env.NOVA_BROWSER_SESSION_TTL_MS ?? 60 * 60 * 1000,
+    });
+    browserSessionHandler = createBrowserSessionFetchHandler({ service: browserSessionService });
+  }
 
   let billingHandler = null;
   if (options.purchaseVerifier) {
@@ -119,6 +134,7 @@ export function createNovaGatewayApplication(options = {}) {
       service: macroCandidateReviewService,
     }),
     anonymousSessionHandler: createAnonymousSessionFetchHandler({ service: anonymousSessionService }),
+    browserSessionHandler,
     billingHandler,
     productEventHandler,
     safeSummary: Object.freeze({
@@ -131,6 +147,7 @@ export function createNovaGatewayApplication(options = {}) {
       aiPlusRpmLimit: aiPlusLimits.rpmLimit,
       signedNovaSessions: true,
       proofGatedAnonymousSessions: true,
+      googleBrowserSessionExchange: Boolean(browserSessionHandler),
       boundedMacroCandidateReview: true,
       serverVerifiedPlayBilling: Boolean(options.purchaseVerifier),
       privacySafeProductEvents: Boolean(options.productEventStore),
