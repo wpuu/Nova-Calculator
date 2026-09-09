@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "purpose": "Validate that Shopify site adapters generalize beyond export-orders and fail safely on unseen variants.",
+  "version": 3,
+  "purpose": "Validate that Shopify site adapters generalize across five order-management actions and fail safely on unseen variants.",
   "actions": [
     {
       "id": "shopify.open_orders",
@@ -11,6 +11,17 @@
         {"id":"nav-de","target":"orders-link","expected":"AUTO","html":"<nav aria-label='Navigation'><a href='/home'>Start</a><a id='orders-link' href='/orders'>Bestellungen</a><a href='/products'>Produkte</a></nav>"},
         {"id":"nav-holdout-icon-label","target":"orders-link","expected":"AUTO_OR_REVIEW","holdout":true,"html":"<nav aria-label='Admin'><a href='/home'>Home</a><a id='orders-link' href='/orders' aria-label='Customer purchases'>▦</a><a href='/products'>Products</a></nav>"},
         {"id":"nav-ambiguous","target":null,"expected":"AI_REVIEW_OR_ABSTAIN","holdout":true,"html":"<nav aria-label='Admin'><a href='/orders?scope=open'>Orders</a><a href='/orders?scope=archived'>Orders</a></nav>"}
+      ]
+    },
+    {
+      "id": "shopify.open_order",
+      "recorded": {"role":"link","names":["#1042"],"context":["Orders"],"hrefPath":"/store/demo/orders/987654321"},
+      "variants": [
+        {"id":"order-row-standard","target":"order-1042","expected":"AUTO","html":"<main data-section='Orders'><h1>Orders</h1><a href='/store/demo/orders/111'>#1041</a><a id='order-1042' href='/store/demo/orders/222'>#1042</a><a href='/store/demo/orders/333'>#1043</a></main>"},
+        {"id":"order-row-accessible-label","target":"order-1042","expected":"AUTO_OR_REVIEW","html":"<main data-section='Orders'><h1>Orders</h1><a id='order-1042' href='/store/demo/orders/222' aria-label='View order #1042'>Open</a><a href='/store/demo/orders/333' aria-label='View order #1043'>Open</a></main>"},
+        {"id":"order-row-web-component","target":"order-1042","expected":"AUTO","html":"<main data-section='Orders'><h1>Orders</h1><s-link role='link' href='/store/demo/orders/111'>#1041</s-link><s-link id='order-1042' role='link' href='/store/demo/orders/222'>#1042</s-link></main>"},
+        {"id":"order-row-holdout-purchase-label","target":"order-1042","expected":"AUTO_OR_REVIEW","holdout":true,"html":"<main data-section='Orders'><h1>Orders</h1><a id='order-1042' href='/store/demo/orders/222' aria-label='Purchase 1042'></a><a href='/store/demo/orders/333' aria-label='Purchase 1043'></a></main>"},
+        {"id":"order-row-ambiguous-duplicate","target":null,"expected":"AI_REVIEW_OR_ABSTAIN","holdout":true,"html":"<main data-section='Orders'><h1>Orders</h1><a href='/store/demo/orders/222'>#1042</a><a href='/store/demo/orders/999'>#1042</a></main>"}
       ]
     },
     {
