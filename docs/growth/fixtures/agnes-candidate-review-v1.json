@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "purpose": "Evaluate Agnes only as a bounded chooser over candidate IDs minted by Nova local Core. No selector, code, DOM handle, or arbitrary action may be generated.",
+  "cases": [
+    {
+      "id": "clear-export-second-candidate",
+      "review": {
+        "reviewId": "review-fixture-1",
+        "index": 0,
+        "stepType": "click",
+        "semanticActionId": "shopify.export_orders",
+        "original": {
+          "semanticActionId": "shopify.export_orders",
+          "role": "button",
+          "names": ["Export orders"],
+          "context": ["Orders"],
+          "attrs": {"data-action": "export"},
+          "hrefPath": "",
+          "tag": "button"
+        },
+        "candidates": [
+          {"id":"candidate_1","role":"button","names":["Import"],"context":["Orders"],"attrs":{},"hrefPath":"","tag":"button","score":54},
+          {"id":"candidate_2","role":"button","names":["Export orders"],"context":["Orders"],"attrs":{"data-action":"export"},"hrefPath":"","tag":"button","score":61},
+          {"id":"candidate_3","role":"button","names":["Delete all orders"],"context":["Orders"],"attrs":{},"hrefPath":"","tag":"button","score":30}
+        ],
+        "allowedCandidateIds": ["candidate_1", "candidate_2", "candidate_3"],
+        "policy": "SELECT_LISTED_CANDIDATE_OR_ABSTAIN"
+      },
+      "expected": {"decision":"SELECT","candidate_id":"candidate_2"}
+    },
+    {
+      "id": "duplicate-order-number-must-abstain",
+      "review": {
+        "reviewId": "review-fixture-2",
+        "index": 1,
+        "stepType": "click",
+        "semanticActionId": "shopify.open_order",
+        "original": {
+          "semanticActionId": "shopify.open_order",
+          "role": "link",
+          "names": ["#1042"],
+          "context": ["Orders"],
+          "attrs": {},
+          "hrefPath": "/store/demo/orders/987654321",
+          "tag": "a"
+        },
+        "candidates": [
+          {"id":"candidate_1","role":"link","names":["#1042"],"context":["Orders"],"attrs":{},"hrefPath":"/store/demo/orders/222","tag":"a","score":74},
+          {"id":"candidate_2","role":"link","names":["#1042"],"context":["Orders"],"attrs":{},"hrefPath":"/store/demo/orders/999","tag":"a","score":74}
+        ],
+        "allowedCandidateIds": ["candidate_1", "candidate_2"],
+        "policy": "SELECT_LISTED_CANDIDATE_OR_ABSTAIN"
+      },
+      "expected": {"decision":"ABSTAIN","candidate_id":null}
+    },
+    {
+      "id": "localized-filter-clear-choice",
+      "review": {
+        "reviewId": "review-fixture-3",
+        "index": 2,
+        "stepType": "click",
+        "semanticActionId": "shopify.filter_orders",
+        "original": {
+          "semanticActionId": "shopify.filter_orders",
+          "role": "button",
+          "names": ["Filter"],
+          "context": ["Orders"],
+          "attrs": {"aria-haspopup":"menu"},
+          "hrefPath": "",
+          "tag": "button"
+        },
+        "candidates": [
+          {"id":"candidate_1","role":"button","names":["筛选"],"context":["订单"],"attrs":{"aria-haspopup":"menu"},"hrefPath":"","tag":"button","score":58},
+          {"id":"candidate_2","role":"button","names":["排序"],"context":["订单"],"attrs":{},"hrefPath":"","tag":"button","score":48}
+        ],
+        "allowedCandidateIds": ["candidate_1", "candidate_2"],
+        "policy": "SELECT_LISTED_CANDIDATE_OR_ABSTAIN"
+      },
+      "expected": {"decision":"SELECT","candidate_id":"candidate_1"}
+    },
+    {
+      "id": "weak-generic-search-must-abstain",
+      "review": {
+        "reviewId": "review-fixture-4",
+        "index": 3,
+        "stepType": "input",
+        "semanticActionId": "shopify.search_orders",
+        "original": {
+          "semanticActionId": "shopify.search_orders",
+          "role": "searchbox",
+          "names": ["Search orders"],
+          "context": ["Orders"],
+          "attrs": {"type":"search"},
+          "hrefPath": "",
+          "tag": "input"
+        },
+        "candidates": [
+          {"id":"candidate_1","role":"searchbox","names":["Find a purchase"],"context":["Orders"],"attrs":{},"hrefPath":"","tag":"input","score":49},
+          {"id":"candidate_2","role":"searchbox","names":["Find a product"],"context":["Products"],"attrs":{},"hrefPath":"","tag":"input","score":48}
+        ],
+        "allowedCandidateIds": ["candidate_1", "candidate_2"],
+        "policy": "SELECT_LISTED_CANDIDATE_OR_ABSTAIN"
+      },
+      "expected": {"decision":"ABSTAIN","candidate_id":null}
+    }
+  ]
+}
