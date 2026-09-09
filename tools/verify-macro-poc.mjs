@@ -33,67 +33,43 @@ for (const permission of forbiddenInstallPermissions) {
 if (manifest.host_permissions?.length) fail('host_permissions must not be requested at install time');
 const optionalHosts = new Set(manifest.optional_host_permissions || []);
 if (!optionalHosts.has('https://*/*') || !optionalHosts.has('http://*/*')) {
-  fail('optional host permission pool must support explicit current-site grants');
+  fail('optional host permission pool must remain available for a future explicit persistent-access feature');
 }
 
 const requiredFiles = [
-  'manifest.json',
-  'background.js',
-  'semantic-matcher.js',
-  'content.js',
-  'popup.html',
-  'popup.js',
-  'ui-contract.json',
+  'manifest.json', 'background.js', 'semantic-matcher.js', 'content.js',
+  'popup.html', 'popup.js', 'ui-contract.json',
 ];
 for (const file of requiredFiles) {
   if (!fs.existsSync(path.join(extDir, file))) fail(`required extension file missing: ${file}`);
 }
 
-const javascriptFiles = ['background.js', 'semantic-matcher.js', 'content.js', 'popup.js'];
-for (const file of javascriptFiles) {
+for (const file of ['background.js', 'semantic-matcher.js', 'content.js', 'popup.js']) {
   const source = read(file);
-  try {
-    new Function(source);
-  } catch (error) {
-    fail(`${file} has invalid JavaScript: ${error.message}`);
-  }
-  const forbiddenRemoteExecution = [
-    /\beval\s*\(/,
-    /\bnew\s+Function\s*\(/,
-    /importScripts\s*\(\s*['"]https?:/i,
-  ];
-  for (const pattern of forbiddenRemoteExecution) {
+  try { new Function(source); } catch (error) { fail(`${file} has invalid JavaScript: ${error.message}`); }
+  for (const pattern of [/\beval\s*\(/, /\bnew\s+Function\s*\(/, /importScripts\s*\(\s*['"]https?:/i]) {
     if (pattern.test(source)) fail(`${file} contains forbidden dynamic/remote execution pattern: ${pattern}`);
   }
 }
 
 const matcher = read('semantic-matcher.js');
 const requiredActions = [
-  'shopify.open_orders',
-  'shopify.search_orders',
-  'shopify.filter_orders',
-  'shopify.export_orders',
+  'shopify.open_orders', 'shopify.search_orders', 'shopify.filter_orders', 'shopify.export_orders',
 ];
 for (const action of requiredActions) {
   if (!matcher.includes(`'${action}'`)) fail(`semantic action missing from matcher: ${action}`);
 }
 
-const requiredStates = [
-  'IDLE',
-  'RECORDING',
-  'SITE_ACCESS_REQUIRED',
-  'REPLAYING',
-  'AI_REVIEW',
-  'REQUIRES_CONFIRMATION',
-  'BLOCKED_SENSITIVE_INPUT',
-];
-for (const state of requiredStates) {
+for (const state of ['IDLE','RECORDING','SITE_ACCESS_REQUIRED','REPLAYING','AI_REVIEW','REQUIRES_CONFIRMATION','BLOCKED_SENSITIVE_INPUT']) {
   if (!contract.states?.includes(state)) fail(`UI contract state missing: ${state}`);
 }
+if (!contract.commands?.includes('RESUME_CURRENT_SITE_ONCE')) fail('one-time cross-origin resume command missing');
 
 const requiredUiRules = {
   requestSiteAccessOnlyFromExplicitUserGesture: true,
   doNotRequestAllUrlsAtInstall: true,
+  defaultCrossOriginResumeUsesActiveTabOnly: true,
+  persistentHostPermissionIsDeferred: true,
   aiCannotGenerateExecutableSelector: true,
   aiCandidatesMustComeFromCore: true,
   dangerousActionsRequireExplicitConfirmation: true,
@@ -109,45 +85,26 @@ const fixtureActions = new Set((fixture.actions || []).map((action) => action.id
 for (const action of requiredActions) {
   if (!fixtureActions.has(action)) fail(`fixture coverage missing semantic action: ${action}`);
 }
-const holdoutCount = (fixture.actions || [])
-  .flatMap((action) => action.variants || [])
-  .filter((variant) => variant.holdout).length;
+const holdoutCount = (fixture.actions || []).flatMap((action) => action.variants || []).filter((variant) => variant.holdout).length;
 if (holdoutCount < 4) fail(`holdout coverage too small: ${holdoutCount}`);
 
 const content = read('content.js');
-for (const marker of [
-  'BLOCKED_SENSITIVE_INPUT',
-  'REQUIRES_CONFIRMATION',
-  'NOVA_RECORD_STEP',
-  'resolveWithWait',
-  'setNativeValue',
-  'HTMLInputElement.prototype',
-  'urlBefore',
-  'NOVA_CONTENT_STATE',
-]) {
+for (const marker of ['BLOCKED_SENSITIVE_INPUT','REQUIRES_CONFIRMATION','NOVA_RECORD_STEP','resolveWithWait','setNativeValue','HTMLInputElement.prototype','urlBefore','NOVA_CONTENT_STATE']) {
   if (!content.includes(marker)) fail(`content safety/orchestration marker missing: ${marker}`);
 }
 
 const background = read('background.js');
-for (const marker of [
-  'chrome.storage.session',
-  'chrome.tabs.onUpdated',
-  'stepWriteQueue',
-  'NOVA_RESUME_CURRENT',
-  'needsSiteAccess',
-  'replayWaitingForDocument',
-  'waitingFromUrl',
-  'probeNavigationProgress',
-  "if (!session.replayWaitingForDocument && !session.needsSiteAccess) return session;",
-  'Delivery here is deliberately at-most-once',
-]) {
+for (const marker of ['chrome.storage.session','chrome.tabs.onUpdated','stepWriteQueue','NOVA_RESUME_CURRENT','needsSiteAccess','replayWaitingForDocument','waitingFromUrl','probeNavigationProgress',"if (!session.replayWaitingForDocument && !session.needsSiteAccess) return session;",'Delivery here is deliberately at-most-once']) {
   if (!background.includes(marker)) fail(`background navigation/orchestration marker missing: ${marker}`);
 }
 
-if (!fs.existsSync(path.join(root, 'tools', 'macro-background-state-eval.mjs'))) {
-  fail('service-worker state-machine evaluation missing');
-}
+const popup = read('popup.js');
+if (popup.includes('chrome.permissions.request')) fail('default popup must not request persistent host permission');
+if (!popup.includes("type: 'NOVA_RESUME_CURRENT'")) fail('popup one-time resume must route through background');
+
+if (!fs.existsSync(path.join(root, 'tools', 'macro-background-state-eval.mjs'))) fail('service-worker state-machine evaluation missing');
+if (!fs.existsSync(path.join(root, 'tools', 'macro-cross-origin-e2e.mjs'))) fail('cross-origin real-browser E2E missing');
 
 if (!process.exitCode) {
-  console.log(`Macro POC guard passed: ${requiredActions.length} actions, ${holdoutCount} holdouts, MV3 optional-site permission architecture intact.`);
+  console.log(`Macro POC guard passed: ${requiredActions.length} actions, ${holdoutCount} holdouts, activeTab-first cross-origin architecture intact.`);
 }
