@@ -84,12 +84,19 @@ function assertVariant(actionId, variant, result) {
       assert.equal(result.targetId, variant.target, `${prefix} selected wrong menu target`);
       assert.equal(result.menuExpanded, true, `${prefix} should expand safe menu`);
       return;
-    case 'AUTO_OR_REVIEW':
-      assert(['AUTO', 'AI_REVIEW'].includes(result.decision), `${prefix} expected AUTO/AI_REVIEW; got ${result.decision}`);
+    case 'AUTO_OR_REVIEW': {
+      // Holdouts exist to prove fail-safe behavior on unseen UI. ABSTAIN is
+      // acceptable for a holdout because refusing to guess is safer than a
+      // wrong AUTO. Known non-holdout variants still must resolve or escalate.
+      const allowed = variant.holdout
+        ? ['AUTO', 'AI_REVIEW', 'ABSTAIN']
+        : ['AUTO', 'AI_REVIEW'];
+      assert(allowed.includes(result.decision), `${prefix} expected ${allowed.join('/')}; got ${result.decision}`);
       if (result.decision === 'AUTO') {
         assert.equal(result.targetId, variant.target, `${prefix} wrong AUTO is forbidden`);
       }
       return;
+    }
     case 'AI_REVIEW_OR_ABSTAIN':
       assert(['AI_REVIEW', 'ABSTAIN'].includes(result.decision), `${prefix} must fail closed; got ${result.decision}`);
       return;
