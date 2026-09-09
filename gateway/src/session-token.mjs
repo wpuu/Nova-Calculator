@@ -48,13 +48,13 @@ export class NovaSessionTokenService {
     });
   }
 
-  issueAccount({ accountId, entitlements = [] }) {
+  issueAccount({ accountId, entitlements = [], ttlMs = this.accountTtlMs }) {
     const account = boundedText(accountId, 'accountId', 200);
     return this.issue({
       kind: NOVA_SESSION_KIND.ACCOUNT,
       subjectId: pseudonymousSubject(this.subjectSecret, 'account', account),
       entitlements: normalizeEntitlements(entitlements, true),
-      ttlMs: this.accountTtlMs,
+      ttlMs: positiveInt(ttlMs, 'account ttlMs'),
     });
   }
 
