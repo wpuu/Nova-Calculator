@@ -9,6 +9,8 @@
   const state = {
     recording: false,
     listeners: [],
+    pendingReview: null,
+    reviewCounter: 0,
   };
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -68,6 +70,7 @@
   };
 
   function setRecording(recording) {
+    state.pendingReview = null;
     if (recording === state.recording) return { ok: true, recording };
     state.recording = recording;
     if (recording) {
@@ -93,6 +96,9 @@
       if (last.decision === 'AUTO' && last.target) {
         return { ...last, waitedMs: Date.now() - startedAt, menuExpanded };
       }
+      if (last.decision === 'AI_REVIEW') {
+        return { ...last, waitedMs: Date.now() - startedAt, menuExpanded };
+      }
 
       await sleep(120);
     }
@@ -112,26 +118,72 @@
     else target.value = value;
   }
 
-  async function replayStep(step, index) {
-    if (step.type === 'blocked_sensitive_input') {
-      return { ok: false, status: 'BLOCKED_SENSITIVE_INPUT', index };
-    }
-    if (step.requiresConfirmation || step.fingerprint?.dangerous) {
+  function safeFingerprintSummary(fp = {}) {
+    return {
+      semanticActionId: fp.semanticActionId || null,
+      role: fp.role || null,
+      names: Array.isArray(fp.names) ? fp.names.slice(0, 6) : [],
+      context: Array.isArray(fp.context) ? fp.context.slice(0, 6) : [],
+      attrs: fp.attrs && typeof fp.attrs === 'object' ? { ...fp.attrs } : {},
+      hrefPath: fp.hrefPath || '',
+      tag: fp.tag || '',
+    };
+  }
+
+  function candidateSummary(candidate, id) {
+    return {
+      id,
+      role: candidate.role || null,
+      names: Array.isArray(candidate.names) ? candidate.names.slice(0, 6) : [],
+      context: Array.isArray(candidate.context) ? candidate.context.slice(0, 6) : [],
+      attrs: candidate.attrs && typeof candidate.attrs === 'object' ? { ...candidate.attrs } : {},
+      hrefPath: candidate.hrefPath || '',
+      tag: candidate.tag || '',
+      score: Number(candidate.score || 0),
+    };
+  }
+
+  function createPendingReview(step, index, resolved) {
+    const ranked = (resolved.ranked || [])
+      .filter((candidate) => candidate?.el && candidate.visible && candidate.enabled && !candidate.dangerous)
+      .slice(0, 5);
+    if (!ranked.length) return null;
+
+    const reviewId = `review-${Date.now()}-${++state.reviewCounter}`;
+    const candidates = new Map();
+    const summaries = ranked.map((candidate, candidateIndex) => {
+      const id = `candidate_${candidateIndex + 1}`;
+      candidates.set(id, candidate.el);
+      return candidateSummary(candidate, id);
+    });
+
+    state.pendingReview = {
+      reviewId,
+      index,
+      step,
+      candidates,
+      createdAt: Date.now(),
+    };
+
+    return {
+      reviewId,
+      index,
+      stepType: step.type,
+      semanticActionId: step.fingerprint?.semanticActionId || null,
+      original: safeFingerprintSummary(step.fingerprint),
+      candidates: summaries,
+      allowedCandidateIds: summaries.map((candidate) => candidate.id),
+      policy: 'SELECT_LISTED_CANDIDATE_OR_ABSTAIN',
+    };
+  }
+
+  async function executeResolvedTarget(step, index, target, meta = {}) {
+    if (!target?.isConnected) return { ok: false, status: 'STALE_AI_REVIEW', index };
+    const current = matcher.candidateRecord(target);
+    if (current.dangerous || step.requiresConfirmation || step.fingerprint?.dangerous) {
       return { ok: false, status: 'REQUIRES_CONFIRMATION', index };
     }
 
-    const resolved = await resolveWithWait(step.fingerprint, step.timeoutMs || 5000);
-    if (resolved.decision !== 'AUTO' || !resolved.target) {
-      return {
-        ok: false,
-        status: resolved.decision === 'AI_REVIEW' ? 'AI_REVIEW' : 'ABSTAIN',
-        index,
-        waitedMs: resolved.waitedMs,
-        topScores: (resolved.ranked || []).slice(0, 3).map((candidate) => candidate.score),
-      };
-    }
-
-    const target = resolved.target;
     target.scrollIntoView?.({ block: 'center', inline: 'center' });
 
     if (step.type === 'click') {
@@ -145,8 +197,9 @@
         ok: true,
         status: 'CLICKED',
         index,
-        waitedMs: resolved.waitedMs,
-        menuExpanded: !!resolved.menuExpanded,
+        waitedMs: meta.waitedMs || 0,
+        menuExpanded: !!meta.menuExpanded,
+        selectedCandidateId: meta.selectedCandidateId || null,
         mayNavigate: !!mayNavigate,
         urlBefore,
       };
@@ -162,12 +215,68 @@
         ok: true,
         status: 'INPUT_SET',
         index,
-        waitedMs: resolved.waitedMs,
+        waitedMs: meta.waitedMs || 0,
+        selectedCandidateId: meta.selectedCandidateId || null,
         mayNavigate: false,
       };
     }
 
     return { ok: false, status: 'UNKNOWN_STEP', index };
+  }
+
+  async function replayStep(step, index) {
+    state.pendingReview = null;
+    if (step.type === 'blocked_sensitive_input') {
+      return { ok: false, status: 'BLOCKED_SENSITIVE_INPUT', index };
+    }
+    if (step.requiresConfirmation || step.fingerprint?.dangerous) {
+      return { ok: false, status: 'REQUIRES_CONFIRMATION', index };
+    }
+
+    const resolved = await resolveWithWait(step.fingerprint, step.timeoutMs || 5000);
+    if (resolved.decision !== 'AUTO' || !resolved.target) {
+      if (resolved.decision === 'AI_REVIEW') {
+        const review = createPendingReview(step, index, resolved);
+        if (review) {
+          return {
+            ok: false,
+            status: 'AI_REVIEW',
+            index,
+            waitedMs: resolved.waitedMs,
+            review,
+            topScores: review.candidates.map((candidate) => candidate.score),
+          };
+        }
+      }
+      return {
+        ok: false,
+        status: 'ABSTAIN',
+        index,
+        waitedMs: resolved.waitedMs,
+        topScores: (resolved.ranked || []).slice(0, 3).map((candidate) => candidate.score),
+      };
+    }
+
+    return executeResolvedTarget(step, index, resolved.target, {
+      waitedMs: resolved.waitedMs,
+      menuExpanded: resolved.menuExpanded,
+    });
+  }
+
+  async function applyReviewChoice(reviewId, candidateId) {
+    const pending = state.pendingReview;
+    if (!pending || pending.reviewId !== reviewId) {
+      return { ok: false, status: 'STALE_AI_REVIEW' };
+    }
+    if (typeof candidateId !== 'string' || !pending.candidates.has(candidateId)) {
+      return { ok: false, status: 'INVALID_AI_CANDIDATE', index: pending.index };
+    }
+
+    const target = pending.candidates.get(candidateId);
+    state.pendingReview = null;
+    return executeResolvedTarget(pending.step, pending.index, target, {
+      selectedCandidateId: candidateId,
+    });
   }
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -178,8 +287,16 @@
       if (message?.type === 'NOVA_EXECUTE_STEP') {
         return replayStep(message.step, message.index);
       }
+      if (message?.type === 'NOVA_APPLY_REVIEW_CHOICE') {
+        return applyReviewChoice(message.reviewId, message.candidateId);
+      }
       if (message?.type === 'NOVA_CONTENT_STATE') {
-        return { ok: true, recording: state.recording, url: location.href };
+        return {
+          ok: true,
+          recording: state.recording,
+          url: location.href,
+          pendingReviewId: state.pendingReview?.reviewId || null,
+        };
       }
       return { ok: false, error: 'UNKNOWN_CONTENT_MESSAGE' };
     })().then(sendResponse).catch((error) => {
@@ -192,6 +309,11 @@
     setRecording,
     resolveWithWait,
     replayStep,
-    getState: () => ({ recording: state.recording, url: location.href }),
+    applyReviewChoice,
+    getState: () => ({
+      recording: state.recording,
+      url: location.href,
+      pendingReviewId: state.pendingReview?.reviewId || null,
+    }),
   };
 })(globalThis);
