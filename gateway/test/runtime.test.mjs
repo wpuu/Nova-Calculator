@@ -9,7 +9,7 @@ function env(overrides = {}) {
     NOVA_PROVIDER_BASE_URL: 'https://runtime-provider.invalid/v1',
     NOVA_PROVIDER_MODEL: 'runtime-model',
     NOVA_PROVIDER_KEYS: 'secret-a,secret-b',
-    NOVA_PROVIDER_RPM_PER_KEY: '20',
+    NOVA_PROVIDER_RPM_PER_KEY: '12',
     NOVA_PAID_RESERVE_FRACTION: '0.2',
     ...overrides,
   };
@@ -95,7 +95,7 @@ test('safe runtime summary never exposes provider identity or raw credentials', 
 
   assert.deepEqual(runtime.safeSummary, {
     providerKeyCount: 2,
-    rpmPerKey: 20,
+    rpmPerKey: 12,
     paidReserveFraction: 0.2,
     providerTimeoutMs: 15_000,
     maxTokens: 800,
@@ -184,6 +184,10 @@ test('runtime rejects missing provider secrets and invalid capacity settings', (
   assert.throws(
     () => createGatewayRuntime(env({ NOVA_PROVIDER_RPM_PER_KEY: '0' })),
     /positive integer/,
+  );
+  assert.throws(
+    () => createGatewayRuntime(env({ NOVA_PROVIDER_RPM_PER_KEY: '16' })),
+    /between 1 and 15/,
   );
   assert.throws(
     () => createGatewayRuntime(env({ NOVA_PAID_RESERVE_FRACTION: '1' })),
