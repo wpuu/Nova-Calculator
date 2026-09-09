@@ -37,5 +37,8 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --no-save puppeteer@25.10.0
 
-      - name: Run real MV3 extension E2E
+      - name: Run same-origin real MV3 E2E
         run: node tools/macro-extension-e2e.mjs
+
+      - name: Run cross-origin permission E2E
+        run: node tools/macro-cross-origin-e2e.mjs
