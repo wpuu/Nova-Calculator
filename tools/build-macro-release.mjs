@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -8,6 +9,11 @@ const outIndex = args.indexOf('--out');
 const outputDir = path.resolve(root, outIndex >= 0 ? String(args[outIndex + 1] || '') : 'dist/nova-macro-mv3');
 
 const extensionId = normalizeExtensionId(process.env.NOVA_MACRO_EXTENSION_ID);
+const extensionPublicKey = normalizeExtensionPublicKey(process.env.NOVA_MACRO_EXTENSION_PUBLIC_KEY);
+const derivedExtensionId = extensionIdFromPublicKey(extensionPublicKey);
+if (derivedExtensionId !== extensionId) {
+  throw new Error(`NOVA_MACRO_EXTENSION_PUBLIC_KEY derives ${derivedExtensionId}, not configured extension id ${extensionId}`);
+}
 const gatewayOrigin = normalizeGatewayOrigin(process.env.NOVA_MACRO_GATEWAY_ORIGIN);
 const oauthClientId = normalizeOauthClientId(process.env.NOVA_MACRO_GOOGLE_OAUTH_CLIENT_ID);
 
@@ -23,6 +29,7 @@ for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
 
 const manifestPath = path.join(outputDir, 'manifest.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+manifest.key = extensionPublicKey;
 manifest.oauth2 = {
   client_id: oauthClientId,
   scopes: ['openid'],
@@ -42,8 +49,9 @@ const configuredSource = source.replace(
 fs.writeFileSync(aiClientPath, configuredSource, 'utf8');
 
 const metadata = {
-  configVersion: 1,
+  configVersion: 2,
   extensionId,
+  publicKeyFingerprint: createHash('sha256').update(Buffer.from(extensionPublicKey, 'base64')).digest('hex'),
   gatewayOrigin,
   googleOauthClientId: oauthClientId,
   oauthScopes: ['openid'],
@@ -54,13 +62,15 @@ fs.writeFileSync(
   'utf8',
 );
 
-verifyBuiltRelease({ outputDir, extensionId, gatewayOrigin, oauthClientId });
+verifyBuiltRelease({ outputDir, extensionId, extensionPublicKey, gatewayOrigin, oauthClientId });
 console.log(`Macro release configured: ${outputDir}`);
 
-function verifyBuiltRelease({ outputDir, extensionId, gatewayOrigin, oauthClientId }) {
+function verifyBuiltRelease({ outputDir, extensionId, extensionPublicKey, gatewayOrigin, oauthClientId }) {
   const manifest = JSON.parse(fs.readFileSync(path.join(outputDir, 'manifest.json'), 'utf8'));
   if (!manifest.permissions?.includes('identity')) throw new Error('release manifest lost identity permission');
   if (manifest.permissions?.includes('identity.email')) throw new Error('release manifest must not request identity.email');
+  if (manifest.key !== extensionPublicKey) throw new Error('release manifest public key mismatch');
+  if (extensionIdFromPublicKey(manifest.key) !== extensionId) throw new Error('release manifest key/id mismatch');
   if (manifest.oauth2?.client_id !== oauthClientId) throw new Error('OAuth client id mismatch');
   if (JSON.stringify(manifest.oauth2?.scopes) !== JSON.stringify(['openid'])) {
     throw new Error('OAuth scopes must remain exactly openid');
@@ -76,7 +86,7 @@ function verifyBuiltRelease({ outputDir, extensionId, gatewayOrigin, oauthClient
     throw new Error('release AI client remained fail-closed/unconfigured');
   }
   const metadata = JSON.parse(fs.readFileSync(path.join(outputDir, 'release-metadata.json'), 'utf8'));
-  if (metadata.extensionId !== extensionId || metadata.gatewayOrigin !== gatewayOrigin) {
+  if (metadata.extensionId !== extensionId || metadata.gatewayOrigin !== gatewayOrigin || metadata.configVersion !== 2) {
     throw new Error('release metadata mismatch');
   }
 }
@@ -87,6 +97,24 @@ function normalizeExtensionId(value) {
     throw new Error('NOVA_MACRO_EXTENSION_ID must be a 32-character Chrome extension id (a-p only)');
   }
   return text;
+}
+
+function normalizeExtensionPublicKey(value) {
+  const text = String(value ?? '').trim().replace(/\s+/g, '');
+  if (!text || text.length > 8192 || !/^[A-Za-z0-9+/]+={0,2}$/.test(text)) {
+    throw new Error('NOVA_MACRO_EXTENSION_PUBLIC_KEY must be a base64 DER public key');
+  }
+  let bytes;
+  try { bytes = Buffer.from(text, 'base64'); } catch { throw new Error('NOVA_MACRO_EXTENSION_PUBLIC_KEY is invalid base64'); }
+  if (bytes.length < 64 || bytes.length > 4096) {
+    throw new Error('NOVA_MACRO_EXTENSION_PUBLIC_KEY has an invalid DER size');
+  }
+  return text;
+}
+
+function extensionIdFromPublicKey(publicKey) {
+  const digest = createHash('sha256').update(Buffer.from(publicKey, 'base64')).digest('hex').slice(0, 32);
+  return [...digest].map((hex) => String.fromCharCode('a'.charCodeAt(0) + Number.parseInt(hex, 16))).join('');
 }
 
 function normalizeGatewayOrigin(value) {
