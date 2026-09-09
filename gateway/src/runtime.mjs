@@ -74,7 +74,9 @@ function readConfig(env) {
     providerBaseUrl: requireEnv(env, 'NOVA_PROVIDER_BASE_URL'),
     providerModel: requireEnv(env, 'NOVA_PROVIDER_MODEL'),
     providerKeys: requireEnv(env, 'NOVA_PROVIDER_KEYS'),
-    rpmPerKey: positiveInt(env.NOVA_PROVIDER_RPM_PER_KEY ?? 20, 'NOVA_PROVIDER_RPM_PER_KEY'),
+    // Agnes deployment policy: steady-state 12 RPM/key, hard fail above 15.
+    // parseProviderKeys enforces the hard ceiling so a bad deployment value cannot silently overrun it.
+    rpmPerKey: positiveInt(env.NOVA_PROVIDER_RPM_PER_KEY ?? 12, 'NOVA_PROVIDER_RPM_PER_KEY'),
     paidReserveFraction: fraction(env.NOVA_PAID_RESERVE_FRACTION ?? 0.2, 'NOVA_PAID_RESERVE_FRACTION'),
     providerTimeoutMs: positiveInt(env.NOVA_PROVIDER_TIMEOUT_MS ?? 15_000, 'NOVA_PROVIDER_TIMEOUT_MS'),
     maxTokens: positiveInt(env.NOVA_PROVIDER_MAX_TOKENS ?? 800, 'NOVA_PROVIDER_MAX_TOKENS'),
