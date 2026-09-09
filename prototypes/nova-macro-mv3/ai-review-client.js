@@ -4,8 +4,8 @@
   if (root.NovaMacroAiReview) return;
 
   const CONFIG_KEY = 'novaMacroGatewaySession';
-  // Shared name is deliberate: future Agnes-backed extension modules must reuse this
-  // chrome.storage.session lock instead of inventing per-feature concurrency.
+  // Shared name is deliberate: every Agnes-backed extension module must reuse
+  // this chrome.storage.session lock instead of inventing per-feature concurrency.
   const LOCK_KEY = 'novaAgnesSingleFlight';
   const LOCK_TTL_MS = 30_000;
 
@@ -17,6 +17,7 @@
     const abstainRepair = options?.abstainRepair;
     const fetchImpl = options?.fetchImpl || root.fetch;
     const now = options?.now || (() => Date.now());
+    const runtimeConfig = options?.runtimeConfig || root.NovaMacroRuntimeConfig || {};
     const newRequestId = options?.newRequestId || (() => {
       const uuid = root.crypto?.randomUUID?.();
       return uuid ? `macro_${uuid}` : `macro_${now()}_${Math.random().toString(36).slice(2)}`;
@@ -33,13 +34,94 @@
 
     let lockQueue = Promise.resolve();
 
+    async function connectGoogle(_message, sender) {
+      if (!isTrustedExtensionUiSender(chrome, sender)) {
+        return { ok: false, error: 'UNTRUSTED_BROWSER_SESSION_SENDER' };
+      }
+
+      const origin = configuredGatewayOrigin(runtimeConfig);
+      if (!origin) return { ok: false, error: 'GATEWAY_ORIGIN_NOT_CONFIGURED' };
+
+      const oauth = chrome.runtime?.getManifest?.()?.oauth2;
+      const clientId = String(oauth?.client_id || '').trim();
+      const manifestScopes = Array.isArray(oauth?.scopes) ? oauth.scopes.map(String) : [];
+      if (!clientId || manifestScopes.length !== 1 || manifestScopes[0] !== 'openid') {
+        return { ok: false, error: 'GOOGLE_OAUTH_NOT_CONFIGURED' };
+      }
+      if (!chrome.identity || typeof chrome.identity.getAuthToken !== 'function') {
+        return { ok: false, error: 'CHROME_IDENTITY_UNAVAILABLE' };
+      }
+
+      const lock = await claimLock('browser-session');
+      if (!lock.ok) return lock;
+      let googleToken = '';
+      try {
+        try {
+          googleToken = await getGoogleAccessToken(chrome);
+        } catch {
+          return { ok: false, error: 'GOOGLE_OAUTH_FAILED' };
+        }
+        if (!googleToken) return { ok: false, error: 'GOOGLE_OAUTH_FAILED' };
+
+        let response;
+        try {
+          response = await fetchImpl(`${origin}/api/browser-session`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ accessToken: googleToken }),
+            cache: 'no-store',
+          });
+        } catch {
+          return { ok: false, error: 'BROWSER_SESSION_TRANSPORT_FAILED' };
+        }
+
+        let payload;
+        try { payload = await response.json(); } catch {
+          return { ok: false, error: 'BROWSER_SESSION_INVALID_RESPONSE' };
+        }
+        if (!response.ok || payload?.status !== 'SUCCESS') {
+          if ([401, 403].includes(Number(response.status))) {
+            await removeCachedGoogleToken(chrome, googleToken);
+          }
+          return {
+            ok: false,
+            error: browserSessionStatusError(payload?.status, response.status),
+          };
+        }
+
+        const novaToken = String(payload.sessionToken || '').trim();
+        const expiresAtEpochMs = Number(payload.expiresAtEpochMs || 0);
+        if (novaToken.length < 16 || novaToken.length > 8192 || !Number.isFinite(expiresAtEpochMs) || expiresAtEpochMs <= now()) {
+          return { ok: false, error: 'BROWSER_SESSION_INVALID_RESPONSE' };
+        }
+
+        const config = Object.freeze({
+          endpoint: `${origin}/api/macro-candidate-review`,
+          sessionToken: novaToken,
+          expiresAtEpochMs,
+        });
+        await chrome.storage.session.set({ [CONFIG_KEY]: config });
+        return {
+          ok: true,
+          configured: true,
+          endpoint: config.endpoint,
+          expiresAtEpochMs: config.expiresAtEpochMs,
+        };
+      } finally {
+        // The Google access token exists only in this stack frame. It is never
+        // persisted to chrome.storage or copied into the Nova session.
+        googleToken = '';
+        await releaseLock(lock.token);
+      }
+    }
+
     async function setGatewaySession(message, sender) {
       if (!isTrustedExtensionUiSender(chrome, sender)) {
         return { ok: false, error: 'UNTRUSTED_GATEWAY_CONFIG_SENDER' };
       }
       let config;
       try {
-        config = normalizeGatewayConfig(message);
+        config = normalizeGatewayConfig(message, configuredGatewayOrigin(runtimeConfig));
       } catch (error) {
         return { ok: false, error: error?.message || 'INVALID_GATEWAY_CONFIG' };
       }
@@ -123,9 +205,7 @@
         }
 
         let payload;
-        try {
-          payload = await response.json();
-        } catch {
+        try { payload = await response.json(); } catch {
           return { ok: false, error: 'GATEWAY_INVALID_RESPONSE' };
         }
 
@@ -185,16 +265,44 @@
       return operation;
     }
 
-    return Object.freeze({ setGatewaySession, clearGatewaySession, gatewayPublicState, runAiReview });
+    return Object.freeze({
+      connectGoogle,
+      setGatewaySession,
+      clearGatewaySession,
+      gatewayPublicState,
+      runAiReview,
+    });
   }
 
-  function normalizeGatewayConfig(message) {
+  async function getGoogleAccessToken(chrome) {
+    const result = await chrome.identity.getAuthToken({ interactive: true, scopes: ['openid'] });
+    if (typeof result === 'string') return result.trim();
+    return typeof result?.token === 'string' ? result.token.trim() : '';
+  }
+
+  async function removeCachedGoogleToken(chrome, token) {
+    if (!token || typeof chrome.identity?.removeCachedAuthToken !== 'function') return;
+    try { await chrome.identity.removeCachedAuthToken({ token }); } catch { /* best effort */ }
+  }
+
+  function configuredGatewayOrigin(runtimeConfig) {
+    const raw = String(runtimeConfig?.gatewayOrigin || '').trim();
+    if (!raw) return '';
+    let url;
+    try { url = new URL(raw); } catch { return ''; }
+    if (url.protocol !== 'https:' || url.username || url.password || url.search || url.hash) return '';
+    if (url.pathname !== '/' && url.pathname !== '') return '';
+    return url.origin;
+  }
+
+  function normalizeGatewayConfig(message, expectedOrigin = '') {
     const rawEndpoint = String(message?.endpoint || '').trim();
     let endpoint;
     try { endpoint = new URL(rawEndpoint); } catch { throw new Error('INVALID_GATEWAY_ENDPOINT'); }
     if (endpoint.protocol !== 'https:') throw new Error('GATEWAY_REQUIRES_HTTPS');
     if (endpoint.username || endpoint.password || endpoint.hash) throw new Error('INVALID_GATEWAY_ENDPOINT');
     if (!endpoint.pathname.endsWith('/api/macro-candidate-review')) throw new Error('INVALID_GATEWAY_ENDPOINT_PATH');
+    if (expectedOrigin && endpoint.origin !== expectedOrigin) throw new Error('GATEWAY_ORIGIN_MISMATCH');
 
     const sessionToken = String(message?.sessionToken || '').trim();
     if (sessionToken.length < 16 || sessionToken.length > 8192) throw new Error('INVALID_GATEWAY_SESSION_TOKEN');
@@ -231,6 +339,11 @@
     const runtimeId = String(chrome?.runtime?.id || '').trim();
     const senderUrl = String(sender?.url || '').trim();
     return Boolean(runtimeId && senderUrl.startsWith(`chrome-extension://${runtimeId}/`));
+  }
+
+  function browserSessionStatusError(status, httpStatus) {
+    const known = new Set(['INVALID_REQUEST','IDENTITY_REJECTED','TEMPORARILY_UNAVAILABLE']);
+    return known.has(status) ? `BROWSER_SESSION_${status}` : `BROWSER_SESSION_HTTP_${Number(httpStatus) || 0}`;
   }
 
   function gatewayStatusError(status, httpStatus) {
