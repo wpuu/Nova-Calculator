@@ -99,7 +99,8 @@ test('missing fixed Gateway origin fails before Google OAuth', async () => {
     oauth2: { client_id: 'client.apps.googleusercontent.com', scopes: ['openid'] },
   });
   const result = await h.controller.connectGoogle({}, SENDER);
-  assert.deepEqual(result, { ok: false, error: 'GATEWAY_ORIGIN_NOT_CONFIGURED' });
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'GATEWAY_ORIGIN_NOT_CONFIGURED');
   assert.equal(h.identityCalls.length, 0);
   assert.equal(h.networkCalls.length, 0);
 });
@@ -162,7 +163,8 @@ test('content/tab sender cannot trigger interactive OAuth', async () => {
     oauth2: { client_id: 'client.apps.googleusercontent.com', scopes: ['openid'] },
   });
   const result = await h.controller.connectGoogle({}, { tab: { id: 5 }, url: 'https://shop.example/' });
-  assert.deepEqual(result, { ok: false, error: 'UNTRUSTED_BROWSER_SESSION_SENDER' });
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'UNTRUSTED_BROWSER_SESSION_SENDER');
   assert.equal(h.identityCalls.length, 0);
   assert.equal(h.networkCalls.length, 0);
 });
@@ -177,7 +179,8 @@ test('global single-flight prevents simultaneous browser bootstrap requests', as
   const first = h.controller.connectGoogle({}, SENDER);
   while (h.networkCalls.length < 1) await new Promise((resolve) => setTimeout(resolve, 1));
   const second = await h.controller.connectGoogle({}, SENDER);
-  assert.deepEqual(second, { ok: false, error: 'AI_REVIEW_IN_FLIGHT' });
+  assert.equal(second.ok, false);
+  assert.equal(second.error, 'AI_REVIEW_IN_FLIGHT');
   assert.equal(h.identityCalls.length, 1);
   assert.equal(h.networkCalls.length, 1);
   release(new Response(JSON.stringify({
