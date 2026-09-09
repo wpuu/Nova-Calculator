@@ -1,1 +1,0 @@
-Second CI trigger probe via Git data path follows.
