@@ -1,6 +1,6 @@
 'use strict';
 
-importScripts('ai-review-client.js');
+importScripts('runtime-config.js', 'ai-review-client.js');
 
 const SESSION_KEY = 'novaMacroPocSession';
 const SAVED_MACRO_KEY = 'novaMacroPocLast';
@@ -387,6 +387,7 @@ const aiReviewController = globalThis.NovaMacroAiReview.createController({
   reviewFromSession,
   selectRepairCandidate,
   abstainRepair,
+  runtimeConfig: globalThis.NovaMacroRuntimeConfig,
   fetchImpl: (...args) => fetch(...args),
 });
 
@@ -412,6 +413,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return selectRepairCandidate(message);
       case 'NOVA_ABSTAIN_REPAIR':
         return abstainRepair(message);
+      case 'NOVA_CONNECT_GOOGLE':
+        return aiReviewController.connectGoogle(message, sender);
       case 'NOVA_SET_GATEWAY_SESSION':
         return aiReviewController.setGatewaySession(message, sender);
       case 'NOVA_CLEAR_GATEWAY_SESSION':
