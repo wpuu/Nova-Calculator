@@ -4,7 +4,9 @@
   if (root.NovaMacroAiReview) return;
 
   const CONFIG_KEY = 'novaMacroGatewaySession';
-  const LOCK_KEY = 'novaMacroAiReviewLock';
+  // Shared name is deliberate: future Agnes-backed extension modules must reuse this
+  // chrome.storage.session lock instead of inventing per-feature concurrency.
+  const LOCK_KEY = 'novaAgnesSingleFlight';
   const LOCK_TTL_MS = 30_000;
 
   function createController(options) {
@@ -83,6 +85,12 @@
       if (session?.mode !== 'AI_REVIEW' || !review) {
         return { ok: false, error: 'NO_PENDING_AI_REVIEW' };
       }
+      if (review.policy !== 'SELECT_LISTED_CANDIDATE_OR_ABSTAIN') {
+        return { ok: false, error: 'INVALID_AI_REVIEW_POLICY' };
+      }
+      if (!Array.isArray(review.allowedCandidateIds) || review.allowedCandidateIds.length < 1 || review.allowedCandidateIds.length > 5) {
+        return { ok: false, error: 'INVALID_AI_REVIEW_CANDIDATES' };
+      }
       if (message?.reviewId && message.reviewId !== review.reviewId) {
         return { ok: false, error: 'STALE_AI_REVIEW' };
       }
@@ -134,40 +142,20 @@
             reviewId: review.reviewId,
             reason: safeReason(payload.reason),
           });
-          return {
-            ok: true,
-            gatewayDecision: 'ABSTAIN',
-            session: next,
-          };
+          return { ok: true, gatewayDecision: 'ABSTAIN', session: next };
         }
 
         const candidateId = typeof payload.candidateId === 'string' ? payload.candidateId : '';
-        if (
-          payload.decision !== 'SELECT' ||
-          !Array.isArray(review.allowedCandidateIds) ||
-          !review.allowedCandidateIds.includes(candidateId)
-        ) {
+        if (payload.decision !== 'SELECT' || !review.allowedCandidateIds.includes(candidateId)) {
           const next = await abstainRepair({
             reviewId: review.reviewId,
             reason: 'CLIENT_CANDIDATE_REJECTED',
           });
-          return {
-            ok: true,
-            gatewayDecision: 'ABSTAIN',
-            session: next,
-          };
+          return { ok: true, gatewayDecision: 'ABSTAIN', session: next };
         }
 
-        const next = await selectRepairCandidate({
-          reviewId: review.reviewId,
-          candidateId,
-        });
-        return {
-          ok: true,
-          gatewayDecision: 'SELECT',
-          candidateId,
-          session: next,
-        };
+        const next = await selectRepairCandidate({ reviewId: review.reviewId, candidateId });
+        return { ok: true, gatewayDecision: 'SELECT', candidateId, session: next };
       } finally {
         await releaseLock(lock.token);
       }
@@ -177,16 +165,10 @@
       const operation = lockQueue.then(async () => {
         const current = await readLock(chrome);
         const timestamp = now();
-        if (isLiveLock(current, timestamp)) {
-          return { ok: false, error: 'AI_REVIEW_IN_FLIGHT' };
-        }
+        if (isLiveLock(current, timestamp)) return { ok: false, error: 'AI_REVIEW_IN_FLIGHT' };
         const token = newRequestId();
         await chrome.storage.session.set({
-          [LOCK_KEY]: {
-            token,
-            reviewId,
-            startedAtEpochMs: timestamp,
-          },
+          [LOCK_KEY]: { token, reviewId, startedAtEpochMs: timestamp },
         });
         return { ok: true, token };
       });
@@ -197,52 +179,31 @@
     async function releaseLock(token) {
       const operation = lockQueue.then(async () => {
         const current = await readLock(chrome);
-        if (current?.token === token) {
-          await chrome.storage.session.set({ [LOCK_KEY]: null });
-        }
+        if (current?.token === token) await chrome.storage.session.set({ [LOCK_KEY]: null });
       });
       lockQueue = operation.catch(() => {});
       return operation;
     }
 
-    return Object.freeze({
-      setGatewaySession,
-      clearGatewaySession,
-      gatewayPublicState,
-      runAiReview,
-    });
+    return Object.freeze({ setGatewaySession, clearGatewaySession, gatewayPublicState, runAiReview });
   }
 
   function normalizeGatewayConfig(message) {
     const rawEndpoint = String(message?.endpoint || '').trim();
     let endpoint;
-    try {
-      endpoint = new URL(rawEndpoint);
-    } catch {
-      throw new Error('INVALID_GATEWAY_ENDPOINT');
-    }
+    try { endpoint = new URL(rawEndpoint); } catch { throw new Error('INVALID_GATEWAY_ENDPOINT'); }
     if (endpoint.protocol !== 'https:') throw new Error('GATEWAY_REQUIRES_HTTPS');
     if (endpoint.username || endpoint.password || endpoint.hash) throw new Error('INVALID_GATEWAY_ENDPOINT');
-    if (!endpoint.pathname.endsWith('/api/macro-candidate-review')) {
-      throw new Error('INVALID_GATEWAY_ENDPOINT_PATH');
-    }
+    if (!endpoint.pathname.endsWith('/api/macro-candidate-review')) throw new Error('INVALID_GATEWAY_ENDPOINT_PATH');
 
     const sessionToken = String(message?.sessionToken || '').trim();
-    if (sessionToken.length < 16 || sessionToken.length > 8192) {
-      throw new Error('INVALID_GATEWAY_SESSION_TOKEN');
-    }
+    if (sessionToken.length < 16 || sessionToken.length > 8192) throw new Error('INVALID_GATEWAY_SESSION_TOKEN');
     const expiresAtEpochMs = Number(message?.expiresAtEpochMs || 0);
-    if (!Number.isFinite(expiresAtEpochMs) || expiresAtEpochMs < 0) {
-      throw new Error('INVALID_GATEWAY_SESSION_EXPIRY');
-    }
+    if (!Number.isFinite(expiresAtEpochMs) || expiresAtEpochMs < 0) throw new Error('INVALID_GATEWAY_SESSION_EXPIRY');
 
     endpoint.search = '';
     endpoint.hash = '';
-    return Object.freeze({
-      endpoint: endpoint.toString(),
-      sessionToken,
-      expiresAtEpochMs,
-    });
+    return Object.freeze({ endpoint: endpoint.toString(), sessionToken, expiresAtEpochMs });
   }
 
   async function readGatewayConfig(chrome, now) {
@@ -260,11 +221,8 @@
 
   function isLiveLock(lock, nowMs) {
     return Boolean(
-      lock &&
-      typeof lock.token === 'string' &&
-      Number.isFinite(lock.startedAtEpochMs) &&
-      nowMs - lock.startedAtEpochMs >= 0 &&
-      nowMs - lock.startedAtEpochMs < LOCK_TTL_MS
+      lock && typeof lock.token === 'string' && Number.isFinite(lock.startedAtEpochMs) &&
+      nowMs - lock.startedAtEpochMs >= 0 && nowMs - lock.startedAtEpochMs < LOCK_TTL_MS
     );
   }
 
@@ -276,13 +234,7 @@
   }
 
   function gatewayStatusError(status, httpStatus) {
-    const known = new Set([
-      'AUTH_REQUIRED',
-      'QUOTA_EXHAUSTED',
-      'RATE_LIMITED',
-      'INVALID_REQUEST',
-      'TEMPORARILY_UNAVAILABLE',
-    ]);
+    const known = new Set(['AUTH_REQUIRED','QUOTA_EXHAUSTED','RATE_LIMITED','INVALID_REQUEST','TEMPORARILY_UNAVAILABLE']);
     return known.has(status) ? `GATEWAY_${status}` : `GATEWAY_HTTP_${Number(httpStatus) || 0}`;
   }
 
