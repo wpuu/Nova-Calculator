@@ -1,1 +1,0 @@
-Final marker before Git ref probe.
