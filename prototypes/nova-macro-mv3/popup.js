@@ -11,19 +11,7 @@ function originPatternFor(url) {
   if (!['http:', 'https:'].includes(parsed.protocol)) {
     throw new Error('Nova Macro can only run on http/https pages.');
   }
-  // Chrome host permission match patterns do not include ports. Omitting the
-  // port also keeps local/dev and enterprise web apps on non-standard ports
-  // compatible with the same explicit host grant.
   return `${parsed.protocol}//${parsed.hostname}/*`;
-}
-
-async function ensureCurrentSitePermission(tab) {
-  const originPattern = originPatternFor(tab.url);
-  const already = await chrome.permissions.contains({ origins: [originPattern] });
-  if (already) return originPattern;
-  const granted = await chrome.permissions.request({ origins: [originPattern] });
-  if (!granted) throw new Error(`Site access was not granted for ${originPattern}`);
-  return originPattern;
 }
 
 async function callBackground(message) {
@@ -54,10 +42,6 @@ document.getElementById('start').addEventListener('click', () => withUiLock(asyn
   return callBackground({
     type: 'NOVA_START_RECORDING',
     tabId: tab.id,
-    // Opening the extension popup grants activeTab for the current origin. That
-    // temporary grant survives same-origin navigation, so do not immediately
-    // ask the user for persistent host access. Persistent optional permission is
-    // requested only if the macro later crosses to a different origin.
     originPattern: originPatternFor(tab.url),
   });
 }));
@@ -76,12 +60,14 @@ document.getElementById('replay').addEventListener('click', () => withUiLock(asy
 }));
 
 document.getElementById('grant').addEventListener('click', () => withUiLock(async () => {
+  // Triggering the extension action on this page already grants activeTab for
+  // the current origin. Resume with that one-session capability instead of
+  // requesting a persistent host permission by default.
   const tab = await activeTab();
-  const originPattern = await ensureCurrentSitePermission(tab);
   return callBackground({
     type: 'NOVA_RESUME_CURRENT',
     tabId: tab.id,
-    originPattern,
+    originPattern: originPatternFor(tab.url),
   });
 }));
 
