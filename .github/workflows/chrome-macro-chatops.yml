@@ -1,0 +1,41 @@
+name: Chrome Macro ChatOps
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  macro-e2e:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.user.login == 'wpuu' &&
+      contains(github.event.comment.body, '/run-macro-e2e')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v5
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Verify Macro contracts and state machine
+        run: |
+          node tools/verify-macro-poc.mjs
+          node tools/macro-background-state-eval.mjs
+
+      - name: Install Puppeteer with Chrome for Testing
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save puppeteer@25.10.0
+
+      - name: Run real MV3 extension E2E
+        run: node tools/macro-extension-e2e.mjs
