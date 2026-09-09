@@ -1,5 +1,6 @@
 import { createNovaGatewayApplication } from './application.mjs';
 import { googleAndroidPublisherAccessTokenProviderFromEnv } from './google-android-publisher-token.mjs';
+import { googleBrowserAccessTokenVerifierFromEnv } from './google-browser-access-token-verifier.mjs';
 import { googlePlayIntegrityDecoderFromEnv } from './google-play-integrity-decoder.mjs';
 import { GooglePlayPurchaseVerifier } from './google-play-purchase-verifier.mjs';
 import { PlayIntegrityInstallationProofVerifier } from './play-integrity-proof-verifier.mjs';
@@ -14,7 +15,7 @@ import { upstashRedisEvalClientFromEnv } from './upstash-redis-eval-client.mjs';
  *
  * This is the only layer that binds the provider-neutral core to concrete server adapters:
  * shared Redis capacity/accounting, privacy-safe product funnel aggregation, Google Play Integrity
- * server decoding, and (when credentials are configured) Google Play purchase verification.
+ * server decoding, optional Chrome Google identity exchange, and Google Play purchase verification.
  */
 export function createProductionNovaGatewayApplication(options = {}) {
   const env = options.env ?? process.env;
@@ -70,6 +71,14 @@ export function createProductionNovaGatewayApplication(options = {}) {
     });
   }
 
+  let browserIdentityVerifier = options.browserIdentityVerifier ?? null;
+  if (!browserIdentityVerifier && hasChromeOAuthConfig(env)) {
+    browserIdentityVerifier = googleBrowserAccessTokenVerifierFromEnv(env, {
+      fetchImpl: options.fetchImpl,
+      now,
+    });
+  }
+
   let purchaseVerifier = options.purchaseVerifier ?? null;
   if (!purchaseVerifier && hasBillingCredentials(env)) {
     const billingAccessTokenProvider = googleAndroidPublisherAccessTokenProviderFromEnv(env, {
@@ -93,6 +102,7 @@ export function createProductionNovaGatewayApplication(options = {}) {
     quotaStore,
     keyPoolFactory,
     installationProofVerifier,
+    browserIdentityVerifier,
     purchaseVerifier,
     productEventStore,
   });
@@ -125,6 +135,7 @@ export function createProductionNovaGatewayApplication(options = {}) {
       sharedQuotaStore: true,
       sharedProviderCapacity: true,
       playIntegrityServerDecode: !options.installationProofVerifier,
+      googleBrowserIdentityVerification: Boolean(browserIdentityVerifier),
       googlePlayPurchaseVerification: Boolean(purchaseVerifier),
       redisProductFunnelAggregation: Boolean(productEventStore),
       pseudonymousProductEventRateLimit: Boolean(productEventStore),
@@ -147,6 +158,10 @@ function guardProductionIdentity(env, packageName) {
       && packageName.toLowerCase().endsWith('.dev')) {
     throw new Error('production deployment refuses a .dev Android package');
   }
+}
+
+function hasChromeOAuthConfig(env) {
+  return Boolean(String(env.NOVA_CHROME_OAUTH_CLIENT_IDS ?? '').trim());
 }
 
 function hasBillingCredentials(env) {
