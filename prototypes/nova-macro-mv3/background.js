@@ -1,5 +1,7 @@
 'use strict';
 
+importScripts('ai-review-client.js');
+
 const SESSION_KEY = 'novaMacroPocSession';
 const SAVED_MACRO_KEY = 'novaMacroPocLast';
 let stepWriteQueue = Promise.resolve();
@@ -361,7 +363,7 @@ async function selectRepairCandidate({ reviewId, candidateId }) {
   return continueAfterSuccessfulStep(session, index, result);
 }
 
-async function abstainRepair({ reviewId }) {
+async function abstainRepair({ reviewId, reason = '' }) {
   const session = await getSession();
   const review = reviewFromSession(session);
   if (session.mode !== 'AI_REVIEW' || !review) {
@@ -375,8 +377,18 @@ async function abstainRepair({ reviewId }) {
     status: 'ABSTAIN',
     index: session.replayIndex,
     reviewId,
+    reason: typeof reason === 'string' ? reason.slice(0, 300) : '',
   });
 }
+
+const aiReviewController = globalThis.NovaMacroAiReview.createController({
+  chrome,
+  getSession,
+  reviewFromSession,
+  selectRepairCandidate,
+  abstainRepair,
+  fetchImpl: (...args) => fetch(...args),
+});
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo.status !== 'complete') return;
@@ -400,6 +412,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return selectRepairCandidate(message);
       case 'NOVA_ABSTAIN_REPAIR':
         return abstainRepair(message);
+      case 'NOVA_SET_GATEWAY_SESSION':
+        return aiReviewController.setGatewaySession(message, sender);
+      case 'NOVA_CLEAR_GATEWAY_SESSION':
+        return aiReviewController.clearGatewaySession(message, sender);
+      case 'NOVA_GET_GATEWAY_STATE':
+        return aiReviewController.gatewayPublicState(message, sender);
+      case 'NOVA_RUN_AI_REVIEW':
+        return aiReviewController.runAiReview(message, sender);
       case 'NOVA_GET_SESSION':
         return getSession();
       case 'NOVA_CLEAR_SESSION':
